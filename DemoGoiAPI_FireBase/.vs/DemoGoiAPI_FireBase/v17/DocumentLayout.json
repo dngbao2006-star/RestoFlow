@@ -1,0 +1,99 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\SVNAM2\\HK2\\LTmang\\DemoGoiAPI_FireBase\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{ECEC043A-5D9C-4920-840E-FFDC84D7E0D3}|DemoGoiAPI_FireBase.csproj|d:\\svnam2\\hk2\\ltmang\\demogoiapi_firebase\\form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ECEC043A-5D9C-4920-840E-FFDC84D7E0D3}|DemoGoiAPI_FireBase.csproj|solutionrelative:form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ECEC043A-5D9C-4920-840E-FFDC84D7E0D3}|DemoGoiAPI_FireBase.csproj|D:\\SVNAM2\\HK2\\LTmang\\DemoGoiAPI_FireBase\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{ECEC043A-5D9C-4920-840E-FFDC84D7E0D3}|DemoGoiAPI_FireBase.csproj|solutionrelative:form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ECEC043A-5D9C-4920-840E-FFDC84D7E0D3}|DemoGoiAPI_FireBase.csproj|d:\\svnam2\\hk2\\ltmang\\demogoiapi_firebase\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ECEC043A-5D9C-4920-840E-FFDC84D7E0D3}|DemoGoiAPI_FireBase.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ECEC043A-5D9C-4920-840E-FFDC84D7E0D3}|DemoGoiAPI.csproj|D:\\SVNAM2\\HK2\\LTmang\\DemoGoiAPI_FireBase\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{ECEC043A-5D9C-4920-840E-FFDC84D7E0D3}|DemoGoiAPI.csproj|solutionrelative:form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ECEC043A-5D9C-4920-840E-FFDC84D7E0D3}|DemoGoiAPI_FireBase.csproj|d:\\svnam2\\hk2\\ltmang\\demogoiapi_firebase\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ECEC043A-5D9C-4920-840E-FFDC84D7E0D3}|DemoGoiAPI_FireBase.csproj|solutionrelative:form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Form1.Designer.cs",
+              "DocumentMoniker": "D:\\SVNAM2\\HK2\\LTmang\\DemoGoiAPI_FireBase\\Form1.Designer.cs",
+              "RelativeDocumentMoniker": "Form1.Designer.cs",
+              "ToolTip": "D:\\SVNAM2\\HK2\\LTmang\\DemoGoiAPI_FireBase\\Form1.Designer.cs",
+              "RelativeToolTip": "Form1.Designer.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-25T03:16:33.917Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\SVNAM2\\HK2\\LTmang\\DemoGoiAPI_FireBase\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "D:\\SVNAM2\\HK2\\LTmang\\DemoGoiAPI_FireBase\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAA2AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-25T03:14:46.942Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Form1.cs [Design]",
+              "DocumentMoniker": "D:\\SVNAM2\\HK2\\LTmang\\DemoGoiAPI_FireBase\\Form1.cs",
+              "RelativeDocumentMoniker": "Form1.cs",
+              "ToolTip": "D:\\SVNAM2\\HK2\\LTmang\\DemoGoiAPI_FireBase\\Form1.cs [Design]",
+              "RelativeToolTip": "Form1.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-25T03:14:12.54Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Form1.cs",
+              "DocumentMoniker": "D:\\SVNAM2\\HK2\\LTmang\\DemoGoiAPI_FireBase\\Form1.cs",
+              "RelativeDocumentMoniker": "Form1.cs",
+              "ToolTip": "D:\\SVNAM2\\HK2\\LTmang\\DemoGoiAPI_FireBase\\Form1.cs",
+              "RelativeToolTip": "Form1.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-24T02:48:03.303Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Form1.cs [Design]",
+              "DocumentMoniker": "D:\\SVNAM2\\HK2\\LTmang\\DemoGoiAPI_FireBase\\Form1.cs",
+              "RelativeDocumentMoniker": "Form1.cs",
+              "ToolTip": "C:\\Users\\Admin\\source\\repos\\DemoGoiAPI\\Form1.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-24T02:46:47.842Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

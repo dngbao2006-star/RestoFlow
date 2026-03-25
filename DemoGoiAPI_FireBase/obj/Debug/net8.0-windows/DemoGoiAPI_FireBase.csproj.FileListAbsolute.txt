@@ -1,0 +1,16 @@
+D:\SVNAM2\HK2\LTmang\DemoGoiAPI_FireBase\obj\Debug\net8.0-windows\DemoGoiAPI_FireBase.Form1.resources
+D:\SVNAM2\HK2\LTmang\DemoGoiAPI_FireBase\obj\Debug\net8.0-windows\DemoGoiAPI_FireBase.csproj.GenerateResource.cache
+D:\SVNAM2\HK2\LTmang\DemoGoiAPI_FireBase\obj\Debug\net8.0-windows\DemoGoiAPI_FireBase.GeneratedMSBuildEditorConfig.editorconfig
+D:\SVNAM2\HK2\LTmang\DemoGoiAPI_FireBase\obj\Debug\net8.0-windows\DemoGoiAPI_FireBase.AssemblyInfoInputs.cache
+D:\SVNAM2\HK2\LTmang\DemoGoiAPI_FireBase\obj\Debug\net8.0-windows\DemoGoiAPI_FireBase.AssemblyInfo.cs
+D:\SVNAM2\HK2\LTmang\DemoGoiAPI_FireBase\obj\Debug\net8.0-windows\DemoGoiAPI_FireBase.csproj.CoreCompileInputs.cache
+D:\SVNAM2\HK2\LTmang\DemoGoiAPI_FireBase\bin\Debug\net8.0-windows\DemoGoiAPI_FireBase.exe
+D:\SVNAM2\HK2\LTmang\DemoGoiAPI_FireBase\bin\Debug\net8.0-windows\DemoGoiAPI_FireBase.deps.json
+D:\SVNAM2\HK2\LTmang\DemoGoiAPI_FireBase\bin\Debug\net8.0-windows\DemoGoiAPI_FireBase.runtimeconfig.json
+D:\SVNAM2\HK2\LTmang\DemoGoiAPI_FireBase\bin\Debug\net8.0-windows\DemoGoiAPI_FireBase.dll
+D:\SVNAM2\HK2\LTmang\DemoGoiAPI_FireBase\bin\Debug\net8.0-windows\DemoGoiAPI_FireBase.pdb
+D:\SVNAM2\HK2\LTmang\DemoGoiAPI_FireBase\obj\Debug\net8.0-windows\DemoGoiAPI_FireBase.dll
+D:\SVNAM2\HK2\LTmang\DemoGoiAPI_FireBase\obj\Debug\net8.0-windows\refint\DemoGoiAPI_FireBase.dll
+D:\SVNAM2\HK2\LTmang\DemoGoiAPI_FireBase\obj\Debug\net8.0-windows\DemoGoiAPI_FireBase.pdb
+D:\SVNAM2\HK2\LTmang\DemoGoiAPI_FireBase\obj\Debug\net8.0-windows\DemoGoiAPI_FireBase.genruntimeconfig.cache
+D:\SVNAM2\HK2\LTmang\DemoGoiAPI_FireBase\obj\Debug\net8.0-windows\ref\DemoGoiAPI_FireBase.dll

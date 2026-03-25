@@ -1,0 +1,106 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\DemoGoiAPI_FireBase\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{ECEC043A-5D9C-4920-840E-FFDC84D7E0D3}|DemoGoiAPI_FireBase.csproj|c:\\users\\ch\u00ED\\downloads\\demo02\\demo02\\demogoiapi_firebase\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{ECEC043A-5D9C-4920-840E-FFDC84D7E0D3}|DemoGoiAPI_FireBase.csproj|solutionrelative:form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ECEC043A-5D9C-4920-840E-FFDC84D7E0D3}|DemoGoiAPI.csproj|C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\DemoGoiAPI_FireBase\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{ECEC043A-5D9C-4920-840E-FFDC84D7E0D3}|DemoGoiAPI.csproj|solutionrelative:form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ECEC043A-5D9C-4920-840E-FFDC84D7E0D3}|DemoGoiAPI_FireBase.csproj|c:\\users\\ch\u00ED\\downloads\\demo02\\demo02\\demogoiapi_firebase\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ECEC043A-5D9C-4920-840E-FFDC84D7E0D3}|DemoGoiAPI_FireBase.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ECEC043A-5D9C-4920-840E-FFDC84D7E0D3}|DemoGoiAPI_FireBase.csproj|c:\\users\\ch\u00ED\\downloads\\demo02\\demo02\\demogoiapi_firebase\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ECEC043A-5D9C-4920-840E-FFDC84D7E0D3}|DemoGoiAPI_FireBase.csproj|solutionrelative:form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ECEC043A-5D9C-4920-840E-FFDC84D7E0D3}|DemoGoiAPI_FireBase.csproj|c:\\users\\ch\u00ED\\downloads\\demo02\\demo02\\demogoiapi_firebase\\form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{ECEC043A-5D9C-4920-840E-FFDC84D7E0D3}|DemoGoiAPI_FireBase.csproj|solutionrelative:form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Form1.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\DemoGoiAPI_FireBase\\Form1.cs",
+              "RelativeDocumentMoniker": "Form1.cs",
+              "ToolTip": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\DemoGoiAPI_FireBase\\Form1.cs [Design]",
+              "RelativeToolTip": "Form1.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-25T13:03:02.069Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Form1.Designer.cs",
+              "DocumentMoniker": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\DemoGoiAPI_FireBase\\Form1.Designer.cs",
+              "RelativeDocumentMoniker": "Form1.Designer.cs",
+              "ToolTip": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\DemoGoiAPI_FireBase\\Form1.Designer.cs",
+              "RelativeToolTip": "Form1.Designer.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-25T12:56:18.778Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\DemoGoiAPI_FireBase\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\DemoGoiAPI_FireBase\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAA2AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-25T12:56:18.996Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Form1.cs",
+              "DocumentMoniker": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\DemoGoiAPI_FireBase\\Form1.cs",
+              "RelativeDocumentMoniker": "Form1.cs",
+              "ToolTip": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\DemoGoiAPI_FireBase\\Form1.cs",
+              "RelativeToolTip": "Form1.cs",
+              "ViewState": "AgIAAJAAAAAAAAAAAAAqwKYAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-25T12:56:19.046Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Form1.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\DemoGoiAPI_FireBase\\Form1.cs",
+              "RelativeDocumentMoniker": "Form1.cs",
+              "ToolTip": "C:\\Users\\Admin\\source\\repos\\DemoGoiAPI\\Form1.cs [Design]",
+              "RelativeToolTip": "..\\..\\..\\..\\..\\Admin\\source\\repos\\DemoGoiAPI\\Form1.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-25T12:56:19.21Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

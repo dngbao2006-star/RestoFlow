@@ -1,0 +1,19 @@
+{
+  "Menu": {
+    "1": {
+      "id": 1,
+      "TenMon": "Phở Bò tái lăn",
+      "Gia": 50000
+    },
+    "2": {
+      "id": 2,
+      "TenMon": "Bún Chả Hà Nội",
+      "Gia": 45000
+    },
+    "3": {
+      "id": 3,
+      "TenMon": "Cơm Tấm Sườn Bì",
+      "Gia": 60000
+    }
+  }
+}

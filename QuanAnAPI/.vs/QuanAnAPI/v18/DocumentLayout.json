@@ -1,0 +1,142 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\QuanAnAPI\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{D4AF82AB-E631-42FE-8ABA-02049A6D4DA2}|QuanAnAPI.csproj|c:\\users\\ch\u00ED\\downloads\\demo02\\demo02\\quananapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D4AF82AB-E631-42FE-8ABA-02049A6D4DA2}|QuanAnAPI.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4AF82AB-E631-42FE-8ABA-02049A6D4DA2}|QuanAnAPI.csproj|c:\\users\\ch\u00ED\\downloads\\demo02\\demo02\\quananapi\\quananapi.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}",
+      "RelativeMoniker": "D:0:0:{D4AF82AB-E631-42FE-8ABA-02049A6D4DA2}|QuanAnAPI.csproj|solutionrelative:quananapi.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4AF82AB-E631-42FE-8ABA-02049A6D4DA2}|QuanAnAPI.csproj|c:\\users\\ch\u00ED\\downloads\\demo02\\demo02\\quananapi\\quanancontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D4AF82AB-E631-42FE-8ABA-02049A6D4DA2}|QuanAnAPI.csproj|solutionrelative:quanancontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4AF82AB-E631-42FE-8ABA-02049A6D4DA2}|QuanAnAPI.csproj|c:\\users\\ch\u00ED\\downloads\\demo02\\demo02\\quananapi\\weatherforecast.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D4AF82AB-E631-42FE-8ABA-02049A6D4DA2}|QuanAnAPI.csproj|solutionrelative:weatherforecast.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4AF82AB-E631-42FE-8ABA-02049A6D4DA2}|QuanAnAPI.csproj|c:\\users\\ch\u00ED\\downloads\\demo02\\demo02\\quananapi\\taikhoan.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D4AF82AB-E631-42FE-8ABA-02049A6D4DA2}|QuanAnAPI.csproj|solutionrelative:taikhoan.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4AF82AB-E631-42FE-8ABA-02049A6D4DA2}|QuanAnAPI.csproj|c:\\users\\ch\u00ED\\downloads\\demo02\\demo02\\quananapi\\monan.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D4AF82AB-E631-42FE-8ABA-02049A6D4DA2}|QuanAnAPI.csproj|solutionrelative:monan.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4AF82AB-E631-42FE-8ABA-02049A6D4DA2}|QuanAnAPI.csproj|c:\\users\\ch\u00ED\\downloads\\demo02\\demo02\\quananapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{D4AF82AB-E631-42FE-8ABA-02049A6D4DA2}|QuanAnAPI.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "QuanAnAPI.http",
+              "DocumentMoniker": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\QuanAnAPI\\QuanAnAPI.http",
+              "RelativeDocumentMoniker": "QuanAnAPI.http",
+              "ToolTip": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\QuanAnAPI\\QuanAnAPI.http",
+              "RelativeToolTip": "QuanAnAPI.http",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003502|",
+              "WhenOpened": "2026-03-25T13:04:33.472Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "WeatherForecast.cs",
+              "DocumentMoniker": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\QuanAnAPI\\WeatherForecast.cs",
+              "RelativeDocumentMoniker": "WeatherForecast.cs",
+              "ToolTip": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\QuanAnAPI\\WeatherForecast.cs",
+              "RelativeToolTip": "WeatherForecast.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-25T12:35:14.163Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "TaiKhoan.cs",
+              "DocumentMoniker": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\QuanAnAPI\\TaiKhoan.cs",
+              "RelativeDocumentMoniker": "TaiKhoan.cs",
+              "ToolTip": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\QuanAnAPI\\TaiKhoan.cs",
+              "RelativeToolTip": "TaiKhoan.cs",
+              "ViewState": "AgIAABcAAAAAAAAAAAAAAAUAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-25T12:26:59.205Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\QuanAnAPI\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\QuanAnAPI\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAGYAAAAAAAAAAAAUwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-25T12:26:59.355Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\QuanAnAPI\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\QuanAnAPI\\appsettings.json",
+              "RelativeToolTip": "appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-03-25T12:26:59.355Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "QuanAnContext.cs",
+              "DocumentMoniker": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\QuanAnAPI\\QuanAnContext.cs",
+              "RelativeDocumentMoniker": "QuanAnContext.cs",
+              "ToolTip": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\QuanAnAPI\\QuanAnContext.cs",
+              "RelativeToolTip": "QuanAnContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-25T12:26:59.355Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "MonAn.cs",
+              "DocumentMoniker": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\QuanAnAPI\\MonAn.cs",
+              "RelativeDocumentMoniker": "MonAn.cs",
+              "ToolTip": "C:\\Users\\Ch\u00ED\\Downloads\\demo02\\demo02\\QuanAnAPI\\MonAn.cs",
+              "RelativeToolTip": "MonAn.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-25T12:26:59.365Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

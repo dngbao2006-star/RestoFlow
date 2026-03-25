@@ -1,0 +1,66 @@
+{
+  "1": {
+    "Id": 1,
+    "TenDangNhap": "admin",
+    "MatKhau": "123456",
+    "Email": "admin@demo.com",
+    "DaXacThucEmail": 1,
+    "Quyen": "Admin"
+  },
+  "2": {
+    "Id": 2,
+    "TenDangNhap": "nguyenvana",
+    "MatKhau": "123456",
+    "Email": "nva@gmail.com",
+    "DaXacThucEmail": 0,
+    "Quyen": "NhanVien"
+  },
+  "3": {
+    "Id": 3,
+    "TenDangNhap": "DangNguyenGiaBao",
+    "MatKhau": "giabao0611",
+    "Email": "dngbao2006@gmail.com",
+    "DaXacThucEmail": 0,
+    "Quyen": "NhanVien"
+  },
+  "4": {
+    "Id": 4,
+    "TenDangNhap": "deptrai",
+    "MatKhau": "123456",
+    "Email": "dangchinha3tn@gmail.com",
+    "DaXacThucEmail": 0,
+    "Quyen": "NhanVien"
+  },
+  "5": {
+    "Id": 5,
+    "TenDangNhap": "user1",
+    "MatKhau": "123456",
+    "Email": "jahaja599@gmail.com",
+    "DaXacThucEmail": 0,
+    "Quyen": "NhanVien"
+  },
+  "6": {
+    "Id": 6,
+    "TenDangNhap": "TestWebService",
+    "MatKhau": "123456",
+    "Email": "Test@gmail.com",
+    "DaXacThucEmail": 0,
+    "Quyen": "NhanVien"
+  },
+  "7": {
+    "Id": 7,
+    "TenDangNhap": "deptrai2",
+    "MatKhau": "123456",
+    "Email": "dangchinha3tn@gmail.com",
+    "DaXacThucEmail": 0,
+    "Quyen": "NhanVien"
+  },
+  "8": {
+    "Id": 8,
+    "TenDangNhap": "Test02",
+    "MatKhau": "123456",
+    "Email": "Test02",
+    "DaXacThucEmail": 0,
+    "Quyen": "NhanVien"
+  }
+}
