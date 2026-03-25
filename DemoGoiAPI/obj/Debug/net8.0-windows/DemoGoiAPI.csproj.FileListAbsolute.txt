@@ -1,0 +1,16 @@
+C:\Users\Admin\source\repos\DemoGoiAPI\bin\Debug\net8.0-windows\DemoGoiAPI.exe
+C:\Users\Admin\source\repos\DemoGoiAPI\bin\Debug\net8.0-windows\DemoGoiAPI.deps.json
+C:\Users\Admin\source\repos\DemoGoiAPI\bin\Debug\net8.0-windows\DemoGoiAPI.runtimeconfig.json
+C:\Users\Admin\source\repos\DemoGoiAPI\bin\Debug\net8.0-windows\DemoGoiAPI.dll
+C:\Users\Admin\source\repos\DemoGoiAPI\bin\Debug\net8.0-windows\DemoGoiAPI.pdb
+C:\Users\Admin\source\repos\DemoGoiAPI\obj\Debug\net8.0-windows\DemoGoiAPI.Form1.resources
+C:\Users\Admin\source\repos\DemoGoiAPI\obj\Debug\net8.0-windows\DemoGoiAPI.csproj.GenerateResource.cache
+C:\Users\Admin\source\repos\DemoGoiAPI\obj\Debug\net8.0-windows\DemoGoiAPI.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Admin\source\repos\DemoGoiAPI\obj\Debug\net8.0-windows\DemoGoiAPI.AssemblyInfoInputs.cache
+C:\Users\Admin\source\repos\DemoGoiAPI\obj\Debug\net8.0-windows\DemoGoiAPI.AssemblyInfo.cs
+C:\Users\Admin\source\repos\DemoGoiAPI\obj\Debug\net8.0-windows\DemoGoiAPI.csproj.CoreCompileInputs.cache
+C:\Users\Admin\source\repos\DemoGoiAPI\obj\Debug\net8.0-windows\DemoGoiAPI.dll
+C:\Users\Admin\source\repos\DemoGoiAPI\obj\Debug\net8.0-windows\refint\DemoGoiAPI.dll
+C:\Users\Admin\source\repos\DemoGoiAPI\obj\Debug\net8.0-windows\DemoGoiAPI.pdb
+C:\Users\Admin\source\repos\DemoGoiAPI\obj\Debug\net8.0-windows\DemoGoiAPI.genruntimeconfig.cache
+C:\Users\Admin\source\repos\DemoGoiAPI\obj\Debug\net8.0-windows\ref\DemoGoiAPI.dll
