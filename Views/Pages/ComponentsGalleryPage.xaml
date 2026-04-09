@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="AppManagermentRestaurant.Views.Pages.ComponentsGalleryPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:AppManagermentRestaurant.Controls"
+    BackgroundColor="White"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+        <controls:AppHeaderView />
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="24" Spacing="24">
+                <Label Text="UI Components Gallery" Style="{StaticResource PageTitle}" />
+                <Label Text="Explore all available components and controls" Style="{StaticResource SecondaryTextStyle}" />
+
+                <!-- Badges Section -->
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Badges" Style="{StaticResource SectionTitle}" />
+                    <Grid ColumnDefinitions="*,*,*,*,*,*" ColumnSpacing="8">
+                        <controls:BadgeView Text="Primary" BadgeType="Primary" />
+                        <controls:BadgeView Text="Success" BadgeType="Success" Grid.Column="1" />
+                        <controls:BadgeView Text="Warning" BadgeType="Warning" Grid.Column="2" />
+                        <controls:BadgeView Text="Danger" BadgeType="Danger" Grid.Column="3" />
+                        <controls:BadgeView Text="Info" BadgeType="Info" Grid.Column="4" />
+                        <controls:BadgeView Text="Muted" BadgeType="Muted" Grid.Column="5" />
+                    </Grid>
+                </VerticalStackLayout>
+
+                <!-- Chips Section -->
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Chips/Tags" Style="{StaticResource SectionTitle}" />
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                        <controls:ChipView Text="Restaurant" Color="#E0F2FE" />
+                        <controls:ChipView Text="Staff" Color="#F0FDF4" IsRemovable="True" Grid.Column="1" />
+                        <controls:ChipView Text="Orders" Color="#FEF3C7" IsRemovable="True" Grid.Column="2" />
+                    </Grid>
+                </VerticalStackLayout>
+
+                <!-- Avatars Section -->
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Avatars" Style="{StaticResource SectionTitle}" />
+                    <HorizontalStackLayout Spacing="12">
+                        <controls:AvatarView Initials="JD" AvatarSize="Small" />
+                        <controls:AvatarView Initials="AB" AvatarSize="Medium" BackgroundColor="#4A90D9" />
+                        <controls:AvatarView Initials="CD" AvatarSize="Large" BackgroundColor="#22C55E" ShowStatus="True" IsOnline="True" />
+                        <controls:AvatarView Initials="EF" AvatarSize="XLarge" BackgroundColor="#F59E0B" ShowStatus="True" IsOnline="False" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- Star Rating Section -->
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Star Rating" Style="{StaticResource SectionTitle}" />
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Read-only (4 stars)" Style="{StaticResource SecondaryTextStyle}" />
+                        <controls:StarRatingView Rating="4" IsReadOnly="True" />
+                        
+                        <Label Text="Interactive Rating" Style="{StaticResource SecondaryTextStyle}" Margin="0,12,0,0" />
+                        <controls:StarRatingView Rating="3" MaxRating="5" />
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- Progress Ring Section -->
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Progress Indicators" Style="{StaticResource SectionTitle}" />
+                    <HorizontalStackLayout Spacing="20" HorizontalOptions="Center">
+                        <controls:ProgressRingView Progress="0.25" Subtitle="25%" />
+                        <controls:ProgressRingView Progress="0.5" Subtitle="50%" />
+                        <controls:ProgressRingView Progress="0.75" Subtitle="75%" />
+                        <controls:ProgressRingView Progress="1.0" Subtitle="100%" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- Alert Banners Section -->
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Alert Banners" Style="{StaticResource SectionTitle}" />
+                    <controls:AlertBannerView 
+                        Title="Information"
+                        Message="This is an informational message"
+                        AlertType="Info"
+                        IsVisible="True"
+                        IsClosable="True" />
+                    
+                    <controls:AlertBannerView 
+                        Title="Success!"
+                        Message="Operation completed successfully"
+                        AlertType="Success"
+                        IsVisible="True"
+                        IsClosable="True" />
+                    
+                    <controls:AlertBannerView 
+                        Title="Warning"
+                        Message="Please review this action"
+                        AlertType="Warning"
+                        IsVisible="True"
+                        IsClosable="True" />
+                    
+                    <controls:AlertBannerView 
+                        Title="Error"
+                        Message="Something went wrong"
+                        AlertType="Danger"
+                        IsVisible="True"
+                        IsClosable="True" />
+                </VerticalStackLayout>
+
+                <!-- Buttons Section -->
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Button Styles" Style="{StaticResource SectionTitle}" />
+                    <Button Text="Primary Button" Style="{StaticResource PrimaryButton}" />
+                    <Button Text="Secondary Button" Style="{StaticResource SecondaryButton}" />
+                    <Button Text="Success Button" Style="{StaticResource SuccessButton}" />
+                    <Button Text="Warning Button" Style="{StaticResource WarningButton}" />
+                    <Button Text="Danger Button" Style="{StaticResource DangerButton}" />
+                    <Button Text="Ghost Button" Style="{StaticResource GhostButton}" />
+                    <HorizontalStackLayout Spacing="8">
+                        <Button Text="Icon 1" Style="{StaticResource IconButton}" />
+                        <Button Text="Icon 2" Style="{StaticResource IconButton}" />
+                        <Button Text="Icon 3" Style="{StaticResource IconButton}" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- Pagination Section -->
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Pagination" Style="{StaticResource SectionTitle}" />
+                    <controls:PaginationView CurrentPage="3" TotalPages="5" />
+                </VerticalStackLayout>
+
+                <!-- Card Styles Section -->
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Card Styles" Style="{StaticResource SectionTitle}" />
+                    <Border Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Standard Card" FontAttributes="Bold" />
+                            <Label Text="This is a regular card with border and background" Style="{StaticResource SecondaryTextStyle}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Style="{StaticResource ErrorBorder}">
+                        <Label Text="Error State Card" TextColor="#991B1B" FontAttributes="Bold" />
+                    </Border>
+
+                    <Border Style="{StaticResource SuccessBorder}">
+                        <Label Text="Success State Card" TextColor="#065F46" FontAttributes="Bold" />
+                    </Border>
+
+                    <Border Style="{StaticResource WarningBorder}">
+                        <Label Text="Warning State Card" TextColor="#92400E" FontAttributes="Bold" />
+                    </Border>
+
+                    <Border Style="{StaticResource InfoBorder}">
+                        <Label Text="Info State Card" TextColor="#1E40AF" FontAttributes="Bold" />
+                    </Border>
+                </VerticalStackLayout>
+
+                <BoxView HeightRequest="40" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+</ContentPage>

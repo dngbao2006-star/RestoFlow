@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AppManagermentRestaurant.Controls.AlertBannerView">
+
+    <Border 
+        x:Name="AlertBorder"
+        Padding="16"
+        Margin="0,0,0,12"
+        StrokeThickness="1"
+        IsVisible="False">
+
+        <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+            
+            <!-- Icon -->
+            <Label 
+                x:Name="IconLabel"
+                Text="ℹ️"
+                FontSize="20"
+                VerticalOptions="Center" />
+
+            <!-- Content -->
+            <VerticalStackLayout Spacing="4" HorizontalOptions="FillAndExpand">
+                <Label 
+                    x:Name="TitleLabel"
+                    Text="Alert Title"
+                    FontAttributes="Bold"
+                    FontSize="14" />
+                <Label 
+                    x:Name="MessageLabel"
+                    Text=""
+                    Style="{StaticResource SecondaryTextStyle}"
+                    FontSize="12"
+                    IsVisible="False" />
+            </VerticalStackLayout>
+
+            <!-- Close Button -->
+            <Button 
+                x:Name="CloseButton"
+                Text="✕"
+                BackgroundColor="Transparent"
+                Padding="0"
+                FontSize="16"
+                WidthRequest="40"
+                HeightRequest="40"
+                IsVisible="False"
+                Clicked="OnCloseClicked" />
+
+        </HorizontalStackLayout>
+
+    </Border>
+
+</ContentView>

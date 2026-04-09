@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="AppManagermentRestaurant.Views.Pages.DashboardPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:AppManagermentRestaurant.Controls"
+    BackgroundColor="White"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+        <controls:AppHeaderView />
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="24" Spacing="20">
+                <Label Text="Good morning!" Style="{StaticResource PageTitle}" />
+
+                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
+                    <Border Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Today's Revenue" FontAttributes="Bold" />
+                            <Label Text="{Binding TodayRevenueDisplay}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Style="{StaticResource CardBorder}" Grid.Column="1">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Active Orders" FontAttributes="Bold" />
+                            <Label Text="{Binding Orders.Count}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource PrimaryAccent}" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Style="{StaticResource CardBorder}" Grid.Column="2">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Occupied Tables" FontAttributes="Bold" />
+                            <Label Text="{Binding OccupiedCount}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Warning}" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Style="{StaticResource CardBorder}" Grid.Column="3">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Staff On Duty" FontAttributes="Bold" />
+                            <Label Text="3 / 5" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Success}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Border Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="Revenue Chart" Style="{StaticResource SectionTitle}" FontSize="20" />
+                            <CollectionView ItemsSource="{Binding RevenueDaily}" SelectionMode="None">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Padding="0,4">
+                                            <Label Text="{Binding Label}" Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
+                                            <Label Grid.Column="1" Text="{Binding ValueDisplay}" FontAttributes="Bold" HorizontalOptions="End" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <VerticalStackLayout Spacing="12">
+                        <Border Style="{StaticResource CardBorder}">
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="Recent Alerts" Style="{StaticResource SectionTitle}" FontSize="20" />
+                                <Label Text="Warning - Tables need clearing" Style="{StaticResource SecondaryTextStyle}" />
+                                <Label Text="Info - Beef Pho Soup out of stock" Style="{StaticResource SecondaryTextStyle}" />
+                                <Label Text="Success - Dish ready for Table 8" Style="{StaticResource SecondaryTextStyle}" />
+                                <Label Text="Warning - VIP booking at 7 PM" Style="{StaticResource SecondaryTextStyle}" />
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Border Style="{StaticResource CardBorder}">
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="Table Status Overview" Style="{StaticResource SectionTitle}" FontSize="20" />
+                                <HorizontalStackLayout Spacing="6">
+                                    <Ellipse Fill="{StaticResource TableAvailable}" WidthRequest="10" HeightRequest="10" />
+                                    <Label Text="Available" Style="{StaticResource SecondaryTextStyle}" />
+                                    <Label Text="{Binding AvailableCount}" FontAttributes="Bold" HorizontalOptions="EndAndExpand" />
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Spacing="6">
+                                    <Ellipse Fill="{StaticResource TableOccupied}" WidthRequest="10" HeightRequest="10" />
+                                    <Label Text="Occupied" Style="{StaticResource SecondaryTextStyle}" />
+                                    <Label Text="{Binding OccupiedCount}" FontAttributes="Bold" HorizontalOptions="EndAndExpand" />
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Spacing="6">
+                                    <Ellipse Fill="{StaticResource TableReserved}" WidthRequest="10" HeightRequest="10" />
+                                    <Label Text="Reserved" Style="{StaticResource SecondaryTextStyle}" />
+                                    <Label Text="{Binding ReservedCount}" FontAttributes="Bold" HorizontalOptions="EndAndExpand" />
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Spacing="6">
+                                    <Ellipse Fill="{StaticResource TableNeedsClearing}" WidthRequest="10" HeightRequest="10" />
+                                    <Label Text="Needs Clearing" Style="{StaticResource SecondaryTextStyle}" />
+                                    <Label Text="{Binding NeedsClearingCount}" FontAttributes="Bold" HorizontalOptions="EndAndExpand" />
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Active Orders" Style="{StaticResource SectionTitle}" FontSize="20" />
+                        <CollectionView ItemsSource="{Binding Orders}" SelectionMode="None">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="*,Auto" Padding="4">
+                                        <Label Text="{Binding TableNumber, StringFormat='Table {0}'}" />
+                                        <Label Grid.Column="1" Text="{Binding TotalDisplay}" FontAttributes="Bold" />
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
+

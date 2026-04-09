@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="AppManagermentRestaurant.Views.Pages.HRManagementPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:AppManagermentRestaurant.Controls"
+    BackgroundColor="White"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,350">
+        <controls:AppHeaderView Grid.ColumnSpan="2" />
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="24" Spacing="20">
+                <!-- Header Section -->
+                <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                    <Label Text="Staff Management" Style="{StaticResource PageTitle}" />
+                    <Button 
+                        Text="+ Add Employee" 
+                        Clicked="OnAddEmployeeClicked"
+                        Style="{StaticResource PrimaryButton}" />
+                </HorizontalStackLayout>
+
+                <!-- Statistics Cards -->
+                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
+                    <Border Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Total Staff" FontAttributes="Bold" FontSize="12" TextColor="{StaticResource TextMuted}" />
+                            <Label Text="{Binding TotalStaff}" FontSize="24" FontAttributes="Bold" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Style="{StaticResource CardBorder}" Grid.Column="1">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Active" FontAttributes="Bold" FontSize="12" TextColor="{StaticResource TextMuted}" />
+                            <Label Text="{Binding ActiveStaff}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource Success}" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Style="{StaticResource CardBorder}" Grid.Column="2">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Managers" FontAttributes="Bold" FontSize="12" TextColor="{StaticResource TextMuted}" />
+                            <Label Text="{Binding ManagerCount}" FontSize="24" FontAttributes="Bold" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Style="{StaticResource CardBorder}" Grid.Column="3">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Locked" FontAttributes="Bold" FontSize="12" TextColor="{StaticResource TextMuted}" />
+                            <Label Text="{Binding LockedStaff}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource Danger}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <!-- Filters Section -->
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="12">
+                        <!-- Search Bar -->
+                        <Border Style="{StaticResource InputBorder}">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                <Label Text="🔍" VerticalOptions="Center" FontSize="16" />
+                                <Entry 
+                                    Grid.Column="1"
+                                    Placeholder="Search by name or email..."
+                                    Text="{Binding SearchText}"
+                                    FontSize="14" />
+                                <Button 
+                                    Grid.Column="2"
+                                    Text="✕"
+                                    Clicked="OnClearSearchClicked"
+                                    Background="Transparent"
+                                    TextColor="{StaticResource TextMuted}"
+                                    Padding="0"
+                                    WidthRequest="40"
+                                    HeightRequest="40" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Role Filter -->
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Filter by Role" FontAttributes="Bold" FontSize="12" />
+                            <HorizontalStackLayout Spacing="8">
+                                <Button 
+                                    Text="All Roles"
+                                    Clicked="OnRoleFilterClicked"
+                                    CommandParameter="All"
+                                    Style="{StaticResource PillButton}" />
+                                <Button 
+                                    Text="Staff"
+                                    Clicked="OnRoleFilterClicked"
+                                    CommandParameter="Staff"
+                                    Style="{StaticResource PillButton}" />
+                                <Button 
+                                    Text="Manager"
+                                    Clicked="OnRoleFilterClicked"
+                                    CommandParameter="Manager"
+                                    Style="{StaticResource PillButton}" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+
+                        <!-- Status Filter -->
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Filter by Status" FontAttributes="Bold" FontSize="12" />
+                            <HorizontalStackLayout Spacing="8">
+                                <Button 
+                                    Text="All Status"
+                                    Clicked="OnStatusFilterClicked"
+                                    CommandParameter="All"
+                                    Style="{StaticResource PillButton}" />
+                                <Button 
+                                    Text="Active"
+                                    Clicked="OnStatusFilterClicked"
+                                    CommandParameter="Active"
+                                    Style="{StaticResource PillButton}" />
+                                <Button 
+                                    Text="Inactive"
+                                    Clicked="OnStatusFilterClicked"
+                                    CommandParameter="Inactive"
+                                    Style="{StaticResource PillButton}" />
+                                <Button 
+                                    Text="Locked"
+                                    Clicked="OnStatusFilterClicked"
+                                    CommandParameter="Locked"
+                                    Style="{StaticResource PillButton}" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+
+                        <Button 
+                            Text="Clear All Filters"
+                            Clicked="OnClearFiltersClicked"
+                            Style="{StaticResource SecondaryButton}"
+                            Margin="0,8,0,0" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Staff List -->
+                <Label Text="{Binding FilteredStaff.Count, StringFormat='Showing {0} staff members'}" 
+                       FontSize="12" TextColor="{StaticResource TextMuted}" FontAttributes="Bold" />
+
+                <CollectionView ItemsSource="{Binding FilteredStaff}" SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Border 
+                                Style="{StaticResource CardBorder}" 
+                                Margin="0,0,0,12"
+                                Padding="16">
+                                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*,Auto">
+                                    <!-- Staff Avatar and Basic Info -->
+                                    <Border 
+                                        Background="{StaticResource PrimaryAccent}" 
+                                        Stroke="{StaticResource BorderLight}" 
+                                        StrokeThickness="1" 
+                                        StrokeShape="RoundRectangle 14" 
+                                        Padding="12"
+                                        WidthRequest="48"
+                                        HeightRequest="48">
+                                        <Label 
+                                            Text="{Binding Initials}" 
+                                            TextColor="White" 
+                                            FontAttributes="Bold"
+                                            HorizontalTextAlignment="Center"
+                                            VerticalTextAlignment="Center" />
+                                    </Border>
+
+                                    <VerticalStackLayout Grid.Column="1" Margin="12,0,0,0" Spacing="4" Padding="0">
+                                        <Label Text="{Binding Name}" FontAttributes="Bold" FontSize="14" />
+                                        <Label Text="{Binding Email}" FontSize="12" TextColor="{StaticResource TextMuted}" />
+                                        <Label Text="{Binding Phone}" FontSize="11" TextColor="{StaticResource TextMuted}" />
+                                        <HorizontalStackLayout Spacing="6" Margin="0,4,0,0">
+                                            <Border Style="{StaticResource BadgeBorder}">
+                                                <Label Text="{Binding RoleLabel}" Style="{StaticResource BadgeText}" FontSize="10" />
+                                            </Border>
+                                            <Border 
+                                                Style="{StaticResource BadgeBorder}"
+                                                BackgroundColor="{Binding Status, Converter={StaticResource StatusColorConverter}}">
+                                                <Label Text="{Binding StatusLabel}" Style="{StaticResource BadgeText}" FontSize="10" />
+                                            </Border>
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
+
+                                    <!-- Action Buttons -->
+                                    <VerticalStackLayout 
+                                        Grid.Column="2" 
+                                        Spacing="6"
+                                        Margin="12,0,0,0"
+                                        VerticalOptions="Center">
+                                        <Button 
+                                            Text="View"
+                                            Clicked="OnViewStaffClicked"
+                                            CommandParameter="{Binding .}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="12,6"
+                                            FontSize="12" />
+                                        <Button 
+                                            Text="{Binding Status, Converter={StaticResource LockUnlockButtonConverter}}"
+                                            Clicked="OnToggleLockClicked"
+                                            CommandParameter="{Binding .}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="12,6"
+                                            FontSize="12" />
+                                    </VerticalStackLayout>
+
+                                    <!-- Last Login Info -->
+                                    <Label 
+                                        Grid.Row="1"
+                                        Grid.ColumnSpan="3"
+                                        Text="{Binding LastLogin, StringFormat='Last login: {0:g}'}"
+                                        FontSize="10"
+                                        TextColor="{StaticResource TextMuted}"
+                                        Margin="0,8,0,0" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Right Sidebar - Staff Details -->
+        <Grid 
+            Grid.Row="1" 
+            Grid.Column="1"
+            IsVisible="{Binding ShowStaffDetails}"
+            BackgroundColor="#F8F9FA"
+            Padding="20">
+            <VerticalStackLayout Spacing="16" IsVisible="{Binding SelectedStaff, Converter={StaticResource IsNotNullConverter}}">
+                <!-- Close Button -->
+                <HorizontalStackLayout Spacing="12" VerticalOptions="Start">
+                    <Label Text="Staff Details" FontAttributes="Bold" FontSize="16" />
+                    <Button 
+                        Text="✕"
+                        Clicked="OnCloseDetailsClicked"
+                        Background="Transparent"
+                        TextColor="{StaticResource TextMuted}"
+                        Padding="0"
+                        HorizontalOptions="EndAndExpand"
+                        WidthRequest="32"
+                        HeightRequest="32" />
+                </HorizontalStackLayout>
+
+                <!-- Staff Info -->
+                <Border Style="{StaticResource CardBorder}" Padding="12">
+                    <VerticalStackLayout Spacing="12">
+                        <!-- Avatar -->
+                        <Border 
+                            Background="{StaticResource PrimaryAccent}" 
+                            Stroke="{StaticResource BorderLight}" 
+                            StrokeThickness="1" 
+                            StrokeShape="RoundRectangle 30" 
+                            Padding="20"
+                            WidthRequest="80"
+                            HeightRequest="80"
+                            HorizontalOptions="Center">
+                            <Label 
+                                Text="{Binding SelectedStaff.Initials}" 
+                                TextColor="White" 
+                                FontAttributes="Bold"
+                                FontSize="32"
+                                HorizontalTextAlignment="Center"
+                                VerticalTextAlignment="Center" />
+                        </Border>
+
+                        <!-- Name -->
+                        <Label 
+                            Text="{Binding SelectedStaff.Name}" 
+                            FontAttributes="Bold" 
+                            FontSize="18"
+                            HorizontalTextAlignment="Center" />
+
+                        <!-- Details Grid -->
+                        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="Auto,*" ColumnSpacing="8" RowSpacing="8">
+                            <Label Grid.Row="0" Grid.Column="0" Text="Email:" FontAttributes="Bold" FontSize="11" />
+                            <Label Grid.Row="0" Grid.Column="1" Text="{Binding SelectedStaff.Email}" FontSize="11" />
+
+                            <Label Grid.Row="1" Grid.Column="0" Text="Phone:" FontAttributes="Bold" FontSize="11" />
+                            <Label Grid.Row="1" Grid.Column="1" Text="{Binding SelectedStaff.Phone}" FontSize="11" />
+
+                            <Label Grid.Row="2" Grid.Column="0" Text="Role:" FontAttributes="Bold" FontSize="11" />
+                            <Label Grid.Row="2" Grid.Column="1" Text="{Binding SelectedStaff.RoleLabel}" FontSize="11" />
+
+                            <Label Grid.Row="3" Grid.Column="0" Text="Status:" FontAttributes="Bold" FontSize="11" />
+                            <Label Grid.Row="3" Grid.Column="1" Text="{Binding SelectedStaff.StatusLabel}" FontSize="11" />
+
+                            <Label Grid.Row="4" Grid.Column="0" Text="Joined:" FontAttributes="Bold" FontSize="11" />
+                            <Label Grid.Row="4" Grid.Column="1" Text="{Binding SelectedStaff.JoinDate, StringFormat='{0:MMM d, yyyy}'}" FontSize="11" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Permissions Section -->
+                <Border Style="{StaticResource CardBorder}" Padding="12">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Permissions" FontAttributes="Bold" FontSize="12" />
+                        <VerticalStackLayout 
+                            Spacing="6"
+                            BindableLayout.ItemsSource="{Binding SelectedStaff.Permissions}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <Label Text="✓" FontSize="12" TextColor="{StaticResource Success}" />
+                                        <Label Text="{Binding ., Converter={StaticResource PermissionLabelConverter}}" FontSize="11" />
+                                    </HorizontalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Action Buttons -->
+                <VerticalStackLayout Spacing="8">
+                    <Button 
+                        Text="Edit Staff"
+                        Clicked="OnEditStaffClicked"
+                        Style="{StaticResource PrimaryButton}" />
+                    <Button 
+                        Text="Remove Staff"
+                        Clicked="OnDeleteStaffClicked"
+                        Style="{StaticResource DangerButton}" />
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Empty State -->
+            <VerticalStackLayout 
+                Spacing="12" 
+                VerticalOptions="Center"
+                HorizontalOptions="Center"
+                IsVisible="{Binding SelectedStaff, Converter={StaticResource IsNullConverter}}">
+                <Label 
+                    Text="👤" 
+                    FontSize="48"
+                    HorizontalTextAlignment="Center" />
+                <Label 
+                    Text="Select a staff member" 
+                    FontAttributes="Bold" 
+                    HorizontalTextAlignment="Center" />
+                <Label 
+                    Text="Choose from the list to view details"
+                    FontSize="12" 
+                    TextColor="{StaticResource TextMuted}"
+                    HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+        </Grid>
+    </Grid>
+</ContentPage>
+

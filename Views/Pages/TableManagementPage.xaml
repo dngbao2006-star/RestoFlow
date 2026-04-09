@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="AppManagermentRestaurant.Views.Pages.TableManagementPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:AppManagermentRestaurant.Controls"
+    xmlns:helpers="clr-namespace:AppManagermentRestaurant.Helpers"
+    BackgroundColor="White"
+    Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <helpers:BooleanNegationConverter x:Key="BoolNegationConverter" />
+        <helpers:HasValueConverter x:Key="HasValueConverter" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- HEADER -->
+        <controls:AppHeaderView />
+
+        <!-- CONTENT -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="24" Spacing="20">
+
+                <!-- TITLE -->
+                <Label Text="Sơ đồ bàn" Style="{StaticResource PageTitle}" />
+                <Border Style="{StaticResource BadgeBorder}">
+                    <Label Text="{Binding FilteredTables.Count}" Style="{StaticResource BadgeText}" />
+                </Border>
+
+                <!-- STATUS SUMMARY CARDS (1.1) - Clickable filters -->
+                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
+
+                    <!-- Available (Green) -->
+                    <Border Style="{StaticResource CardBorder}" 
+                            Background="{Binding SelectedStatusFilter, StringFormat='{0}', Converter={StaticResource StatusFilterColorConverter}}"
+                            Opacity="{Binding IsStatusFilterSelected, StringFormat='Available', Converter={StaticResource OpacityConverter}}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnStatusFilterTapped" CommandParameter="Available" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout>
+                            <Label Text="✓ Còn trống" FontAttributes="Bold" FontSize="12.5"/>
+                            <Label Text="{Binding AvailableCount}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource Success}"/>
+                            <Label Text="bàn" FontSize="12" Style="{StaticResource MutedTextStyle}"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Occupied (Red) -->
+                    <Border Style="{StaticResource CardBorder}" Grid.Column="1"
+                            Opacity="{Binding IsStatusFilterSelected, StringFormat='Occupied', Converter={StaticResource OpacityConverter}}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnStatusFilterTapped" CommandParameter="Occupied" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout>
+                            <Label Text="👥 Có khách" FontAttributes="Bold" FontSize="12.5"/>
+                            <Label Text="{Binding OccupiedCount}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource Danger}"/>
+                            <Label Text="bàn" FontSize="12" Style="{StaticResource MutedTextStyle}"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Reserved (Yellow) -->
+                    <Border Style="{StaticResource CardBorder}" Grid.Column="2"
+                            Opacity="{Binding IsStatusFilterSelected, StringFormat='Reserved', Converter={StaticResource OpacityConverter}}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnStatusFilterTapped" CommandParameter="Reserved" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout>
+                            <Label Text="🕒 Đặt trước" FontAttributes="Bold" FontSize="12.5"/>
+                            <Label Text="{Binding ReservedCount}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource Warning}"/>
+                            <Label Text="bàn" FontSize="12" Style="{StaticResource MutedTextStyle}"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Needs Clearing (Gray) -->
+                    <Border Style="{StaticResource CardBorder}" Grid.Column="3"
+                            Opacity="{Binding IsStatusFilterSelected, StringFormat='NeedsClearing', Converter={StaticResource OpacityConverter}}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnStatusFilterTapped" CommandParameter="NeedsClearing" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout>
+                            <Label Text="🧹 Cần dọn" FontAttributes="Bold" FontSize="12.5"/>
+                            <Label Text="{Binding NeedsClearingCount}" FontSize="24" FontAttributes="Bold" TextColor="#888888"/>
+                            <Label Text="bàn" FontSize="12" Style="{StaticResource MutedTextStyle}"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                </Grid>
+
+                <!-- SEARCH (1.2) -->
+                <Border Style="{StaticResource InputBorder}">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                        <Label Text="🔍" VerticalOptions="Center" FontSize="16" />
+                        <Entry Grid.Column="1" 
+                               Placeholder="Tìm kiếm bàn hoặc khu vực..." 
+                               TextChanged="OnSearchTextChanged"
+                               x:Name="SearchEntry" />
+                    </Grid>
+                </Border>
+
+                <!-- AREA FILTER (1.3) -->
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Chọn khu vực" FontSize="14" FontAttributes="Bold" />
+                        <ScrollView Orientation="Horizontal">
+                            <HorizontalStackLayout Spacing="8">
+                                <Button Text="📍 Tất cả" Style="{StaticResource PillButton}" Clicked="OnAreaFilterClicked" CommandParameter="All"/>
+                                <Button Text="🏢 Tầng 1" Style="{StaticResource PillButton}" Clicked="OnAreaFilterClicked" CommandParameter="Ground Floor"/>
+                                <Button Text="🏢 Tầng 2" Style="{StaticResource PillButton}" Clicked="OnAreaFilterClicked" CommandParameter="Second Floor"/>
+                                <Button Text="🌳 Sân thượng" Style="{StaticResource PillButton}" Clicked="OnAreaFilterClicked" CommandParameter="Garden"/>
+                            </HorizontalStackLayout>
+                        </ScrollView>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- TABLES GROUPED BY AREA (1.4) -->
+                <VerticalStackLayout Spacing="16" IsVisible="{Binding HasFilteredTables}">
+
+                        <!-- GROUND FLOOR TABLES -->
+                        <VerticalStackLayout IsVisible="{Binding ShowGroundFloor}" Spacing="12">
+                            <Label Text="🏢 Tầng 1" Style="{StaticResource SectionTitle}" />
+
+                        <CollectionView ItemsSource="{Binding FilteredGroundFloorTables}"
+                                        SelectionMode="None"
+                                        ItemSizingStrategy="MeasureFirstItem">
+
+                            <CollectionView.ItemsLayout>
+                                <GridItemsLayout Orientation="Vertical" Span="3" HorizontalItemSpacing="12" VerticalItemSpacing="12"/>
+                            </CollectionView.ItemsLayout>
+
+                            <CollectionView.ItemTemplate>
+                                 <DataTemplate>
+                                     <Border Background="{StaticResource Surface}"
+                                             Stroke="{Binding StatusColor}"
+                                             StrokeThickness="2.5"
+                                             StrokeShape="RoundRectangle 14"
+                                             Padding="12"
+                                             HeightRequest="160"
+                                             Margin="0">
+                                         <Border.GestureRecognizers>
+                                             <TapGestureRecognizer Tapped="OnTableTapped" CommandParameter="{Binding .}" />
+                                         </Border.GestureRecognizers>
+                                         <VerticalStackLayout Spacing="8">
+                                             <HorizontalStackLayout Spacing="8">
+                                                 <Label Text="{Binding DisplayNumber, StringFormat='Bàn {0}'}" FontAttributes="Bold" FontSize="17.6"/>
+                                                 <Ellipse Fill="{Binding StatusColor}" WidthRequest="12" HeightRequest="12" VerticalOptions="Center"/>
+                                             </HorizontalStackLayout>
+                                             <Label Text="{Binding StatusLabel}" FontSize="12" FontAttributes="Bold" TextColor="{Binding StatusColor}"/>
+                                             <HorizontalStackLayout Spacing="4">
+                                                 <Label Text="👥" FontSize="12"/>
+                                                 <Label Text="{Binding Capacity, StringFormat='{0} chỗ'}" FontSize="11.5"/>
+                                             </HorizontalStackLayout>
+                                             <HorizontalStackLayout Spacing="4" IsVisible="{Binding IsOccupied}">
+                                                 <Label Text="⏱️" FontSize="12"/>
+                                                 <Label Text="{Binding OccupiedDuration}" FontSize="11.2" Style="{StaticResource SecondaryTextStyle}"/>
+                                             </HorizontalStackLayout>
+                                             <HorizontalStackLayout Spacing="4" IsVisible="{Binding IsOccupied}">
+                                                 <Label Text="🍽️" FontSize="12"/>
+                                                 <Label Text="{Binding OrderItemCount, StringFormat='{0} món'}" FontSize="11.2"/>
+                                                 <Label Text="{Binding OrderTotal, StringFormat='| {0}'}" FontSize="11.2" FontAttributes="Bold" TextColor="{StaticResource Primary}" HorizontalOptions="EndAndExpand"/>
+                                             </HorizontalStackLayout>
+                                             <VerticalStackLayout Spacing="2" IsVisible="{Binding IsReserved}">
+                                                 <Label Text="{Binding ReservationGuestName, StringFormat='👤 {0}'}" FontSize="10.9" FontAttributes="Bold"/>
+                                                 <Label Text="{Binding ReservationTime, StringFormat='🕒 {0}'}" FontSize="10.9" Style="{StaticResource SecondaryTextStyle}"/>
+                                             </VerticalStackLayout>
+                                         </VerticalStackLayout>
+                                     </Border>
+                                 </DataTemplate>
+                             </CollectionView.ItemTemplate>
+
+                         </CollectionView>
+                     </VerticalStackLayout>
+
+                  <!-- SECOND FLOOR TABLES -->
+                 <VerticalStackLayout IsVisible="{Binding ShowSecondFloor}" Spacing="12">
+                     <Label Text="🏢 Tầng 2" Style="{StaticResource SectionTitle}" />
+                         <CollectionView ItemsSource="{Binding FilteredSecondFloorTables}"
+                                         SelectionMode="None"
+                                         ItemSizingStrategy="MeasureFirstItem">
+                             <CollectionView.ItemsLayout>
+                                 <GridItemsLayout Orientation="Vertical" Span="3" HorizontalItemSpacing="12" VerticalItemSpacing="12"/>
+                             </CollectionView.ItemsLayout>
+                             <CollectionView.ItemTemplate>
+                                 <DataTemplate>
+                                     <Border Background="{StaticResource Surface}"
+                                             Stroke="{Binding StatusColor}"
+                                             StrokeThickness="2.5"
+                                             StrokeShape="RoundRectangle 14"
+                                             Padding="12"
+                                             HeightRequest="160"
+                                             Margin="0">
+                                         <Border.GestureRecognizers>
+                                             <TapGestureRecognizer Tapped="OnTableTapped" CommandParameter="{Binding .}" />
+                                         </Border.GestureRecognizers>
+                                         <VerticalStackLayout Spacing="8">
+                                             <HorizontalStackLayout Spacing="8">
+                                                 <Label Text="{Binding DisplayNumber, StringFormat='Bàn {0}'}" FontAttributes="Bold" FontSize="17.6"/>
+                                                 <Ellipse Fill="{Binding StatusColor}" WidthRequest="12" HeightRequest="12" VerticalOptions="Center"/>
+                                             </HorizontalStackLayout>
+                                             <Label Text="{Binding StatusLabel}" FontSize="12" FontAttributes="Bold" TextColor="{Binding StatusColor}"/>
+                                             <HorizontalStackLayout Spacing="4">
+                                                 <Label Text="👥" FontSize="12"/>
+                                                 <Label Text="{Binding Capacity, StringFormat='{0} chỗ'}" FontSize="11.5"/>
+                                             </HorizontalStackLayout>
+                                             <HorizontalStackLayout Spacing="4" IsVisible="{Binding IsOccupied}">
+                                                 <Label Text="⏱️" FontSize="12"/>
+                                                 <Label Text="{Binding OccupiedDuration}" FontSize="11.2" Style="{StaticResource SecondaryTextStyle}"/>
+                                             </HorizontalStackLayout>
+                                             <HorizontalStackLayout Spacing="4" IsVisible="{Binding IsOccupied}">
+                                                 <Label Text="🍽️" FontSize="12"/>
+                                                 <Label Text="{Binding OrderItemCount, StringFormat='{0} món'}" FontSize="11.2"/>
+                                                 <Label Text="{Binding OrderTotal, StringFormat='| {0}'}" FontSize="11.2" FontAttributes="Bold" TextColor="{StaticResource Primary}" HorizontalOptions="EndAndExpand"/>
+                                             </HorizontalStackLayout>
+                                             <VerticalStackLayout Spacing="2" IsVisible="{Binding IsReserved}">
+                                                 <Label Text="{Binding ReservationGuestName, StringFormat='👤 {0}'}" FontSize="10.9" FontAttributes="Bold"/>
+                                                 <Label Text="{Binding ReservationTime, StringFormat='🕒 {0}'}" FontSize="10.9" Style="{StaticResource SecondaryTextStyle}"/>
+                                             </VerticalStackLayout>
+                                         </VerticalStackLayout>
+                                     </Border>
+                                 </DataTemplate>
+                             </CollectionView.ItemTemplate>
+                         </CollectionView>
+                     </VerticalStackLayout>
+
+                <!-- GARDEN TABLES -->
+                   <VerticalStackLayout IsVisible="{Binding ShowGarden}" Spacing="12">
+                       <Label Text="🌳 Sân thượng" Style="{StaticResource SectionTitle}" />
+
+                        <CollectionView ItemsSource="{Binding FilteredGardenTables}"
+                                        SelectionMode="None"
+                                        ItemSizingStrategy="MeasureFirstItem">
+
+                            <CollectionView.ItemsLayout>
+                                <GridItemsLayout Orientation="Vertical"
+                                                 Span="3"
+                                                 HorizontalItemSpacing="12"
+                                                 VerticalItemSpacing="12"/>
+                            </CollectionView.ItemsLayout>
+
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{StaticResource Surface}"
+                                            Stroke="{Binding StatusColor}"
+                                            StrokeThickness="2.5"
+                                            StrokeShape="RoundRectangle 14"
+                                            Padding="12"
+                                            HeightRequest="160"
+                                            Margin="0">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnTableTapped" CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+                                        <VerticalStackLayout Spacing="8">
+                                            <HorizontalStackLayout Spacing="8">
+                                                <Label Text="{Binding DisplayNumber, StringFormat='Bàn {0}'}" FontAttributes="Bold" FontSize="17.6"/>
+                                                <Ellipse Fill="{Binding StatusColor}" WidthRequest="12" HeightRequest="12" VerticalOptions="Center"/>
+                                            </HorizontalStackLayout>
+                                            <Label Text="{Binding StatusLabel}" FontSize="12" FontAttributes="Bold" TextColor="{Binding StatusColor}"/>
+                                            <HorizontalStackLayout Spacing="4">
+                                                <Label Text="👥" FontSize="12"/>
+                                                <Label Text="{Binding Capacity, StringFormat='{0} chỗ'}" FontSize="11.5"/>
+                                            </HorizontalStackLayout>
+                                            <HorizontalStackLayout Spacing="4" IsVisible="{Binding IsOccupied}">
+                                                <Label Text="⏱️" FontSize="12"/>
+                                                <Label Text="{Binding OccupiedDuration}" FontSize="11.2" Style="{StaticResource SecondaryTextStyle}"/>
+                                            </HorizontalStackLayout>
+                                            <HorizontalStackLayout Spacing="4" IsVisible="{Binding IsOccupied}">
+                                                <Label Text="🍽️" FontSize="12"/>
+                                                <Label Text="{Binding OrderItemCount, StringFormat='{0} món'}" FontSize="11.2"/>
+                                                <Label Text="{Binding OrderTotal, StringFormat='| {0}'}" FontSize="11.2" FontAttributes="Bold" TextColor="{StaticResource Primary}" HorizontalOptions="EndAndExpand"/>
+                                            </HorizontalStackLayout>
+                                            <VerticalStackLayout Spacing="2" IsVisible="{Binding IsReserved}">
+                                                <Label Text="{Binding ReservationGuestName, StringFormat='👤 {0}'}" FontSize="10.9" FontAttributes="Bold"/>
+                                                <Label Text="{Binding ReservationTime, StringFormat='🕒 {0}'}" FontSize="10.9" Style="{StaticResource SecondaryTextStyle}"/>
+                                            </VerticalStackLayout>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+
+                        </CollectionView>
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+
+                <!-- EMPTY STATE -->
+                <VerticalStackLayout Spacing="12" IsVisible="{Binding HasFilteredTables, Converter={StaticResource BoolNegationConverter}}" HorizontalOptions="Center" VerticalOptions="Center" Padding="20">
+                    <Label Text="😕 Không tìm thấy bàn nào" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center"/>
+                    <Label Text="Thử thay đổi bộ lọc hoặc tìm kiếm lại" Style="{StaticResource MutedTextStyle}" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
+</ContentPage>

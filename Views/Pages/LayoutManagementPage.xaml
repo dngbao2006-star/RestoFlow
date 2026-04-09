@@ -1,0 +1,97 @@
+
+<ContentPage
+    x:Class="AppManagermentRestaurant.Views.Pages.LayoutManagementPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:AppManagermentRestaurant.Controls"
+    BackgroundColor="White"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+        <controls:AppHeaderView />
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="24" Spacing="20">
+                <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                    <Label Text="Layout Management" Style="{StaticResource PageTitle}" />
+                    <Button Text="Add Table" Style="{StaticResource PrimaryButton}" />
+                </HorizontalStackLayout>
+
+                <Border Style="{StaticResource CardBorder}">
+                    <HorizontalStackLayout Spacing="10">
+                        <Ellipse Fill="{StaticResource TableAvailable}" WidthRequest="10" HeightRequest="10" />
+                        <Label Text="Available" Style="{StaticResource SecondaryTextStyle}" />
+                        <Ellipse Fill="{StaticResource TableOccupied}" WidthRequest="10" HeightRequest="10" />
+                        <Label Text="Occupied" Style="{StaticResource SecondaryTextStyle}" />
+                        <Ellipse Fill="{StaticResource TableReserved}" WidthRequest="10" HeightRequest="10" />
+                        <Label Text="Reserved" Style="{StaticResource SecondaryTextStyle}" />
+                        <Ellipse Fill="{StaticResource TableNeedsClearing}" WidthRequest="10" HeightRequest="10" />
+                        <Label Text="Needs Clearing" Style="{StaticResource SecondaryTextStyle}" />
+                    </HorizontalStackLayout>
+                </Border>
+
+                <ScrollView Orientation="Horizontal">
+                    <HorizontalStackLayout Spacing="8">
+                        <Button Text="Ground Floor" Style="{StaticResource PillButton}" />
+                        <Button Text="Second Floor" Style="{StaticResource PillButton}" />
+                        <Button Text="Garden" Style="{StaticResource PillButton}" />
+                    </HorizontalStackLayout>
+                </ScrollView>
+
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Floor Plan" Style="{StaticResource SectionTitle}" FontSize="20" />
+                        <Border Background="{StaticResource AppBackground}" Stroke="{StaticResource BorderStrong}" StrokeThickness="1.5" StrokeShape="RoundRectangle 16" Padding="16">
+                            <CollectionView ItemsSource="{Binding Tables}" SelectionMode="None">
+                                <CollectionView.ItemsLayout>
+                                    <GridItemsLayout Orientation="Vertical" Span="4" />
+                                </CollectionView.ItemsLayout>
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{StaticResource Surface}" Stroke="{Binding StatusColor}" StrokeThickness="2" StrokeShape="RoundRectangle 12" Padding="12" Margin="0,0,8,8">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="OnTableTapped" CommandParameter="{Binding .}" />
+                                            </Border.GestureRecognizers>
+                                            <VerticalStackLayout Spacing="4" HorizontalOptions="Center" VerticalOptions="Center">
+                                                <Label Text="{Binding DisplayNumber}" FontAttributes="Bold" />
+                                                <Label Text="{Binding Capacity} " Style="{StaticResource MutedTextStyle}" FontSize="11" />
+                                            </VerticalStackLayout>
+                                        </Border>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Table Details" Style="{StaticResource SectionTitle}" FontSize="20" />
+                        <CollectionView ItemsSource="{Binding Tables}" SelectionMode="None">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource InputBorder}" Padding="12" Margin="0,0,0,8">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnTableDetailsTapped" CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+                                        <HorizontalStackLayout Spacing="10">
+                                            <Border Background="{Binding StatusColor}" Stroke="{Binding StatusColor}" StrokeThickness="0" StrokeShape="RoundRectangle 8" Padding="8">
+                                                <Label Text="{Binding DisplayNumber}" TextColor="White" FontSize="12" />
+                                            </Border>
+                                            <VerticalStackLayout Spacing="2">
+                                                <Label Text="{Binding StatusLabel}" FontAttributes="Bold" />
+                                                <Label Text="{Binding Capacity} " Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
+                                            </VerticalStackLayout>
+                                            <Button Text="Delete" Style="{StaticResource DangerButton}" HorizontalOptions="EndAndExpand" />
+                                        </HorizontalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
+

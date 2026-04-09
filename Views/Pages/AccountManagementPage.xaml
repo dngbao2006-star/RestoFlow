@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="AppManagermentRestaurant.Views.Pages.AccountManagementPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:AppManagermentRestaurant.Controls"
+    BackgroundColor="White"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+        <controls:AppHeaderView />
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="24" Spacing="20">
+                <Label Text="Tài khoản của tôi" Style="{StaticResource PageTitle}" />
+
+                <!-- Profile Banner -->
+                <Border Background="{StaticResource Primary}" Stroke="{StaticResource Primary}" StrokeThickness="0" StrokeShape="RoundRectangle 16" Padding="20">
+                    <HorizontalStackLayout Spacing="16">
+                        <Border Background="{StaticResource PrimaryAccent}" Stroke="{StaticResource PrimaryAccent}" StrokeThickness="0" StrokeShape="RoundRectangle 16" Padding="16">
+                            <Label Text="{Binding CurrentUserInitials}" TextColor="White" FontAttributes="Bold" FontSize="18" />
+                        </Border>
+                        <VerticalStackLayout Spacing="4" VerticalOptions="Center">
+                            <Label Text="{Binding CurrentUserName}" TextColor="White" FontAttributes="Bold" FontSize="18" />
+                            <Label Text="{Binding CurrentUserEmail}" TextColor="#E4EAF5" />
+                            <HorizontalStackLayout Spacing="4">
+                                <Label Text="{Binding CurrentUserRole}" TextColor="White" FontSize="12" FontAttributes="Bold" />
+                                <Label Text="●" TextColor="#4CAF50" FontSize="8" VerticalOptions="Center" />
+                                <Label Text="Đang hoạt động" TextColor="#4CAF50" FontSize="12" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </HorizontalStackLayout>
+                </Border>
+
+                <!-- Tab buttons -->
+                <Border Style="{StaticResource CardBorder}">
+                    <ScrollView Orientation="Horizontal">
+                        <HorizontalStackLayout Spacing="8" Padding="0">
+                            <Button Text="Hồ sơ" x:Name="ProfileTabBtn" Style="{StaticResource PillButton}" Clicked="OnTabProfile" Opacity="1.0" />
+                            <Button Text="Đổi mật khẩu" x:Name="PasswordTabBtn" Style="{StaticResource PillButton}" Clicked="OnTabPassword" Opacity="0.6" />
+                            <Button Text="Xác minh Email" x:Name="VerificationTabBtn" Style="{StaticResource PillButton}" Clicked="OnTabVerification" Opacity="0.6" />
+                            <Button Text="Nhật ký hoạt động" x:Name="ActivityTabBtn" Style="{StaticResource PillButton}" Clicked="OnTabActivity" Opacity="0.6" />
+                        </HorizontalStackLayout>
+                    </ScrollView>
+                </Border>
+
+                <!-- Profile Tab -->
+                <VerticalStackLayout IsVisible="{Binding IsProfileTab}" Spacing="12">
+                    <Label Text="Thông tin cá nhân" Style="{StaticResource SectionTitle}" />
+                    <Border Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="12">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Họ tên" Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
+                                <Label Text="{Binding CurrentUserName}" FontAttributes="Bold" FontSize="15" />
+                            </VerticalStackLayout>
+                            <BoxView HeightRequest="1" Color="#E0E0E0" />
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Email" Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
+                                <Label Text="{Binding CurrentUserEmail}" FontAttributes="Bold" FontSize="15" />
+                            </VerticalStackLayout>
+                            <BoxView HeightRequest="1" Color="#E0E0E0" />
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Số điện thoại" Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
+                                <Label Text="{Binding CurrentUserPhone}" FontAttributes="Bold" FontSize="15" />
+                            </VerticalStackLayout>
+                            <BoxView HeightRequest="1" Color="#E0E0E0" />
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Chức vụ" Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
+                                <Label Text="{Binding CurrentUserRoleLabel}" FontAttributes="Bold" FontSize="15" />
+                            </VerticalStackLayout>
+                            <BoxView HeightRequest="1" Color="#E0E0E0" />
+                            <Label Text="📝 Liên hệ với quản lý để cập nhật thông tin cá nhân" Style="{StaticResource MutedTextStyle}" Margin="0,8,0,0" />
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Password Tab -->
+                <VerticalStackLayout IsVisible="{Binding IsPasswordTab}" Spacing="12">
+                    <Label Text="Đổi mật khẩu" Style="{StaticResource SectionTitle}" />
+                    <Border Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="12">
+                            <!-- Error message -->
+                            <Label x:Name="PasswordErrorLabel" Text="{Binding PasswordError}" TextColor="#F44336" FontSize="12" IsVisible="{Binding HasPasswordError}" />
+
+                            <!-- Current password -->
+                            <Border Style="{StaticResource InputBorder}">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                    <Label Text="🔒" TextColor="{StaticResource TextMuted}" VerticalOptions="Center" />
+                                    <Entry x:Name="CurrentPasswordEntry" Grid.Column="1" Placeholder="Mật khẩu hiện tại" IsPassword="{Binding IsCurrentPasswordHidden}" TextChanged="OnPasswordFieldChanged" />
+                                    <ImageButton Grid.Column="2" Source="{Binding CurrentPasswordShowIcon}" Clicked="OnToggleCurrentPassword" HorizontalOptions="End" WidthRequest="24" HeightRequest="24" />
+                                </Grid>
+                            </Border>
+
+                            <!-- New password -->
+                            <Border Style="{StaticResource InputBorder}">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                    <Label Text="🔒" TextColor="{StaticResource TextMuted}" VerticalOptions="Center" />
+                                    <Entry x:Name="NewPasswordEntry" Grid.Column="1" Placeholder="Mật khẩu mới" IsPassword="{Binding IsNewPasswordHidden}" TextChanged="OnPasswordFieldChanged" />
+                                    <ImageButton Grid.Column="2" Source="{Binding NewPasswordShowIcon}" Clicked="OnToggleNewPassword" HorizontalOptions="End" WidthRequest="24" HeightRequest="24" />
+                                </Grid>
+                            </Border>
+
+                            <!-- Confirm password -->
+                            <Border Style="{StaticResource InputBorder}">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                    <Label Text="🔒" TextColor="{StaticResource TextMuted}" VerticalOptions="Center" />
+                                    <Entry x:Name="ConfirmPasswordEntry" Grid.Column="1" Placeholder="Xác nhận mật khẩu mới" IsPassword="{Binding IsConfirmPasswordHidden}" TextChanged="OnPasswordFieldChanged" />
+                                    <ImageButton Grid.Column="2" Source="{Binding ConfirmPasswordShowIcon}" Clicked="OnToggleConfirmPassword" HorizontalOptions="End" WidthRequest="24" HeightRequest="24" />
+                                </Grid>
+                            </Border>
+
+                            <!-- Success message -->
+                            <Label x:Name="PasswordSuccessLabel" Text="✅ Mật khẩu đã được cập nhật thành công!" TextColor="#4CAF50" FontSize="12" IsVisible="{Binding HasPasswordSuccess}" FontAttributes="Bold" />
+
+                            <!-- Update button -->
+                            <Button Text="Cập nhật mật khẩu" Style="{StaticResource PrimaryButton}" Clicked="OnUpdatePasswordClicked" IsEnabled="{Binding CanUpdatePassword}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Email Verification Tab -->
+                <VerticalStackLayout IsVisible="{Binding IsVerificationTab}" Spacing="12">
+                    <Label Text="Xác minh Email" Style="{StaticResource SectionTitle}" />
+                    <Border Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="12">
+                            <!-- Stage 1: Send email -->
+                            <VerticalStackLayout IsVisible="{Binding IsVerificationStage1}" Spacing="12">
+                                <Label Text="{Binding CurrentUserEmail, StringFormat='Gửi mã xác minh đến {0}'}" Style="{StaticResource SecondaryTextStyle}" />
+                                <Button Text="Gửi mã xác minh" Style="{StaticResource PrimaryButton}" Clicked="OnSendVerificationClicked" />
+                            </VerticalStackLayout>
+
+                            <!-- Stage 2: Enter code -->
+                            <VerticalStackLayout IsVisible="{Binding IsVerificationStage2}" Spacing="12">
+                                <Label Text="Kiểm tra hộp thư của bạn và nhập mã 6 chữ số" Style="{StaticResource SecondaryTextStyle}" />
+                                <Border Style="{StaticResource InputBorder}">
+                                    <Entry x:Name="VerificationCodeEntry" Placeholder="000000" Keyboard="Numeric" MaxLength="6" TextChanged="OnVerificationCodeChanged" HorizontalTextAlignment="Center" FontSize="20" />
+                                </Border>
+                                <Label x:Name="VerificationErrorLabel" Text="{Binding VerificationError}" TextColor="#F44336" FontSize="12" IsVisible="{Binding HasVerificationError}" />
+                                <Button Text="Xác minh" Style="{StaticResource PrimaryButton}" Clicked="OnVerifyEmailClicked" IsEnabled="{Binding CanVerifyEmail}" />
+                            </VerticalStackLayout>
+
+                            <!-- Stage 3: Success -->
+                            <VerticalStackLayout IsVisible="{Binding IsVerificationStage3}" Spacing="12" HorizontalOptions="Center">
+                                <Label Text="✅" FontSize="48" HorizontalOptions="Center" />
+                                <Label Text="Email đã được xác minh!" FontAttributes="Bold" FontSize="16" HorizontalOptions="Center" />
+                                <Label Text="Tài khoản của bạn giờ đã an toàn" Style="{StaticResource SecondaryTextStyle}" HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Activity Log Tab -->
+                <VerticalStackLayout IsVisible="{Binding IsActivityTab}" Spacing="12">
+                    <Label Text="Nhật ký hoạt động" Style="{StaticResource SectionTitle}" />
+                    <Border Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="0" x:Name="ActivityLogContainer">
+                            <CollectionView ItemsSource="{Binding ActivityLog}" SelectionMode="None">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <VerticalStackLayout Spacing="8" Padding="0,12">
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                <Label Text="{Binding ActionLabel}" FontAttributes="Bold" FontSize="13" />
+                                                <Label Grid.Column="1" Text="{Binding TimestampDisplay}" Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
+                                            </Grid>
+                                            <Label Text="{Binding DeviceInfo}" Style="{StaticResource MutedTextStyle}" FontSize="11" />
+                                            <BoxView HeightRequest="1" Color="#E0E0E0" IsVisible="{Binding ShowDivider}" />
+                                        </VerticalStackLayout>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
+

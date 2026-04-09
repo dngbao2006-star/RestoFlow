@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="AppManagermentRestaurant.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:AppManagermentRestaurant.Controls"
+    xmlns:pages="clr-namespace:AppManagermentRestaurant.Views.Pages"
+    Title="Classic Restaurant"
+    FlyoutBackgroundColor="{StaticResource Primary}"
+    FlyoutWidth="260">
+
+    <Shell.TitleView>
+        <HorizontalStackLayout Spacing="8" Padding="8,0" VerticalOptions="Center">
+            <Button Text="←" 
+                    Clicked="OnBackButtonClicked"
+                    BackgroundColor="Transparent"
+                    TextColor="{StaticResource Primary}"
+                    FontSize="24"
+                    Padding="8,4"
+                    ToolTipProperties.Text="Quay lại" />
+        </HorizontalStackLayout>
+    </Shell.TitleView>
+
+    <Shell.FlyoutHeader>
+        <controls:SidebarHeaderView />
+    </Shell.FlyoutHeader>
+
+    <FlyoutItem Title="Staff" Route="staff" IsVisible="{Binding IsStaff}">
+        <ShellContent Title="Table Map" ContentTemplate="{DataTemplate pages:TableManagementPage}" Route="staff/tables" />
+        <ShellContent Title="Orders" ContentTemplate="{DataTemplate pages:OrderCreationPage}" Route="staff/orders" />
+        <ShellContent Title="{Binding DishStatusTitle}" ContentTemplate="{DataTemplate pages:DishStatusPage}" Route="staff/dish-status" />
+        <ShellContent Title="Payment" ContentTemplate="{DataTemplate pages:PaymentPage}" Route="staff/payment" />
+        <ShellContent Title="{Binding StaffChatTitle}" ContentTemplate="{DataTemplate pages:ChatPage}" Route="staff/chat" />
+        <ShellContent Title="Order History" ContentTemplate="{DataTemplate pages:OrderHistoryPage}" Route="staff/history" />
+        <ShellContent Title="My Account" ContentTemplate="{DataTemplate pages:AccountManagementPage}" Route="staff/account" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Management" Route="management" IsVisible="{Binding IsManager}">
+        <ShellContent Title="Dashboard" ContentTemplate="{DataTemplate pages:DashboardPage}" Route="management" />
+        <ShellContent Title="Staff Management" ContentTemplate="{DataTemplate pages:HRManagementPage}" Route="management/hr" />
+        <ShellContent Title="Menu Management" ContentTemplate="{DataTemplate pages:MenuManagementPage}" Route="management/menu" />
+        <ShellContent Title="Layout Management" ContentTemplate="{DataTemplate pages:LayoutManagementPage}" Route="management/layout" />
+        <ShellContent Title="Revenue and Reports" ContentTemplate="{DataTemplate pages:RevenuePage}" Route="management/revenue" />
+        <ShellContent Title="Invoice Management" ContentTemplate="{DataTemplate pages:InvoiceManagementPage}" Route="management/invoices" />
+        <ShellContent Title="{Binding StaffChatTitle}" ContentTemplate="{DataTemplate pages:ChatPage}" Route="management/chat" />
+        <ShellContent Title="{Binding NotificationsTitle}" ContentTemplate="{DataTemplate pages:NotificationsManagementPage}" Route="management/notifications" />
+        <ShellContent Title="System Config" ContentTemplate="{DataTemplate pages:SystemConfigPage}" Route="management/system" />
+    </FlyoutItem>
+
+    <MenuItem Text="Sign Out" Clicked="OnSignOutClicked" />
+</Shell>
+
