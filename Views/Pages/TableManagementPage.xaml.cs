@@ -1,17 +1,10 @@
 using AppManagermentRestaurant.Helpers;
-using AppManagermentRestaurant.Services;
 using AppManagermentRestaurant.Models;
+using AppManagermentRestaurant.Services;
+using AppManagermentRestaurant.Constants;
 
 namespace AppManagermentRestaurant.Views.Pages;
 
-/// <summary>
-/// TableManagement page - Enhanced UX with status filtering, search, and area filtering
-/// 1.1 - Status summary cards with clickable filters
-/// 1.2 - Real-time table search
-/// 1.3 - Area/floor filtering
-/// 1.4 - Grouped table display by area with full information
-/// 1.5 - Different behaviors for different table states
-/// </summary>
 public partial class TableManagementPage : ContentPage
 {
     private readonly TableFilterViewModel _filterViewModel = new();
@@ -22,28 +15,31 @@ public partial class TableManagementPage : ContentPage
         BindingContext = _filterViewModel;
     }
 
-    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+    protected override async void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
-        _filterViewModel.RefreshTables();
+        await LoadPageDataAsync();
     }
 
-    /// 1.2 - Real-time table search
+    private async Task LoadPageDataAsync()
+    {
+        await Task.Yield();
+        await _filterViewModel.RefreshTablesAsync();
+    }
+
     private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
     {
         _filterViewModel.SearchTables(e.NewTextValue);
     }
 
-    /// 1.3 - Area filter button clicked
     private void OnAreaFilterClicked(object sender, EventArgs e)
     {
-        if (sender is Button button && button.CommandParameter is string area)
+        if (sender is Button { CommandParameter: string area })
         {
             _filterViewModel.FilterByArea(area);
         }
     }
 
-    /// 1.1 - Status filter clicked (clickable summary cards)
     private void OnStatusFilterTapped(object sender, TappedEventArgs e)
     {
         if (e.Parameter is string status)
@@ -52,70 +48,143 @@ public partial class TableManagementPage : ContentPage
         }
     }
 
-    /// 1.5 - Table clicked - Different behaviors based on state
-    private async void OnTableTapped(object sender, TappedEventArgs e)
+    private async void OnReceiveGuestClicked(object sender, EventArgs e)
     {
-        if (e.Parameter is not Table table)
-            return;
-
-        switch (table.Status)
+        if (sender is Button btn && btn.CommandParameter is Table table)
         {
-            case TableStatus.Available:
-                // Empty table: Ask confirmation to seat guest, then go to order creation
-                var confirmSeat = await DisplayAlert(
-                    "Xếp khách",
-                    $"Xếp khách vào bàn {table.Number}?",
-                    "Xác nhận",
-                    "Hủy");
+            var confirmSeat = await DisplayAlert("Nhận khách", $"Bạn muốn nhận khách vào bàn {table.Number}?", "Xác nhận", "Hủy");
+            if (!confirmSeat) return;
 
-                if (confirmSeat)
+            table.Status = TableStatus.Occupied;
+            table.ArrivalTime = DateTime.Now;
+            table.HasOrdered = false;
+            AppContext.Instance.SelectedTable = table;
+
+            await Shell.Current.GoToAsync(AppRoutes.Absolute(AppRoutes.CreateOrder));
+        }
+    }
+
+    private async void OnCheckInTableClicked(object sender, EventArgs e)
+    {
+        if (sender is Button btn && btn.CommandParameter is Table table)
+        {
+            bool confirm = await DisplayAlert("Nhận bàn đặt", $"Khách {table.ReservedFor} đã đến nhận bàn {table.DisplayNumber}?", "Xác nhận", "Hủy");
+            if (confirm)
+            {
+                table.Status = TableStatus.Occupied;
+                table.ArrivalTime = DateTime.Now;
+                table.HasOrdered = false;
+                await _filterViewModel.RefreshTablesAsync();
+            }
+        }
+    }
+
+    private async void OnChangeTableClicked(object sender, EventArgs e)
+    {
+        if (sender is Button btn && btn.CommandParameter is Table currentTable)
+        {
+            var availableTables = AppContext.Instance.Tables.Where(t => t.Status == TableStatus.Available).ToList();
+            if (!availableTables.Any())
+            {
+                await DisplayAlert("Thông báo", "Hiện tại không còn bàn trống để đổi.", "Đóng");
+                return;
+            }
+
+            var tableNames = availableTables.Select(t => t.DisplayNumber).ToArray();
+            var selectedTableName = await DisplayActionSheet($"Chuyển khách bàn {currentTable.DisplayNumber} sang:", "Hủy", null, tableNames);
+
+            if (selectedTableName != "Hủy" && !string.IsNullOrEmpty(selectedTableName))
+            {
+                var targetTable = availableTables.First(t => t.DisplayNumber == selectedTableName);
+
+                targetTable.Status = TableStatus.Occupied;
+                targetTable.CurrentOrderId = currentTable.CurrentOrderId;
+                targetTable.ArrivalTime = currentTable.ArrivalTime;
+                targetTable.HasOrdered = currentTable.HasOrdered;
+                targetTable.OrderItemCount = currentTable.OrderItemCount;
+                targetTable.OrderTotal = currentTable.OrderTotal;
+
+                var orderToTransfer = AppContext.Instance.Orders.FirstOrDefault(o => o.Id == currentTable.CurrentOrderId);
+                if (orderToTransfer != null)
                 {
-                    table.Status = TableStatus.Occupied;
-                    AppContext.Instance.SelectedTable = table;
-                    await Shell.Current.GoToAsync("staff/orders");
+                    orderToTransfer.TableId = targetTable.Id;
+                    orderToTransfer.TableNumber = targetTable.Number;
                 }
-                break;
 
-            case TableStatus.Occupied:
-                // Occupied table: Go directly to order creation to view/add items
-                AppContext.Instance.SelectedTable = table;
-                await Shell.Current.GoToAsync("staff/orders");
-                break;
+                currentTable.Status = TableStatus.NeedsClearing;
+                currentTable.CurrentOrderId = null;
+                currentTable.ArrivalTime = null;
+                currentTable.HasOrdered = false;
+                currentTable.OrderItemCount = 0;
+                currentTable.OrderTotal = string.Empty;
 
-            case TableStatus.NeedsClearing:
-                // Needs clearing: Ask confirmation to mark as cleaned
-                var confirmClean = await DisplayAlert(
-                    "Đánh dấu dọn xong",
-                    $"Đánh dấu bàn {table.Number} là đã dọn xong?",
-                    "Xác nhận",
-                    "Hủy");
+                await _filterViewModel.RefreshTablesAsync();
+                await DisplayAlert("Thành công", $"Đã chuyển khách sang {targetTable.DisplayNumber}.", "OK");
+            }
+        }
+    }
 
-                if (confirmClean)
+    private async void OnPayTableClicked(object sender, EventArgs e)
+    {
+        if (sender is Button btn && btn.CommandParameter is Table table)
+        {
+            AppContext.Instance.SelectedTable = table;
+            AppContext.Instance.SelectedOrder = AppContext.Instance.Orders.FirstOrDefault(o => o.TableId == table.Id && o.Status == OrderStatus.Active);
+            await Shell.Current.GoToAsync(AppRoutes.Absolute(AppRoutes.Payment));
+        }
+    }
+
+    // HÀM MỚI BỔ SUNG CHO NÚT "GỌI MÓN" Ở BÀN ĐỎ CHƯA CÓ ĐƠN
+    private async void OnOrderTableClicked(object sender, EventArgs e)
+    {
+        if (sender is Button btn && btn.CommandParameter is Table table)
+        {
+            AppContext.Instance.SelectedTable = table;
+            await Shell.Current.GoToAsync(AppRoutes.Absolute(AppRoutes.CreateOrder));
+        }
+    }
+
+    private async void OnClearEmptyTableClicked(object sender, EventArgs e)
+    {
+        if (sender is Button btn && btn.CommandParameter is Table table)
+        {
+            bool confirm = await DisplayAlert("Làm trống bàn", $"Bàn {table.Number} chưa gọi món. Bạn muốn làm trống bàn (trở về màu xanh)?", "Đồng ý", "Hủy");
+            if (confirm)
+            {
+                table.Status = TableStatus.Available;
+                table.CurrentOrderId = null;
+                table.ArrivalTime = null;
+                table.HasOrdered = false;
+
+                var draftOrder = AppContext.Instance.Orders.FirstOrDefault(o => o.TableId == table.Id && o.Status == OrderStatus.Active);
+                if (draftOrder != null)
                 {
-                    table.Status = TableStatus.Available;
-                    _filterViewModel.RefreshTables();
+                    AppContext.Instance.Orders.Remove(draftOrder);
                 }
-                break;
 
-            case TableStatus.Reserved:
-                // Reserved table: Non-clickable, just show message
-                await DisplayAlert(
-                    "Bàn đã đặt",
-                    $"Bàn {table.Number} đã được đặt cho {table.ReservedFor}.",
-                    "OK");
-                break;
+                await _filterViewModel.RefreshTablesAsync();
+            }
+        }
+    }
+
+    private async void OnCleanTableClicked(object sender, EventArgs e)
+    {
+        if (sender is Button btn && btn.CommandParameter is Table table)
+        {
+            var confirmClean = await DisplayAlert("Đánh dấu dọn xong", $"Xác nhận bàn {table.Number} đã dọn dẹp xong?", "Xác nhận", "Hủy");
+            if (!confirmClean) return;
+
+            table.Status = TableStatus.Available;
+            await _filterViewModel.RefreshTablesAsync();
         }
     }
 }
 
-/// <summary>
-/// ViewModel for table management with filtering, search, and status
-/// </summary>
 public class TableFilterViewModel : ObservableObject
 {
-    private string _selectedStatusFilter = ""; // "" = no filter, "Available", "Occupied", "Reserved", "NeedsClearing"
+    private string _selectedStatusFilter = string.Empty;
     private string _selectedAreaFilter = "All";
-    private string _searchQuery = "";
+    private string _searchQuery = string.Empty;
     private bool _showGroundFloor = true;
     private bool _showSecondFloor = true;
     private bool _showGarden = true;
@@ -156,119 +225,38 @@ public class TableFilterViewModel : ObservableObject
         set => SetProperty(ref _showGarden, value);
     }
 
-    // Summary counts
     public int AvailableCount => GetFilteredTables(t => t.Status == TableStatus.Available).Count();
     public int OccupiedCount => GetFilteredTables(t => t.Status == TableStatus.Occupied).Count();
     public int ReservedCount => GetFilteredTables(t => t.Status == TableStatus.Reserved).Count();
     public int NeedsClearingCount => GetFilteredTables(t => t.Status == TableStatus.NeedsClearing).Count();
 
-    // All tables with current filters applied
     public IEnumerable<Table> FilteredTables => GetAllFilteredTables();
     public bool HasFilteredTables => FilteredTables.Any();
 
-    // Tables grouped by area with filters
     public IEnumerable<Table> FilteredGroundFloorTables => GetFilteredTablesByArea("Ground Floor");
     public IEnumerable<Table> FilteredSecondFloorTables => GetFilteredTablesByArea("Second Floor");
     public IEnumerable<Table> FilteredGardenTables => GetFilteredTablesByArea("Garden");
 
     public IEnumerable<Table> Tables => AppContext.Instance.Tables;
 
-    /// <summary>
-    /// Get tables filtered by area
-    /// </summary>
-    private IEnumerable<Table> GetFilteredTablesByArea(string area)
+    public async Task RefreshTablesAsync()
     {
-        var tables = AppContext.Instance.Tables
-            .Where(t => t.Floor == area);
-        return ApplyAllFilters(tables);
+        await Task.Yield();
+        RefreshAllData();
     }
 
-    /// <summary>
-    /// Get all tables with all filters applied
-    /// </summary>
-    private IEnumerable<Table> GetAllFilteredTables()
-    {
-        return ApplyAllFilters(AppContext.Instance.Tables);
-    }
-
-    /// <summary>
-    /// Apply search, status, and area filters to a collection
-    /// </summary>
-    private IEnumerable<Table> ApplyAllFilters(IEnumerable<Table> tables)
-    {
-        // Apply area filter
-        if (SelectedAreaFilter != "All")
-        {
-            tables = tables.Where(t => t.Floor == SelectedAreaFilter);
-        }
-
-        // Apply status filter
-        if (!string.IsNullOrEmpty(SelectedStatusFilter))
-        {
-            tables = tables.Where(t => GetStatusString(t.Status) == SelectedStatusFilter);
-        }
-
-        // Apply search filter
-        if (!string.IsNullOrEmpty(SearchQuery))
-        {
-            var query = SearchQuery.ToLower();
-            tables = tables.Where(t =>
-                t.DisplayNumber.ToLower().Contains(query) ||
-                t.Floor.ToLower().Contains(query));
-        }
-
-        return tables;
-    }
-
-    /// <summary>
-    /// Get filtered tables by predicate
-    /// </summary>
-    private IEnumerable<Table> GetFilteredTables(Func<Table, bool> predicate)
-    {
-        return AppContext.Instance.Tables.Where(predicate);
-    }
-
-    /// <summary>
-    /// Convert TableStatus to string for filtering
-    /// </summary>
-    private string GetStatusString(TableStatus status) => status switch
-    {
-        TableStatus.Available => "Available",
-        TableStatus.Occupied => "Occupied",
-        TableStatus.Reserved => "Reserved",
-        TableStatus.NeedsClearing => "NeedsClearing",
-        _ => ""
-    };
-
-    /// <summary>
-    /// 1.1 - Toggle status filter (click again to deselect)
-    /// </summary>
     public void ToggleStatusFilter(string status)
     {
-        if (SelectedStatusFilter == status)
-        {
-            SelectedStatusFilter = ""; // Deselect
-        }
-        else
-        {
-            SelectedStatusFilter = status;
-        }
-
+        SelectedStatusFilter = SelectedStatusFilter == status ? string.Empty : status;
         RefreshAllData();
     }
 
-    /// <summary>
-    /// 1.2 - Search tables by number or area
-    /// </summary>
-    public void SearchTables(string query)
+    public void SearchTables(string? query)
     {
-        SearchQuery = query;
+        SearchQuery = (query ?? string.Empty).Trim();
         RefreshAllData();
     }
 
-    /// <summary>
-    /// 1.3 - Filter by area/floor
-    /// </summary>
     public void FilterByArea(string area)
     {
         SelectedAreaFilter = area;
@@ -276,9 +264,54 @@ public class TableFilterViewModel : ObservableObject
         RefreshAllData();
     }
 
-    /// <summary>
-    /// Update which area sections are visible based on selected area
-    /// </summary>
+    private IEnumerable<Table> GetFilteredTablesByArea(string area)
+    {
+        var tables = AppContext.Instance.Tables.Where(t => t.Floor == area);
+        return ApplyAllFilters(tables);
+    }
+
+    private IEnumerable<Table> GetAllFilteredTables()
+    {
+        return ApplyAllFilters(AppContext.Instance.Tables);
+    }
+
+    private IEnumerable<Table> ApplyAllFilters(IEnumerable<Table> tables)
+    {
+        if (SelectedAreaFilter != "All")
+        {
+            tables = tables.Where(t => t.Floor == SelectedAreaFilter);
+        }
+
+        if (!string.IsNullOrEmpty(SelectedStatusFilter))
+        {
+            tables = tables.Where(t => GetStatusString(t.Status) == SelectedStatusFilter);
+        }
+
+        if (!string.IsNullOrEmpty(SearchQuery))
+        {
+            var query = SearchQuery.ToLowerInvariant();
+            tables = tables.Where(t =>
+                t.DisplayNumber.ToLowerInvariant().Contains(query) ||
+                t.Floor.ToLowerInvariant().Contains(query));
+        }
+
+        return tables;
+    }
+
+    private IEnumerable<Table> GetFilteredTables(Func<Table, bool> predicate)
+    {
+        return AppContext.Instance.Tables.Where(predicate);
+    }
+
+    private static string GetStatusString(TableStatus status) => status switch
+    {
+        TableStatus.Available => "Available",
+        TableStatus.Occupied => "Occupied",
+        TableStatus.Reserved => "Reserved",
+        TableStatus.NeedsClearing => "NeedsClearing",
+        _ => string.Empty
+    };
+
     private void UpdateVisibleAreas()
     {
         ShowGroundFloor = SelectedAreaFilter == "All" || SelectedAreaFilter == "Ground Floor";
@@ -286,17 +319,6 @@ public class TableFilterViewModel : ObservableObject
         ShowGarden = SelectedAreaFilter == "All" || SelectedAreaFilter == "Garden";
     }
 
-    /// <summary>
-    /// Refresh all filterable data
-    /// </summary>
-    public void RefreshTables()
-    {
-        RefreshAllData();
-    }
-
-    /// <summary>
-    /// Trigger all property notifications to update UI
-    /// </summary>
     private void RefreshAllData()
     {
         OnPropertyChanged(nameof(FilteredTables));

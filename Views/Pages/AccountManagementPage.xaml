@@ -87,7 +87,7 @@
                                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                                     <Label Text="🔒" TextColor="{StaticResource TextMuted}" VerticalOptions="Center" />
                                     <Entry x:Name="CurrentPasswordEntry" Grid.Column="1" Placeholder="Mật khẩu hiện tại" IsPassword="{Binding IsCurrentPasswordHidden}" TextChanged="OnPasswordFieldChanged" />
-                                    <ImageButton Grid.Column="2" Source="{Binding CurrentPasswordShowIcon}" Clicked="OnToggleCurrentPassword" HorizontalOptions="End" WidthRequest="24" HeightRequest="24" />
+                                    <Button Grid.Column="2" Text="{Binding CurrentPasswordShowText}" Clicked="OnToggleCurrentPassword" BackgroundColor="Transparent" Padding="0" WidthRequest="24" HeightRequest="24" />
                                 </Grid>
                             </Border>
 
@@ -96,7 +96,7 @@
                                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                                     <Label Text="🔒" TextColor="{StaticResource TextMuted}" VerticalOptions="Center" />
                                     <Entry x:Name="NewPasswordEntry" Grid.Column="1" Placeholder="Mật khẩu mới" IsPassword="{Binding IsNewPasswordHidden}" TextChanged="OnPasswordFieldChanged" />
-                                    <ImageButton Grid.Column="2" Source="{Binding NewPasswordShowIcon}" Clicked="OnToggleNewPassword" HorizontalOptions="End" WidthRequest="24" HeightRequest="24" />
+                                    <Button Grid.Column="2" Text="{Binding NewPasswordShowText}" Clicked="OnToggleNewPassword" BackgroundColor="Transparent" Padding="0" WidthRequest="24" HeightRequest="24" />
                                 </Grid>
                             </Border>
 
@@ -105,7 +105,7 @@
                                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                                     <Label Text="🔒" TextColor="{StaticResource TextMuted}" VerticalOptions="Center" />
                                     <Entry x:Name="ConfirmPasswordEntry" Grid.Column="1" Placeholder="Xác nhận mật khẩu mới" IsPassword="{Binding IsConfirmPasswordHidden}" TextChanged="OnPasswordFieldChanged" />
-                                    <ImageButton Grid.Column="2" Source="{Binding ConfirmPasswordShowIcon}" Clicked="OnToggleConfirmPassword" HorizontalOptions="End" WidthRequest="24" HeightRequest="24" />
+                                    <Button Grid.Column="2" Text="{Binding ConfirmPasswordShowText}" Clicked="OnToggleConfirmPassword" BackgroundColor="Transparent" Padding="0" WidthRequest="24" HeightRequest="24" />
                                 </Grid>
                             </Border>
 

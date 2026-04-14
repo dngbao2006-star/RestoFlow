@@ -13,26 +13,26 @@
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Padding="24" Spacing="20">
                 <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
-                    <Label Text="Menu Management" Style="{StaticResource PageTitle}" />
-                    <Button Text="Add Dish" Style="{StaticResource PrimaryButton}" />
+                    <Label Text="Quản lý thực đơn" Style="{StaticResource PageTitle}" />
+                    <Button Text="Thêm món" Style="{StaticResource PrimaryButton}" />
                 </HorizontalStackLayout>
 
                 <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
                     <Border Style="{StaticResource CardBorder}">
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Total Dishes" FontAttributes="Bold" />
+                            <Label Text="Tổng số món" FontAttributes="Bold" />
                             <Label Text="{Binding MenuItems.Count}" FontSize="22" FontAttributes="Bold" />
                         </VerticalStackLayout>
                     </Border>
                     <Border Style="{StaticResource CardBorder}" Grid.Column="1">
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Available" FontAttributes="Bold" />
+                            <Label Text="Đang phục vụ" FontAttributes="Bold" />
                             <Label Text="11" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Success}" />
                         </VerticalStackLayout>
                     </Border>
                     <Border Style="{StaticResource CardBorder}" Grid.Column="2">
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Out of Stock" FontAttributes="Bold" />
+                            <Label Text="Hết món" FontAttributes="Bold" />
                             <Label Text="1" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Danger}" />
                         </VerticalStackLayout>
                     </Border>
@@ -42,19 +42,19 @@
                     <VerticalStackLayout Spacing="12">
                         <Border Style="{StaticResource InputBorder}">
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                                <Label Text="Search" TextColor="{StaticResource TextMuted}" VerticalOptions="Center" />
-                                <Entry Grid.Column="1" Placeholder="Search dishes" />
+                                <Label Text="Tìm kiếm" TextColor="{StaticResource TextMuted}" VerticalOptions="Center" />
+                                <Entry Grid.Column="1" Placeholder="Tìm món ăn" />
                             </Grid>
                         </Border>
                         <ScrollView Orientation="Horizontal">
                             <HorizontalStackLayout Spacing="8">
-                                <Button Text="All" Style="{StaticResource PillButton}" />
-                                <Button Text="Appetizers" Style="{StaticResource PillButton}" />
-                                <Button Text="Main Course" Style="{StaticResource PillButton}" />
-                                <Button Text="Soups" Style="{StaticResource PillButton}" />
-                                <Button Text="Seafood" Style="{StaticResource PillButton}" />
-                                <Button Text="Desserts" Style="{StaticResource PillButton}" />
-                                <Button Text="Drinks" Style="{StaticResource PillButton}" />
+                                <Button Text="Tất cả" Style="{StaticResource PillButton}" />
+                                <Button Text="Khai vị" Style="{StaticResource PillButton}" />
+                                <Button Text="Món chính" Style="{StaticResource PillButton}" />
+                                <Button Text="Canh/Súp" Style="{StaticResource PillButton}" />
+                                <Button Text="Hải sản" Style="{StaticResource PillButton}" />
+                                <Button Text="Tráng miệng" Style="{StaticResource PillButton}" />
+                                <Button Text="Đồ uống" Style="{StaticResource PillButton}" />
                             </HorizontalStackLayout>
                         </ScrollView>
                     </VerticalStackLayout>
@@ -71,16 +71,16 @@
                                     <Grid HeightRequest="160">
                                         <Image Source="{Binding Image}" Aspect="AspectFill" />
                                         <Border Background="#99000000" Stroke="#00000000" StrokeThickness="0" IsVisible="{Binding OutOfStock}">
-                                            <Label Text="OUT OF STOCK" TextColor="White" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                            <Label Text="HẾT MÓN" TextColor="White" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
                                         </Border>
                                     </Grid>
                                     <Label Text="{Binding Name}" FontAttributes="Bold" />
                                     <Label Text="{Binding Description}" Style="{StaticResource SecondaryTextStyle}" LineBreakMode="TailTruncation" />
                                     <Label Text="{Binding Price, StringFormat='{0:0,0} VND'}" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
                                     <HorizontalStackLayout Spacing="8">
-                                        <Button Text="Toggle Stock" Style="{StaticResource SecondaryButton}" />
-                                        <Button Text="Edit" Style="{StaticResource SecondaryButton}" />
-                                        <Button Text="Delete" Style="{StaticResource DangerButton}" />
+                                        <Button Text="Đổi trạng thái" Style="{StaticResource SecondaryButton}" />
+                                        <Button Text="Sửa" Style="{StaticResource SecondaryButton}" />
+                                        <Button Text="Xóa" Style="{StaticResource DangerButton}" />
                                     </HorizontalStackLayout>
                                 </VerticalStackLayout>
                             </Border>

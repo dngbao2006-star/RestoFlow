@@ -1,0 +1,584 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\RestoFlow\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\views\\pages\\ordercreationpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:views\\pages\\ordercreationpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\views\\pages\\paymentpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:views\\pages\\paymentpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\views\\pages\\paymentpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:views\\pages\\paymentpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\views\\pages\\ordercreationpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:views\\pages\\ordercreationpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\views\\pages\\tablemanagementpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:views\\pages\\tablemanagementpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\views\\pages\\tablemanagementpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:views\\pages\\tablemanagementpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\models\\table.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:models\\table.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\services\\imockdatastore.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:services\\imockdatastore.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\services\\mockdatastore.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:services\\mockdatastore.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\views\\pages\\layoutmanagementpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:views\\pages\\layoutmanagementpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\views\\pages\\layoutmanagementpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:views\\pages\\layoutmanagementpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\resources\\styles\\colors.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:resources\\styles\\colors.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\resources\\styles\\styles.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:resources\\styles\\styles.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\appshell.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:appshell.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\controls\\sidebarheaderview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:controls\\sidebarheaderview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\viewmodels\\loginviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:viewmodels\\loginviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\views\\pages\\loginpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:views\\pages\\loginpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\views\\pages\\loginpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:views\\pages\\loginpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\views\\pages\\forgotpasswordpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:views\\pages\\forgotpasswordpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\views\\pages\\forgotpasswordpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:views\\pages\\forgotpasswordpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\appmanagermentrestaurant.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:appmanagermentrestaurant.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\models\\fooditem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:models\\fooditem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\views\\pages\\componentsgallerypage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:views\\pages\\componentsgallerypage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\models\\revenuepoint.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:models\\revenuepoint.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\models\\chatmessage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:models\\chatmessage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\controls\\badgeview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:controls\\badgeview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\controls\\avatarview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:controls\\avatarview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\controls\\appheaderview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:controls\\appheaderview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\controls\\snackbar.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:controls\\snackbar.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\constants\\approutes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:constants\\approutes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\appshell.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:appshell.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\controls\\popups\\chatpopup.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:controls\\popups\\chatpopup.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\viewmodels\\headerviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:viewmodels\\headerviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|d:\\restoflow\\views\\pages\\chatpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{18266DB6-3729-2CAD-AE35-96EFF62BE788}|AppManagermentRestaurant.csproj|solutionrelative:views\\pages\\chatpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "IMockDataStore.cs",
+              "DocumentMoniker": "D:\\RestoFlow\\Services\\IMockDataStore.cs",
+              "RelativeDocumentMoniker": "Services\\IMockDataStore.cs",
+              "ToolTip": "D:\\RestoFlow\\Services\\IMockDataStore.cs",
+              "RelativeToolTip": "Services\\IMockDataStore.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-10T00:59:40.041Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "TableManagementPage.xaml",
+              "DocumentMoniker": "D:\\RestoFlow\\Views\\Pages\\TableManagementPage.xaml",
+              "RelativeDocumentMoniker": "Views\\Pages\\TableManagementPage.xaml",
+              "ToolTip": "D:\\RestoFlow\\Views\\Pages\\TableManagementPage.xaml",
+              "RelativeToolTip": "Views\\Pages\\TableManagementPage.xaml",
+              "ViewState": "AgIAAPQAAAAAAAAAAAAgwA8BAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-04-10T02:50:47.387Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "OrderCreationPage.xaml",
+              "DocumentMoniker": "D:\\RestoFlow\\Views\\Pages\\OrderCreationPage.xaml",
+              "RelativeDocumentMoniker": "Views\\Pages\\OrderCreationPage.xaml",
+              "ToolTip": "D:\\RestoFlow\\Views\\Pages\\OrderCreationPage.xaml",
+              "RelativeToolTip": "Views\\Pages\\OrderCreationPage.xaml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-04-13T12:51:55.135Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "PaymentPage.xaml",
+              "DocumentMoniker": "D:\\RestoFlow\\Views\\Pages\\PaymentPage.xaml",
+              "RelativeDocumentMoniker": "Views\\Pages\\PaymentPage.xaml",
+              "ToolTip": "D:\\RestoFlow\\Views\\Pages\\PaymentPage.xaml",
+              "RelativeToolTip": "Views\\Pages\\PaymentPage.xaml",
+              "ViewState": "AgIAAMwAAAAAAAAAAAAgwOcAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-04-10T00:55:37.365Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "OrderCreationPage.xaml.cs",
+              "DocumentMoniker": "D:\\RestoFlow\\Views\\Pages\\OrderCreationPage.xaml.cs",
+              "RelativeDocumentMoniker": "Views\\Pages\\OrderCreationPage.xaml.cs",
+              "ToolTip": "D:\\RestoFlow\\Views\\Pages\\OrderCreationPage.xaml.cs",
+              "RelativeToolTip": "Views\\Pages\\OrderCreationPage.xaml.cs",
+              "ViewState": "AgIAAKkBAAAAAAAAAAAgwMQBAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-13T13:18:24.153Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "PaymentPage.xaml.cs",
+              "DocumentMoniker": "D:\\RestoFlow\\Views\\Pages\\PaymentPage.xaml.cs",
+              "RelativeDocumentMoniker": "Views\\Pages\\PaymentPage.xaml.cs",
+              "ToolTip": "D:\\RestoFlow\\Views\\Pages\\PaymentPage.xaml.cs",
+              "RelativeToolTip": "Views\\Pages\\PaymentPage.xaml.cs",
+              "ViewState": "AgIAAMkAAAAAAAAAAAAmwNwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-10T00:55:49.336Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "MockDataStore.cs",
+              "DocumentMoniker": "D:\\RestoFlow\\Services\\MockDataStore.cs",
+              "RelativeDocumentMoniker": "Services\\MockDataStore.cs",
+              "ToolTip": "D:\\RestoFlow\\Services\\MockDataStore.cs",
+              "RelativeToolTip": "Services\\MockDataStore.cs",
+              "ViewState": "AgIAAEMCAAAAAAAAAAAYwF0CAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-10T00:59:43.512Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "TableManagementPage.xaml.cs",
+              "DocumentMoniker": "D:\\RestoFlow\\Views\\Pages\\TableManagementPage.xaml.cs",
+              "RelativeDocumentMoniker": "Views\\Pages\\TableManagementPage.xaml.cs",
+              "ToolTip": "D:\\RestoFlow\\Views\\Pages\\TableManagementPage.xaml.cs",
+              "RelativeToolTip": "Views\\Pages\\TableManagementPage.xaml.cs",
+              "ViewState": "AgIAADIBAAAAAAAAAAAgwE0BAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-10T00:56:13.06Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Table.cs",
+              "DocumentMoniker": "D:\\RestoFlow\\Models\\Table.cs",
+              "RelativeDocumentMoniker": "Models\\Table.cs",
+              "ToolTip": "D:\\RestoFlow\\Models\\Table.cs",
+              "RelativeToolTip": "Models\\Table.cs",
+              "ViewState": "AgIAACAAAAAAAAAAAAA3wDsAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-10T20:58:28.674Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "LayoutManagementPage.xaml.cs",
+              "DocumentMoniker": "D:\\RestoFlow\\Views\\Pages\\LayoutManagementPage.xaml.cs",
+              "RelativeDocumentMoniker": "Views\\Pages\\LayoutManagementPage.xaml.cs",
+              "ToolTip": "D:\\RestoFlow\\Views\\Pages\\LayoutManagementPage.xaml.cs",
+              "RelativeToolTip": "Views\\Pages\\LayoutManagementPage.xaml.cs",
+              "ViewState": "AgIAAB8AAAAAAAAAAAAgwDoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-10T20:42:54.877Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "SidebarHeaderView.xaml",
+              "DocumentMoniker": "D:\\RestoFlow\\Controls\\SidebarHeaderView.xaml",
+              "RelativeDocumentMoniker": "Controls\\SidebarHeaderView.xaml",
+              "ToolTip": "D:\\RestoFlow\\Controls\\SidebarHeaderView.xaml",
+              "RelativeToolTip": "Controls\\SidebarHeaderView.xaml",
+              "ViewState": "AgIAAE8AAAAAAAAAAAAgwGoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-04-09T22:59:38.599Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Styles.xaml",
+              "DocumentMoniker": "D:\\RestoFlow\\Resources\\Styles\\Styles.xaml",
+              "RelativeDocumentMoniker": "Resources\\Styles\\Styles.xaml",
+              "ToolTip": "D:\\RestoFlow\\Resources\\Styles\\Styles.xaml",
+              "RelativeToolTip": "Resources\\Styles\\Styles.xaml",
+              "ViewState": "AgIAADUBAAAAAAAAAAAgwFABAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-04-10T03:02:25.276Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "ForgotPasswordPage.xaml",
+              "DocumentMoniker": "D:\\RestoFlow\\Views\\Pages\\ForgotPasswordPage.xaml",
+              "RelativeDocumentMoniker": "Views\\Pages\\ForgotPasswordPage.xaml",
+              "ToolTip": "D:\\RestoFlow\\Views\\Pages\\ForgotPasswordPage.xaml",
+              "RelativeToolTip": "Views\\Pages\\ForgotPasswordPage.xaml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAD4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-04-10T19:57:11.831Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "ForgotPasswordPage.xaml.cs",
+              "DocumentMoniker": "D:\\RestoFlow\\Views\\Pages\\ForgotPasswordPage.xaml.cs",
+              "RelativeDocumentMoniker": "Views\\Pages\\ForgotPasswordPage.xaml.cs",
+              "ToolTip": "D:\\RestoFlow\\Views\\Pages\\ForgotPasswordPage.xaml.cs",
+              "RelativeToolTip": "Views\\Pages\\ForgotPasswordPage.xaml.cs",
+              "ViewState": "AgIAABsAAAAAAAAAAAAmwC4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-10T20:02:11.177Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Colors.xaml",
+              "DocumentMoniker": "D:\\RestoFlow\\Resources\\Styles\\Colors.xaml",
+              "RelativeDocumentMoniker": "Resources\\Styles\\Colors.xaml",
+              "ToolTip": "D:\\RestoFlow\\Resources\\Styles\\Colors.xaml",
+              "RelativeToolTip": "Resources\\Styles\\Colors.xaml",
+              "ViewState": "AgIAACAAAAAAAAAAAAAmwCMAAAAyAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-04-10T20:37:13.231Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "LayoutManagementPage.xaml",
+              "DocumentMoniker": "D:\\RestoFlow\\Views\\Pages\\LayoutManagementPage.xaml",
+              "RelativeDocumentMoniker": "Views\\Pages\\LayoutManagementPage.xaml",
+              "ToolTip": "D:\\RestoFlow\\Views\\Pages\\LayoutManagementPage.xaml",
+              "RelativeToolTip": "Views\\Pages\\LayoutManagementPage.xaml",
+              "ViewState": "AgIAAEYAAAAAAAAAAAAgwGEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-04-10T02:50:42.681Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "LoginViewModel.cs",
+              "DocumentMoniker": "D:\\RestoFlow\\ViewModels\\LoginViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\LoginViewModel.cs",
+              "ToolTip": "D:\\RestoFlow\\ViewModels\\LoginViewModel.cs",
+              "RelativeToolTip": "ViewModels\\LoginViewModel.cs",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAiwHgAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-10T20:30:11.071Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "AppShell.xaml",
+              "DocumentMoniker": "D:\\RestoFlow\\AppShell.xaml",
+              "RelativeDocumentMoniker": "AppShell.xaml",
+              "ToolTip": "D:\\RestoFlow\\AppShell.xaml",
+              "RelativeToolTip": "AppShell.xaml",
+              "ViewState": "AgIAAMwAAAAAAAAAAAAgwOcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-04-09T23:05:09.744Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "LoginPage.xaml",
+              "DocumentMoniker": "D:\\RestoFlow\\Views\\Pages\\LoginPage.xaml",
+              "RelativeDocumentMoniker": "Views\\Pages\\LoginPage.xaml",
+              "ToolTip": "D:\\RestoFlow\\Views\\Pages\\LoginPage.xaml",
+              "RelativeToolTip": "Views\\Pages\\LoginPage.xaml",
+              "ViewState": "AgIAAH0AAAAAAAAAAAAgwJgAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-04-10T20:08:09.152Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "LoginPage.xaml.cs",
+              "DocumentMoniker": "D:\\RestoFlow\\Views\\Pages\\LoginPage.xaml.cs",
+              "RelativeDocumentMoniker": "Views\\Pages\\LoginPage.xaml.cs",
+              "ToolTip": "D:\\RestoFlow\\Views\\Pages\\LoginPage.xaml.cs",
+              "RelativeToolTip": "Views\\Pages\\LoginPage.xaml.cs",
+              "ViewState": "AgIAAE4AAAAAAAAAAAAYwGgAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-10T20:17:01.272Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": "HeaderViewModel.cs",
+              "DocumentMoniker": "D:\\RestoFlow\\ViewModels\\HeaderViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\HeaderViewModel.cs",
+              "ToolTip": "D:\\RestoFlow\\ViewModels\\HeaderViewModel.cs",
+              "RelativeToolTip": "ViewModels\\HeaderViewModel.cs",
+              "ViewState": "AgIAAIcAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-10T01:18:38.054Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "AppRoutes.cs",
+              "DocumentMoniker": "D:\\RestoFlow\\Constants\\AppRoutes.cs",
+              "RelativeDocumentMoniker": "Constants\\AppRoutes.cs",
+              "ToolTip": "D:\\RestoFlow\\Constants\\AppRoutes.cs",
+              "RelativeToolTip": "Constants\\AppRoutes.cs",
+              "ViewState": "AgIAABUAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-10T01:18:14.812Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "AppManagermentRestaurant.csproj",
+              "DocumentMoniker": "D:\\RestoFlow\\AppManagermentRestaurant.csproj",
+              "RelativeDocumentMoniker": "AppManagermentRestaurant.csproj",
+              "ToolTip": "D:\\RestoFlow\\AppManagermentRestaurant.csproj",
+              "RelativeToolTip": "AppManagermentRestaurant.csproj",
+              "ViewState": "AgIAAC8AAAAAAAAAAAAEwDAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-04-10T02:27:09.052Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "AppShell.xaml.cs",
+              "DocumentMoniker": "D:\\RestoFlow\\AppShell.xaml.cs",
+              "RelativeDocumentMoniker": "AppShell.xaml.cs",
+              "ToolTip": "D:\\RestoFlow\\AppShell.xaml.cs",
+              "RelativeToolTip": "AppShell.xaml.cs",
+              "ViewState": "AgIAAB0AAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-10T01:18:23.79Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "ChatPopup.xaml",
+              "DocumentMoniker": "D:\\RestoFlow\\Controls\\Popups\\ChatPopup.xaml",
+              "RelativeDocumentMoniker": "Controls\\Popups\\ChatPopup.xaml",
+              "ToolTip": "D:\\RestoFlow\\Controls\\Popups\\ChatPopup.xaml",
+              "RelativeToolTip": "Controls\\Popups\\ChatPopup.xaml",
+              "ViewState": "AgIAACYAAAAAAAAAAABBwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-04-10T01:18:32.369Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 34,
+              "Title": "ChatPage.xaml",
+              "DocumentMoniker": "D:\\RestoFlow\\Views\\Pages\\ChatPage.xaml",
+              "RelativeDocumentMoniker": "Views\\Pages\\ChatPage.xaml",
+              "ToolTip": "D:\\RestoFlow\\Views\\Pages\\ChatPage.xaml",
+              "RelativeToolTip": "Views\\Pages\\ChatPage.xaml",
+              "ViewState": "AgIAAA8AAAAAAAAAAABBwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-04-10T01:18:47.293Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "ComponentsGalleryPage.xaml",
+              "DocumentMoniker": "D:\\RestoFlow\\Views\\Pages\\ComponentsGalleryPage.xaml",
+              "RelativeDocumentMoniker": "Views\\Pages\\ComponentsGalleryPage.xaml",
+              "ToolTip": "D:\\RestoFlow\\Views\\Pages\\ComponentsGalleryPage.xaml",
+              "RelativeToolTip": "Views\\Pages\\ComponentsGalleryPage.xaml",
+              "ViewState": "AgIAAHsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-04-10T00:55:17.877Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "FoodItem.cs",
+              "DocumentMoniker": "D:\\RestoFlow\\Models\\FoodItem.cs",
+              "RelativeDocumentMoniker": "Models\\FoodItem.cs",
+              "ToolTip": "D:\\RestoFlow\\Models\\FoodItem.cs",
+              "RelativeToolTip": "Models\\FoodItem.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-10T00:54:14.725Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "RevenuePoint.cs",
+              "DocumentMoniker": "D:\\RestoFlow\\Models\\RevenuePoint.cs",
+              "RelativeDocumentMoniker": "Models\\RevenuePoint.cs",
+              "ToolTip": "D:\\RestoFlow\\Models\\RevenuePoint.cs",
+              "RelativeToolTip": "Models\\RevenuePoint.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-10T00:54:10.715Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "ChatMessage.cs",
+              "DocumentMoniker": "D:\\RestoFlow\\Models\\ChatMessage.cs",
+              "RelativeDocumentMoniker": "Models\\ChatMessage.cs",
+              "ToolTip": "D:\\RestoFlow\\Models\\ChatMessage.cs",
+              "RelativeToolTip": "Models\\ChatMessage.cs",
+              "ViewState": "AgIAACMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-10T00:54:05.909Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "App.xaml",
+              "DocumentMoniker": "D:\\RestoFlow\\App.xaml",
+              "RelativeDocumentMoniker": "App.xaml",
+              "ToolTip": "D:\\RestoFlow\\App.xaml",
+              "RelativeToolTip": "App.xaml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-04-09T23:03:17.452Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "BadgeView.xaml",
+              "DocumentMoniker": "D:\\RestoFlow\\Controls\\BadgeView.xaml",
+              "RelativeDocumentMoniker": "Controls\\BadgeView.xaml",
+              "ToolTip": "D:\\RestoFlow\\Controls\\BadgeView.xaml",
+              "RelativeToolTip": "Controls\\BadgeView.xaml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-04-09T23:01:03.078Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "AvatarView.xaml",
+              "DocumentMoniker": "D:\\RestoFlow\\Controls\\AvatarView.xaml",
+              "RelativeDocumentMoniker": "Controls\\AvatarView.xaml",
+              "ToolTip": "D:\\RestoFlow\\Controls\\AvatarView.xaml",
+              "RelativeToolTip": "Controls\\AvatarView.xaml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-04-09T23:00:59.342Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "AppHeaderView.xaml",
+              "DocumentMoniker": "D:\\RestoFlow\\Controls\\AppHeaderView.xaml",
+              "RelativeDocumentMoniker": "Controls\\AppHeaderView.xaml",
+              "ToolTip": "D:\\RestoFlow\\Controls\\AppHeaderView.xaml",
+              "RelativeToolTip": "Controls\\AppHeaderView.xaml",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-04-09T23:00:51.829Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "Snackbar.xaml",
+              "DocumentMoniker": "D:\\RestoFlow\\Controls\\Snackbar.xaml",
+              "RelativeDocumentMoniker": "Controls\\Snackbar.xaml",
+              "ToolTip": "D:\\RestoFlow\\Controls\\Snackbar.xaml",
+              "RelativeToolTip": "Controls\\Snackbar.xaml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-04-09T23:00:39.681Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

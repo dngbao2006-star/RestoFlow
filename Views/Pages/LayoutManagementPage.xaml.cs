@@ -1,5 +1,6 @@
 using AppManagermentRestaurant.Models;
 using AppManagermentRestaurant.Services;
+using AppManagermentRestaurant.Constants;
 
 namespace AppManagermentRestaurant.Views.Pages;
 
@@ -52,6 +53,6 @@ public partial class LayoutManagementPage : ContentPage
         }
 
         // Navigate to OrderCreationPage
-        await Shell.Current.GoToAsync("staff/orders");
+        await Shell.Current.GoToAsync(AppRoutes.Absolute(AppRoutes.CreateOrder));
     }
 }

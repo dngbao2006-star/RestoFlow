@@ -3,7 +3,9 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
+    <!-- Inter: font trung tính cho toàn bộ UI thao tác (bảng biểu, menu, báo cáo) -->
     <x:String x:Key="BodyFont">Inter</x:String>
+    <!-- Playfair Display: chỉ dùng cho Logo và Tiêu đề lớn (sang trọng) -->
     <x:String x:Key="DisplayFont">Playfair Display</x:String>
 
     <x:Double x:Key="RadiusSm">8</x:Double>

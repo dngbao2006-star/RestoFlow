@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="AppManagermentRestaurant.Controls.SidebarHeaderView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    x:Name="ThisControl">
+
+    <ContentView.Resources>
+        <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+    </ContentView.Resources>
+
+    <VerticalStackLayout Spacing="0">
+
+        <!-- VÙNG 1 — LOGO NHÀ HÀNG (min 64px, padding 16px) -->
+        <Grid MinimumHeightRequest="64" Padding="16,12,16,12"
+              ColumnDefinitions="40,*" ColumnSpacing="10">
+
+            <!-- Icon logo: 40x40 bo tròn 12px -->
+            <Border Grid.Column="0"
+                    Background="{StaticResource SidebarLogoBox}"
+                    Stroke="Transparent" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    WidthRequest="40" HeightRequest="40"
+                    HorizontalOptions="Start" VerticalOptions="Center">
+                <Path Fill="White" WidthRequest="22" HeightRequest="22"
+                      Aspect="Uniform" HorizontalOptions="Center" VerticalOptions="Center"
+                      Data="M17,12H7C5.9,12 5,12.9 5,14V20H19V14C19,12.9 18.1,12 17,12M12,2C9.79,2 8,3.79 8,6C8,8 9.6,9.72 11.73,9.96L11,12H13L12.27,9.96C14.4,9.72 16,8 16,6C16,3.79 14.21,2 12,2M10,6C10,4.9 10.9,4 12,4C13.1,4 14,4.9 14,6C14,7.1 13.1,8 12,8C10.9,8 10,7.1 10,6Z" />
+            </Border>
+
+            <!-- Text thương hiệu — chỉ hiện khi mở rộng -->
+            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center"
+                                 IsVisible="{Binding Source={x:Reference ThisControl}, Path=IsExpanded}">
+                <Label Text="The Golden Plate"
+                       FontFamily="Playfair Display"
+                       FontSize="16" FontAttributes="Bold"
+                       TextColor="{StaticResource SidebarTextPrimary}"
+                       LineBreakMode="NoWrap" />
+                <Label Text="{Binding Source={x:Reference ThisControl}, Path=RoleSubtitle}"
+                       FontFamily="Inter" FontSize="11"
+                       TextColor="{StaticResource SidebarTextMuted}" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <!-- Divider dưới logo -->
+        <BoxView HeightRequest="1" Color="{StaticResource SidebarDivider}" />
+
+        <!-- VÙNG 2 — NÚT THU GỌN / MỞ RỘNG -->
+        <Border Background="Transparent" Stroke="Transparent" StrokeThickness="0"
+                StrokeShape="RoundRectangle 8"
+                Padding="8" Margin="12,12,12,0" HorizontalOptions="Fill">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnToggleSidebarTapped" />
+            </Border.GestureRecognizers>
+            <Grid>
+                <!-- Expanded: icon X + "Thu gọn" -->
+                <HorizontalStackLayout Spacing="8"
+                    IsVisible="{Binding Source={x:Reference ThisControl}, Path=IsExpanded}">
+                    <Path Fill="{StaticResource SidebarTextMuted}" WidthRequest="18" HeightRequest="18"
+                          Aspect="Uniform" VerticalOptions="Center"
+                          Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+                    <Label Text="Thu gọn" FontFamily="Inter" FontSize="13"
+                           TextColor="{StaticResource SidebarTextMuted}" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+                <!-- Collapsed: only hamburger icon -->
+                <Path Fill="White" WidthRequest="18" HeightRequest="18"
+                      Aspect="Uniform" HorizontalOptions="Center" VerticalOptions="Center"
+                      Data="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z"
+                      IsVisible="{Binding Source={x:Reference ThisControl}, Path=IsExpanded,
+                                         Converter={StaticResource InvertedBoolConverter}}" />
+            </Grid>
+        </Border>
+
+        <!-- VÙNG 3 — THÔNG TIN USER: chỉ hiện khi mở rộng -->
+        <Border Background="{StaticResource SidebarUserCard}"
+                Stroke="{StaticResource SidebarDivider}" StrokeThickness="1"
+                StrokeShape="RoundRectangle 12"
+                Padding="12" Margin="12,12,12,4"
+                IsVisible="{Binding Source={x:Reference ThisControl}, Path=IsExpanded}">
+            <HorizontalStackLayout Spacing="10">
+                <!-- Avatar tròn 36x36 -->
+                <Border Background="{StaticResource PrimaryAccent}"
+                        Stroke="Transparent" StrokeThickness="0"
+                        StrokeShape="RoundRectangle 18"
+                        WidthRequest="36" HeightRequest="36"
+                        HorizontalOptions="Start" VerticalOptions="Center">
+                    <Label Text="{Binding CurrentUser.Initials}"
+                           FontFamily="Inter" FontSize="14" FontAttributes="Bold"
+                           TextColor="White"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <!-- Tên rút gọn + vai trò -->
+                <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                    <Label Text="{Binding CurrentUser.ShortName}"
+                           FontFamily="Inter" FontSize="13.5" FontAttributes="Bold"
+                           TextColor="{StaticResource SidebarTextPrimary}"
+                           LineBreakMode="TailTruncation" MaxLines="1" />
+                    <Label Text="{Binding CurrentUser.RoleLabel}"
+                           FontFamily="Inter" FontSize="11.5"
+                           TextColor="{StaticResource SidebarTextMuted}" />
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+        </Border>
+
+    </VerticalStackLayout>
+</ContentView>

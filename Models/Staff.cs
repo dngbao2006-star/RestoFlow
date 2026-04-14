@@ -14,13 +14,25 @@ public class Staff
 
     public string Initials => string.Join("", Name.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(word => word[0])).ToUpperInvariant();
 
-    public string RoleLabel => Role == StaffRole.Manager ? "Manager" : "Staff";
+    /// <summary>Lấy 2 từ cuối của họ tên đầy đủ (ví dụ "Nguyễn Thị Hương" → "Thị Hương")</summary>
+    public string ShortName
+    {
+        get
+        {
+            var parts = Name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            return parts.Length >= 2
+                ? string.Join(" ", parts.TakeLast(2))
+                : Name;
+        }
+    }
+
+    public string RoleLabel => Role == StaffRole.Manager ? "Quản lý" : "Nhân viên";
 
     public string StatusLabel => Status switch
     {
-        StaffStatus.Active => "Active",
-        StaffStatus.Inactive => "Inactive",
-        StaffStatus.Locked => "Locked",
-        _ => "Unknown"
+        StaffStatus.Active => "Hoạt động",
+        StaffStatus.Inactive => "Ngừng hoạt động",
+        StaffStatus.Locked => "Đã khóa",
+        _ => "Không xác định"
     };
 }

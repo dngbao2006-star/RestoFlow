@@ -1,54 +1,54 @@
-﻿using AppManagermentRestaurant.Services;
+﻿using AppManagermentRestaurant.Constants;
+using AppManagermentRestaurant.Services;
 using AppManagermentRestaurant.Views.Pages;
 
 namespace AppManagermentRestaurant;
 
 public partial class AppShell : Shell
 {
-	public AppShell()
-	{
-		InitializeComponent();
-		BindingContext = AppContext.Instance;
+    public static readonly BindableProperty IsSidebarExpandedProperty = BindableProperty.Create(
+        nameof(IsSidebarExpanded), typeof(bool), typeof(AppShell), true,
+        propertyChanged: (b, o, n) =>
+        {
+            if (b is AppShell shell)
+            {
+                shell.FlyoutWidth = (bool)n ? 260 : 72;
+            }
+        });
 
-		// ✅ Đăng ký route
-		Routing.RegisterRoute(nameof(ForgotPasswordPage), typeof(ForgotPasswordPage));
-		Routing.RegisterRoute("ordercreation", typeof(OrderCreationPage));
-		Routing.RegisterRoute("staff/orders", typeof(OrderCreationPage));
-		Routing.RegisterRoute("staff/dish-status", typeof(DishStatusPage));
-		Routing.RegisterRoute("staff/tables", typeof(TableManagementPage));
-		Routing.RegisterRoute("staff/dashboard", typeof(DashboardPage));
-	}
+    public bool IsSidebarExpanded
+    {
+        get => (bool)GetValue(IsSidebarExpandedProperty);
+        set => SetValue(IsSidebarExpandedProperty, value);
+    }
 
-	private async void OnSignOutClicked(object sender, EventArgs e)
-	{
-		var dialogService = new Services.DialogService(Shell.Current);
-		var confirmed = await dialogService.ShowLogoutConfirmAsync();
+    public AppShell()
+    {
+        InitializeComponent();
+        BindingContext = AppContext.Instance;
 
-		if (confirmed)
-		{
-			// Log logout activity before clearing user
-			ActivityLogService.Instance.LogLogout();
+        Routing.RegisterRoute(AppRoutes.ForgotPassword, typeof(ForgotPasswordPage));
+        Routing.RegisterRoute(AppRoutes.Profile, typeof(AccountManagementPage));
+    }
 
-			AppContext.Instance.CurrentUser = null;
-			App.ShowLogin();
-		}
-	}
+    private async Task HandleSignOutAsync()
+    {
+        var hostPage = Shell.Current ?? this;
+        var dialogService = new DialogService(hostPage);
+        var confirmed = await dialogService.ShowLogoutConfirmAsync();
 
-	private async void OnBackButtonClicked(object sender, EventArgs e)
-	{
-		// Clear selected table and order when going back
-		AppContext.Instance.SelectedTable = null;
-		AppContext.Instance.SelectedOrder = null;
+        if (!confirmed)
+        {
+            return;
+        }
 
-		// Navigate back or show flyout menu
-		if (Shell.Current.Navigation.NavigationStack.Count > 1)
-		{
-			await Shell.Current.Navigation.PopAsync();
-		}
-		else
-		{
-			// If no navigation history, show flyout menu
-			Shell.Current.FlyoutIsPresented = true;
-		}
-	}
+        ActivityLogService.Instance.LogLogout();
+        await MainThread.InvokeOnMainThreadAsync(App.ShowLogin);
+        AppContext.Instance.CurrentUser = null;
+    }
+
+    private async void OnSignOutTapped(object sender, TappedEventArgs e)
+    {
+        await HandleSignOutAsync();
+    }
 }

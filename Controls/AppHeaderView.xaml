@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    AppHeaderView.xaml
+    ─────────────────────────────────────────────────────────────────────────
+    SỬA LỖI: Các dropdown (Thông báo / Chat / Tài khoản) trước đây được
+    nhúng inline vào Grid.Row="1" với RowDefinitions="40,Auto", khiến khi
+    hiện ra chúng đẩy toàn bộ nội dung bên dưới xuống.
+
+    GIẢI PHÁP: Xoá hoàn toàn các inline panel. Mỗi nút khi bấm sẽ gọi
+    ShowPopupAsync() trong code-behind → Popup của CommunityToolkit.Maui
+    nổi lên như một overlay thực sự, không ảnh hưởng layout.
+    ─────────────────────────────────────────────────────────────────────────
+-->
+<ContentView
+    x:Class="AppManagermentRestaurant.Controls.AppHeaderView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Name="RootHeader">
+
+    <Grid Padding="24,12,24,0" ColumnDefinitions="*,Auto">
+
+        <!-- Ngày hôm nay -->
+        <Label
+            Text="{Binding TodayLabel}"
+            Style="{StaticResource SecondaryTextStyle}"
+            FontAttributes="Bold"
+            VerticalOptions="Center" />
+
+        <!-- Nhóm nút bên phải -->
+        <HorizontalStackLayout Grid.Column="1" Spacing="12" VerticalOptions="Center">
+
+            <!-- ── NÚT THÔNG BÁO ─────────────────────────────────────────── -->
+            <Grid WidthRequest="40" HeightRequest="40">
+                <!-- Nền nút -->
+                <Border
+                    WidthRequest="40"
+                    HeightRequest="40"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="#EDE8DC" />
+
+                <!-- Icon chuông — Clicked gọi ShowPopupAsync, không dùng Command toggle -->
+                <Button
+                    Text="🔔"
+                    FontSize="20"
+                    Padding="0"
+                    BackgroundColor="Transparent"
+                    TextColor="#1B3A6B"
+                    CornerRadius="12"
+                    Clicked="OnBellClicked" />
+
+                <!-- Badge số thông báo chưa đọc -->
+                <Border
+                    WidthRequest="20"
+                    HeightRequest="20"
+                    BackgroundColor="#EF4444"
+                    Stroke="#EF4444"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 10"
+                    HorizontalOptions="End"
+                    VerticalOptions="Start"
+                    TranslationX="4"
+                    TranslationY="-4"
+                    IsVisible="{Binding HasUnreadNotifications}"
+                    InputTransparent="True">
+                    <Label
+                        Text="{Binding AppContext.UnreadNotifications}"
+                        TextColor="White"
+                        FontSize="10"
+                        FontAttributes="Bold"
+                        HorizontalTextAlignment="Center"
+                        VerticalTextAlignment="Center" />
+                </Border>
+            </Grid>
+
+            <!-- ── NÚT CHAT ──────────────────────────────────────────────── -->
+            <Grid WidthRequest="40" HeightRequest="40">
+                <!-- Nền nút (đổi màu khi active) -->
+                <Border
+                    x:Name="ChatButtonBackground"
+                    WidthRequest="40"
+                    HeightRequest="40"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="#EDE8DC" />
+
+                <!-- Icon chat — Clicked gọi ShowPopupAsync -->
+                <Button
+                    x:Name="ChatIconButton"
+                    Text="💬"
+                    FontSize="20"
+                    Padding="0"
+                    BackgroundColor="Transparent"
+                    TextColor="#1B3A6B"
+                    CornerRadius="12"
+                    Clicked="OnChatClicked" />
+
+                <!-- Badge số tin nhắn chưa đọc -->
+                <Border
+                    WidthRequest="20"
+                    HeightRequest="20"
+                    BackgroundColor="#EF4444"
+                    Stroke="#EF4444"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 10"
+                    HorizontalOptions="End"
+                    VerticalOptions="Start"
+                    TranslationX="4"
+                    TranslationY="-4"
+                    IsVisible="{Binding HasUnreadMessages}"
+                    InputTransparent="True">
+                    <Label
+                        Text="{Binding AppContext.UnreadMessages}"
+                        TextColor="White"
+                        FontSize="10"
+                        FontAttributes="Bold"
+                        HorizontalTextAlignment="Center"
+                        VerticalTextAlignment="Center" />
+                </Border>
+            </Grid>
+
+            <!-- ── NÚT TÀI KHOẢN ─────────────────────────────────────────── -->
+            <!--
+                Dùng Grid để chồng Border nền lên trên Button trong suốt,
+                tránh Border nhận tap và chặn Button.
+            -->
+            <Grid HeightRequest="40">
+                <Border
+                    BackgroundColor="#EDE8DC"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="12,8">
+                    <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                        <!-- Avatar chữ cái đầu -->
+                        <Border
+                            WidthRequest="28"
+                            HeightRequest="28"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 14"
+                            BackgroundColor="{Binding CurrentUserAvatarColor}">
+                            <Label
+                                Text="{Binding CurrentUserInitial}"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                TextColor="White"
+                                HorizontalTextAlignment="Center"
+                                VerticalTextAlignment="Center" />
+                        </Border>
+
+                        <Label
+                            Text="{Binding CurrentUserDisplayName}"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            TextColor="#1A1209"
+                            MaximumWidthRequest="120"
+                            LineBreakMode="TailTruncation"
+                            VerticalTextAlignment="Center" />
+
+                        <Label Text="⌄" FontSize="16" TextColor="#7B6A57" VerticalTextAlignment="Center" />
+                    </HorizontalStackLayout>
+                </Border>
+
+                <!-- Nút trong suốt phủ lên trên để bắt tap, gọi ShowPopupAsync -->
+                <Button
+                    Text=""
+                    BackgroundColor="Transparent"
+                    Clicked="OnAccountClicked" />
+            </Grid>
+
+        </HorizontalStackLayout>
+    </Grid>
+</ContentView>

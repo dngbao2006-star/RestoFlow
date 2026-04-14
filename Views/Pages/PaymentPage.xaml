@@ -10,38 +10,42 @@
 
     <ContentPage.Resources>
         <helpers:BooleanNegationConverter x:Key="BoolNegationConverter" />
+        <helpers:HasValueConverter x:Key="HasValueConverter" />
     </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,*" ColumnSpacing="20">
         <controls:AppHeaderView Grid.ColumnSpan="2" />
 
-        <!-- Left Column: Invoice -->
         <ScrollView Grid.Row="1" Grid.Column="0">
             <VerticalStackLayout Padding="24" Spacing="20">
-                <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
-                    <Label Text="Thanh toán" Style="{StaticResource PageTitle}" />
-                </HorizontalStackLayout>
 
-                <!-- Table Selection Section -->
                 <VerticalStackLayout Spacing="12">
                     <Label Text="Chọn bàn cần thanh toán" FontAttributes="Bold" FontSize="14" />
 
-                    <!-- Table ComboBox Selection -->
-                        <VerticalStackLayout Spacing="10" IsVisible="{Binding OrdersWithServedItems, Converter={StaticResource HasValueConverter}}">
-                            <Border Style="{StaticResource InputBorder}" Padding="12">
+                    <VerticalStackLayout Spacing="10" IsVisible="{Binding HasBillableTables}">
+
+                        <Border Stroke="#6366F1" StrokeThickness="1" StrokeShape="RoundRectangle 8" BackgroundColor="White" HorizontalOptions="Start" WidthRequest="340" HeightRequest="42" Padding="0">
+                            <Grid>
                                 <Picker x:Name="TablePicker"
-                                        ItemsSource="{Binding OrdersWithServedItems}"
-                                        ItemDisplayBinding="{Binding PaymentDisplayText}"
+                                        ItemsSource="{Binding ActiveOrders}"
+                                        ItemDisplayBinding="{Binding TableNumber, StringFormat='Bàn {0}'}"
                                         SelectedItem="{Binding SelectedTableOrder}"
-                                        SelectedIndexChanged="OnTableSelected"
-                                    TextColor="{StaticResource TextPrimary}"
-                                    BackgroundColor="{StaticResource Surface}"
-                                    FontSize="13"
-                                    FontAttributes="Bold" />
+                                        TextColor="{StaticResource TextPrimary}"
+                                        BackgroundColor="Transparent"
+                                        FontSize="14"
+                                        FontAttributes="Bold" 
+                                        VerticalOptions="FillAndExpand"
+                                        HorizontalOptions="FillAndExpand"
+                                        Margin="24,0,24,0"/>
+
+                                <Grid ColumnDefinitions="Auto,*,Auto" InputTransparent="True" Padding="12,0">
+                                    <Ellipse Grid.Column="0" Fill="#22C55E" WidthRequest="8" HeightRequest="8" VerticalOptions="Center" />
+                                    <Label Grid.Column="2" Text="▼" FontSize="11" TextColor="#6B7280" VerticalOptions="Center"/>
+                                </Grid>
+                            </Grid>
                         </Border>
 
-                        <!-- Selected Table Info -->
-                        <Border Style="{StaticResource CardBorder}" IsVisible="{Binding SelectedTableOrder, Converter={StaticResource HasValueConverter}}" Padding="16">
+                        <Border Style="{StaticResource CardBorder}" IsVisible="{Binding HasSelectedOrder}" Padding="16" Margin="0,0,0,10">
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" RowSpacing="8">
                                 <VerticalStackLayout Spacing="4" Grid.Column="0">
                                     <HorizontalStackLayout Spacing="8">
@@ -51,10 +55,6 @@
                                     <HorizontalStackLayout Spacing="8">
                                         <Label Text="👨‍💼" FontSize="12" VerticalOptions="Center" />
                                         <Label Text="{Binding SelectedTableOrder.ServerName}" Style="{StaticResource SecondaryTextStyle}" FontSize="11" />
-                                    </HorizontalStackLayout>
-                                    <HorizontalStackLayout Spacing="8">
-                                        <Label Text="🍽️" FontSize="12" VerticalOptions="Center" />
-                                        <Label Text="{Binding SelectedTableOrder.Items.Count, StringFormat='{0} món'}" Style="{StaticResource MutedTextStyle}" FontSize="11" />
                                     </HorizontalStackLayout>
                                 </VerticalStackLayout>
 
@@ -66,16 +66,11 @@
                         </Border>
                     </VerticalStackLayout>
 
-                    <!-- Empty State -->
-                    <Label Text="Không có bàn nào cần thanh toán" 
-                           Style="{StaticResource MutedTextStyle}" 
-                           HorizontalOptions="Center" 
-                           IsVisible="{Binding OrdersWithServedItems, Converter={StaticResource HasValueConverter}}" />
+                    <Label Text="Không có bàn nào cần thanh toán" Style="{StaticResource MutedTextStyle}" HorizontalOptions="Center" IsVisible="{Binding HasBillableTables, Converter={StaticResource BoolNegationConverter}}" />
                 </VerticalStackLayout>
 
                 <Border Style="{StaticResource CardBorder}" IsVisible="{Binding HasSelectedOrder}">
                     <VerticalStackLayout Spacing="16">
-                        <!-- Header -->
                         <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
                             <Label Text="Hóa Đơn Thanh Toán" FontFamily="{StaticResource DisplayFont}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource Primary}" HorizontalOptions="Center" />
                             <Label Text="Classic Restaurant" FontFamily="{StaticResource DisplayFont}" FontSize="16" TextColor="{StaticResource Primary}" HorizontalOptions="Center" />
@@ -84,17 +79,13 @@
 
                         <BoxView HeightRequest="1" Color="{StaticResource BorderLight}" />
 
-                        <!-- Table Info -->
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
                             <Label Text="Bàn:" FontAttributes="Bold" />
-                            <Label Text="{Binding SelectedTableOrder.TableNumber, StringFormat='Số {0}'}" FontAttributes="Bold" TextColor="{StaticResource Primary}" FontSize="16" />
-                            <Label Text="•" HorizontalOptions="EndAndExpand" />
-                            <Label Text="{Binding SelectedTableOrder.ServerName}" Style="{StaticResource SecondaryTextStyle}" FontSize="11" />
+                            <Label Text="{Binding SelectedTableOrder.TableNumber, StringFormat='• {0}'}" FontAttributes="Bold" TextColor="{StaticResource Primary}" FontSize="16" />
                         </HorizontalStackLayout>
 
                         <BoxView HeightRequest="1" Color="{StaticResource BorderLight}" />
 
-                        <!-- Items List with better formatting -->
                         <Label Text="Danh sách món ăn" FontAttributes="Bold" FontSize="12" />
                         <CollectionView ItemsSource="{Binding SelectedTableOrder.Items}" SelectionMode="None">
                             <CollectionView.ItemTemplate>
@@ -113,11 +104,10 @@
 
                         <BoxView HeightRequest="1" Color="{StaticResource BorderLight}" />
 
-                        <!-- Totals Section -->
                         <VerticalStackLayout Spacing="8">
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                                 <Label Grid.Column="0" Text="Cộng tiền hàng:" Style="{StaticResource SecondaryTextStyle}" />
-                                <Label Grid.Column="1" Text="{Binding SelectedTableOrder.Subtotal, StringFormat='{0:0,0} VND'}" FontAttributes="Bold" />
+                                <Label Grid.Column="1" Text="{Binding SelectedTableOrder.Subtotal, StringFormat='{0:0,0} đ'}" FontAttributes="Bold" />
                             </Grid>
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" IsVisible="{Binding SelectedTableOrder.HasDiscount}">
                                 <Label Grid.Column="0" Text="Giảm giá:" Style="{StaticResource SecondaryTextStyle}" TextColor="{StaticResource Success}" />
@@ -130,12 +120,11 @@
                             </Grid>
                         </VerticalStackLayout>
 
-                        <!-- Discount Code Input -->
-                        <Border Style="{StaticResource InputBorder}">
+                        <Border Style="{StaticResource InputBorder}" BackgroundColor="#F5F5F5" Padding="12">
                             <VerticalStackLayout Spacing="8">
                                 <Label Text="Áp dụng mã giảm giá" FontAttributes="Bold" FontSize="12" />
                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                    <Entry Grid.Column="0" x:Name="DiscountCodeEntry" Placeholder="Nhập mã giảm giá" />
+                                    <Entry Grid.Column="0" x:Name="DiscountCodeEntry" Placeholder="Nhập mã giảm giá" BackgroundColor="Transparent" />
                                     <Button Grid.Column="1" Text="Áp dụng" Style="{StaticResource SecondaryButton}" Clicked="OnApplyDiscountClicked" Padding="12,8" FontSize="13" />
                                 </Grid>
                                 <Label x:Name="DiscountErrorLabel" TextColor="{StaticResource Danger}" IsVisible="False" FontSize="12" />
@@ -143,19 +132,14 @@
                         </Border>
                     </VerticalStackLayout>
                 </Border>
-
-                <Label Text="Không có bàn nào cần thanh toán" Style="{StaticResource MutedTextStyle}" HorizontalOptions="Center" IsVisible="{Binding OrdersWithServedItems, Converter={StaticResource HasValueConverter}}" />
             </VerticalStackLayout>
         </ScrollView>
 
-        <!-- Right Column: Payment Method -->
         <ScrollView Grid.Row="1" Grid.Column="1" IsVisible="{Binding HasSelectedOrder}">
             <VerticalStackLayout Padding="24" Spacing="20">
                 <Label Text="Phương thức thanh toán" Style="{StaticResource SectionTitle}" FontSize="20" />
 
-                <!-- Payment Method Selection -->
                 <VerticalStackLayout Spacing="12">
-                    <!-- QR Payment Option -->
                     <Border Stroke="{StaticResource BorderLight}" StrokeThickness="2" Padding="16" StrokeShape="RoundRectangle 12" Background="{StaticResource Surface}">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnPaymentMethodTapped" CommandParameter="QR" />
@@ -171,7 +155,6 @@
                         </HorizontalStackLayout>
                     </Border>
 
-                    <!-- Cash Payment Option -->
                     <Border Stroke="{StaticResource BorderLight}" StrokeThickness="2" Padding="16" StrokeShape="RoundRectangle 12" Background="{StaticResource Surface}">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnPaymentMethodTapped" CommandParameter="Cash" />
@@ -188,7 +171,6 @@
                     </Border>
                 </VerticalStackLayout>
 
-                <!-- QR Code Display (only when QR selected) -->
                 <Border Style="{StaticResource CardBorder}" IsVisible="{Binding IsQRSelected}">
                     <VerticalStackLayout Spacing="16">
                         <Label Text="Mã QR thanh toán" FontAttributes="Bold" FontSize="16" />
@@ -208,22 +190,18 @@
                                         <Label Text="Ngân hàng:" FontAttributes="Bold" />
                                         <Label Text="Vietcombank" />
                                     </HorizontalStackLayout>
-
                                     <Label Grid.Row="1" Grid.Column="0" Text="🏷️" FontSize="12" VerticalOptions="Center" />
                                     <HorizontalStackLayout Grid.Row="1" Grid.Column="1" Spacing="8">
                                         <Label Text="Số tài khoản:" FontAttributes="Bold" />
                                         <Label Text="1024688888" />
                                     </HorizontalStackLayout>
-
                                     <Label Grid.Row="2" Grid.Column="0" Text="👤" FontSize="12" VerticalOptions="Center" />
                                     <HorizontalStackLayout Grid.Row="2" Grid.Column="1" Spacing="8">
                                         <Label Text="Chủ tài khoản:" FontAttributes="Bold" />
                                         <Label Text="Nhà hàng Dĩa Vàng" />
                                     </HorizontalStackLayout>
                                 </Grid>
-
                                 <BoxView HeightRequest="1" Color="{StaticResource BorderLight}" Margin="0,4" />
-
                                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                                     <Label Grid.Column="0" Text="💰" FontSize="12" VerticalOptions="Center" />
                                     <HorizontalStackLayout Grid.Column="1" Spacing="8">
@@ -231,22 +209,18 @@
                                         <Label Text="{Binding SelectedTableOrder.TotalDisplay}" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
                                     </HorizontalStackLayout>
                                 </Grid>
-
                                 <Label Text="{Binding TransferContent}" Style="{StaticResource MutedTextStyle}" FontSize="10" />
                             </VerticalStackLayout>
                         </Border>
                     </VerticalStackLayout>
                 </Border>
 
-                <!-- Confirm Payment Button -->
-                <Button Text="✓ Xác nhận thanh toán" Style="{StaticResource PrimaryButton}" Clicked="OnConfirmPaymentClicked" IsEnabled="{Binding CanConfirmPayment}" Padding="16,14" FontSize="16" FontAttributes="Bold" />
+                <Button Text="✓ Xác nhận thanh toán" Style="{StaticResource PrimaryButton}" Clicked="OnConfirmPaymentClicked" IsEnabled="{Binding CanConfirmPayment}" Padding="16,14" FontSize="16" FontAttributes="Bold" BackgroundColor="#1E3A8A" TextColor="White" />
             </VerticalStackLayout>
         </ScrollView>
 
-        <!-- Empty State for Right Column -->
         <ScrollView Grid.Row="1" Grid.Column="1" IsVisible="{Binding HasSelectedOrder, Converter={StaticResource BoolNegationConverter}}">
             <VerticalStackLayout Padding="24" Spacing="20" HorizontalOptions="Center" VerticalOptions="Center">
-                <Label Text="Chủ yến Thanh toán" Style="{StaticResource SectionTitle}" FontSize="20" HorizontalOptions="Center" />
                 <VerticalStackLayout Spacing="16" HorizontalOptions="Center">
                     <Label Text="👈" FontSize="48" HorizontalOptions="Center" />
                     <Label Text="Vui lòng chọn một bàn từ danh sách bên trái" Style="{StaticResource MutedTextStyle}" HorizontalTextAlignment="Center" />
@@ -256,4 +230,3 @@
         </ScrollView>
     </Grid>
 </ContentPage>
-

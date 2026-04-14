@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using AppManagermentRestaurant.Helpers;
 using AppManagermentRestaurant.Models;
+using AppManagermentRestaurant.Services;
 
 namespace AppManagermentRestaurant.ViewModels;
 
@@ -9,10 +10,18 @@ public class HRManagementViewModel : ObservableObject
     private string _searchText = string.Empty;
     private StaffRole _selectedRole = StaffRole.Staff;
     private StaffStatus _selectedStatus = StaffStatus.Active;
-    private bool _filterByRole = false;
-    private bool _filterByStatus = false;
+    private bool _filterByRole;
+    private bool _filterByStatus;
     private Staff? _selectedStaff;
-    private bool _showStaffDetails = false;
+    private bool _showStaffDetails;
+
+    private readonly AppContext _appContext;
+
+    public HRManagementViewModel()
+    {
+        _appContext = AppContext.Instance;
+        FilterStaff();
+    }
 
     public string SearchText
     {
@@ -88,51 +97,12 @@ public class HRManagementViewModel : ObservableObject
 
     public ObservableCollection<Staff> FilteredStaff { get; } = new();
 
-    private readonly AppContext _appContext;
-
-    public HRManagementViewModel()
-    {
-        _appContext = AppContext.Instance;
-        FilterStaff();
-    }
-
-    private void FilterStaff()
-    {
-        var filtered = _appContext.StaffMembers
-            .Where(s =>
-            {
-                // Search filter
-                if (!string.IsNullOrEmpty(_searchText))
-                {
-                    var search = _searchText.ToLower();
-                    if (!s.Name.ToLower().Contains(search) && !s.Email.ToLower().Contains(search))
-                    {
-                        return false;
-                    }
-                }
-
-                // Role filter
-                if (_filterByRole && s.Role != _selectedRole)
-                {
-                    return false;
-                }
-
-                // Status filter
-                if (_filterByStatus && s.Status != _selectedStatus)
-                {
-                    return false;
-                }
-
-                return true;
-            })
-            .ToList();
-
-        FilteredStaff.Clear();
-        foreach (var staff in filtered)
-        {
-            FilteredStaff.Add(staff);
-        }
-    }
+    public int TotalStaff => _appContext.StaffMembers.Count;
+    public int ActiveStaff => _appContext.StaffMembers.Count(s => s.Status == StaffStatus.Active);
+    public int InactiveStaff => _appContext.StaffMembers.Count(s => s.Status == StaffStatus.Inactive);
+    public int LockedStaff => _appContext.StaffMembers.Count(s => s.Status == StaffStatus.Locked);
+    public int ManagerCount => _appContext.StaffMembers.Count(s => s.Role == StaffRole.Manager);
+    public int StaffCount => _appContext.StaffMembers.Count(s => s.Role == StaffRole.Staff);
 
     public void RefreshFilteredList()
     {
@@ -161,34 +131,76 @@ public class HRManagementViewModel : ObservableObject
         SelectedStaff = null;
     }
 
-    public async Task UnlockStaff(Staff staff)
-    {
-        if (staff.Status == StaffStatus.Locked)
-        {
-            staff.Status = StaffStatus.Active;
-            OnPropertyChanged(nameof(FilteredStaff));
-        }
-    }
-
-    public async Task LockStaff(Staff staff)
+    public void UnlockStaff(Staff staff)
     {
         if (staff.Status != StaffStatus.Locked)
         {
-            staff.Status = StaffStatus.Locked;
-            OnPropertyChanged(nameof(FilteredStaff));
+            return;
         }
+
+        // TODO: [BACKEND] - Chỗ này gọi API mở khóa tài khoản nhân viên và đồng bộ trạng thái.
+        staff.Status = StaffStatus.Active;
+        OnPropertyChanged(nameof(FilteredStaff));
+    }
+
+    public void LockStaff(Staff staff)
+    {
+        if (staff.Status == StaffStatus.Locked)
+        {
+            return;
+        }
+
+        // TODO: [BACKEND] - Chỗ này gọi API khóa tài khoản nhân viên.
+        staff.Status = StaffStatus.Locked;
+        OnPropertyChanged(nameof(FilteredStaff));
     }
 
     public void RemoveStaff(Staff staff)
     {
+        // TODO: [BACKEND] - Chỗ này gọi API xóa nhân viên khỏi hệ thống.
         _appContext.StaffMembers.Remove(staff);
         FilterStaff();
     }
 
-    public int TotalStaff => _appContext.StaffMembers.Count;
-    public int ActiveStaff => _appContext.StaffMembers.Count(s => s.Status == StaffStatus.Active);
-    public int InactiveStaff => _appContext.StaffMembers.Count(s => s.Status == StaffStatus.Inactive);
-    public int LockedStaff => _appContext.StaffMembers.Count(s => s.Status == StaffStatus.Locked);
-    public int ManagerCount => _appContext.StaffMembers.Count(s => s.Role == StaffRole.Manager);
-    public int StaffCount => _appContext.StaffMembers.Count(s => s.Role == StaffRole.Staff);
+    private void FilterStaff()
+    {
+        var filtered = _appContext.StaffMembers
+            .Where(s =>
+            {
+                if (!string.IsNullOrWhiteSpace(_searchText))
+                {
+                    var search = _searchText.ToLowerInvariant();
+                    if (!s.Name.ToLowerInvariant().Contains(search) && !s.Email.ToLowerInvariant().Contains(search))
+                    {
+                        return false;
+                    }
+                }
+
+                if (_filterByRole && s.Role != _selectedRole)
+                {
+                    return false;
+                }
+
+                if (_filterByStatus && s.Status != _selectedStatus)
+                {
+                    return false;
+                }
+
+                return true;
+            })
+            .ToList();
+
+        FilteredStaff.Clear();
+        foreach (var staff in filtered)
+        {
+            FilteredStaff.Add(staff);
+        }
+
+        OnPropertyChanged(nameof(TotalStaff));
+        OnPropertyChanged(nameof(ActiveStaff));
+        OnPropertyChanged(nameof(InactiveStaff));
+        OnPropertyChanged(nameof(LockedStaff));
+        OnPropertyChanged(nameof(ManagerCount));
+        OnPropertyChanged(nameof(StaffCount));
+    }
 }

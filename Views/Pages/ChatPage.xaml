@@ -12,11 +12,11 @@
         <helpers:BooleanNegationConverter x:Key="BoolNegationConverter" />
     </ContentPage.Resources>
 
-    <Grid RowDefinitions="Auto,*,Auto">
-        <controls:AppHeaderView />
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+        <controls:AppHeaderView Grid.Row="0" />
 
         <!-- Online Users Count -->
-        <HorizontalStackLayout Grid.Row="0" Padding="24,12" Spacing="8" VerticalOptions="Center">
+        <HorizontalStackLayout Grid.Row="1" Padding="24,12" Spacing="8" VerticalOptions="Center">
             <Label Text="💬" FontSize="16" />
             <Label Text="{Binding ChatTitle}" Style="{StaticResource SectionTitle}" FontSize="18" />
             <HorizontalStackLayout HorizontalOptions="EndAndExpand" Spacing="4" VerticalOptions="Center">
@@ -26,7 +26,7 @@
         </HorizontalStackLayout>
 
         <!-- Messages List -->
-        <CollectionView x:Name="MessagesList" Grid.Row="1" ItemsSource="{Binding ChatMessages}" SelectionMode="None">
+        <CollectionView x:Name="MessagesList" Grid.Row="2" ItemsSource="{Binding ChatMessages}" SelectionMode="None">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <VerticalStackLayout Spacing="6" Padding="12,4">
@@ -73,7 +73,7 @@
         </CollectionView>
 
         <!-- Message Input -->
-        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Margin="24,12">
+        <Border Grid.Row="3" Style="{StaticResource CardBorder}" Margin="24,12">
             <VerticalStackLayout Spacing="8">
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                     <Editor x:Name="MessageEditor" Placeholder="Nhập tin nhắn..." AutoSize="TextChanges" MaximumHeightRequest="100" />

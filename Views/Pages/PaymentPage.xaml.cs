@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using AppManagermentRestaurant.Helpers;
 using AppManagermentRestaurant.Models;
 using AppManagermentRestaurant.Services;
@@ -8,7 +9,8 @@ public partial class PaymentPage : ContentPage
 {
     private PaymentMethod? _selectedPaymentMethod;
     private Order? _selectedTableOrder;
-    private HashSet<int> _selectedTableIds = new(); // Track multiple selected tables
+
+    private ObservableCollection<Order> _activeOrders = new();
 
     public PaymentPage()
     {
@@ -25,19 +27,46 @@ public partial class PaymentPage : ContentPage
     private void RefreshPage()
     {
         _selectedPaymentMethod = null;
-        _selectedTableOrder = null;
-        _selectedTableIds.Clear();
         DiscountCodeEntry.Text = "";
         DiscountErrorLabel.IsVisible = false;
-        OnPropertyChanged(nameof(HasSelectedOrder));
-        OnPropertyChanged(nameof(SelectedTableOrder));
+
+        // 1. Tải bàn CÓ THỂ THANH TOÁN và sắp xếp (Bàn số nhỏ nhất đứng đầu)
+        _activeOrders.Clear();
+        var billable = AppContext.Instance.Orders
+            .Where(o => o.Status == OrderStatus.Active && o.Items.Any())
+            .OrderBy(o => o.TableNumber)
+            .ToList();
+
+        foreach (var o in billable)
+        {
+            _activeOrders.Add(o);
+        }
+
+        OnPropertyChanged(nameof(HasBillableTables));
+
+        Order targetOrder = null;
+
+        // 2. Xét xem có bàn nào đang được truyền từ trang sơ đồ qua không
+        if (AppContext.Instance.SelectedTable != null)
+        {
+            targetOrder = _activeOrders.FirstOrDefault(o => o.TableId == AppContext.Instance.SelectedTable.Id);
+        }
+
+        // 3. TỰ ĐỘNG CHỌN BÀN SỐ NHỎ NHẤT (Nếu không có bàn nào đang chọn)
+        if (targetOrder == null && _activeOrders.Any())
+        {
+            targetOrder = _activeOrders.First(); // Ưu tiên T1, T2...
+        }
+
+        // 4. Cập nhật giao diện
+        SelectedTableOrder = targetOrder;
+
+        OnPropertyChanged(nameof(IsQRSelected));
+        OnPropertyChanged(nameof(IsCashSelected));
         OnPropertyChanged(nameof(CanConfirmPayment));
-        OnPropertyChanged(nameof(OrdersWithServedItems));
-        OnPropertyChanged(nameof(SelectedTablesCount));
-        OnPropertyChanged(nameof(TotalAmountForSelectedTables));
     }
 
-    public bool HasSelectedOrder => AppContext.Instance.SelectedOrder != null;
+    public bool HasSelectedOrder => _selectedTableOrder != null;
 
     public Order? SelectedTableOrder
     {
@@ -47,56 +76,38 @@ public partial class PaymentPage : ContentPage
             if (_selectedTableOrder != value)
             {
                 _selectedTableOrder = value;
+
                 if (value != null)
                 {
-                    SelectOrder(value);
-                    // Add this table to selected tables
-                    _selectedTableIds.Add(value.Id);
+                    AppContext.Instance.SelectedOrder = value;
+                    AppContext.Instance.SelectedTable = AppContext.Instance.Tables.FirstOrDefault(t => t.Id == value.TableId);
                 }
+
                 OnPropertyChanged(nameof(SelectedTableOrder));
-                OnPropertyChanged(nameof(SelectedTablesCount));
-                OnPropertyChanged(nameof(TotalAmountForSelectedTables));
+                OnPropertyChanged(nameof(HasSelectedOrder));
+                OnPropertyChanged(nameof(CanConfirmPayment));
+                OnPropertyChanged(nameof(TransferContent));
+                OnPropertyChanged(nameof(DiscountDisplay));
             }
         }
     }
 
-    public IEnumerable<Order> ActiveOrders => AppContext.Instance.Orders.Where(o => o.Status == OrderStatus.Active);
-
-    public IEnumerable<Order> OrdersWithServedItems => AppContext.Instance.Orders.Where(o => 
-        o.Status == OrderStatus.Active && 
-        o.Items.Any() &&
-        o.Items.All(item => item.Status == DishStatus.Served)).ToList();
+    public ObservableCollection<Order> ActiveOrders => _activeOrders;
+    public bool HasBillableTables => _activeOrders.Any();
 
     public bool IsQRSelected => _selectedPaymentMethod == PaymentMethod.Qr;
-
     public bool IsCashSelected => _selectedPaymentMethod == PaymentMethod.Cash;
+    public bool CanConfirmPayment => _selectedPaymentMethod.HasValue && SelectedTableOrder != null;
 
-    public bool CanConfirmPayment => _selectedPaymentMethod.HasValue && AppContext.Instance.SelectedOrder != null;
-
-    public int SelectedTablesCount => _selectedTableIds.Count;
-
-    public string TotalAmountForSelectedTables
+    public string TransferContent
     {
         get
         {
-            var total = AppContext.Instance.Orders
-                .Where(o => _selectedTableIds.Contains(o.Id) && o.Status == OrderStatus.Active)
-                .Sum(o => o.Total);
-            return Formatters.FormatCurrency(total);
-        }
-    }
-
-    public string TransferContent 
-    { 
-        get
-        {
-            if (AppContext.Instance.SelectedOrder == null)
+            if (SelectedTableOrder == null)
                 return "";
 
             var date = DateTime.Now.ToString("dd/MM/yyyy");
-            if (_selectedTableIds.Count > 1)
-                return $"Nội dung: Thanh toán {_selectedTableIds.Count} bàn - {date}";
-            return $"Nội dung: Thanh toán Bàn {AppContext.Instance.SelectedOrder.TableNumber} - {date}";
+            return $"Nội dung: Thanh toán Bàn {SelectedTableOrder.TableNumber} - {date}";
         }
     }
 
@@ -104,57 +115,11 @@ public partial class PaymentPage : ContentPage
     {
         get
         {
-            if (AppContext.Instance.SelectedOrder == null)
-                return "0 VND";
+            if (SelectedTableOrder == null)
+                return "0 đ";
 
-            return Formatters.FormatCurrency(AppContext.Instance.SelectedOrder.Discount);
+            return Formatters.FormatCurrency(SelectedTableOrder.Discount);
         }
-    }
-
-    private void SelectOrder(Order order)
-    {
-        if (order != null)
-        {
-            AppContext.Instance.SelectedOrder = order;
-            OnPropertyChanged(nameof(HasSelectedOrder));
-            OnPropertyChanged(nameof(CanConfirmPayment));
-            OnPropertyChanged(nameof(TransferContent));
-            OnPropertyChanged(nameof(DiscountDisplay));
-        }
-    }
-
-    private void OnTableItemTapped(object sender, TappedEventArgs e)
-    {
-        if (sender is Border border && border.BindingContext is Order order)
-        {
-            SelectOrder(order);
-        }
-    }
-
-    private void OnTableButtonClicked(object sender, EventArgs e)
-    {
-        if (sender is Button button && button.BindingContext is Order order)
-        {
-            SelectOrder(order);
-            UpdateTableButtonStyles();
-        }
-    }
-
-    private void UpdateTableButtonStyles()
-    {
-        // This method updates visual feedback for selected table
-        // The XAML will handle the styling through bindings
-        OnPropertyChanged(nameof(HasSelectedOrder));
-    }
-
-    private void OnTableSelected(object sender, EventArgs e)
-    {
-        // This event handler is triggered when a table is selected from the Picker
-        // The SelectedItem binding will automatically update SelectedTableOrder property
-        OnPropertyChanged(nameof(HasSelectedOrder));
-        OnPropertyChanged(nameof(CanConfirmPayment));
-        OnPropertyChanged(nameof(TransferContent));
-        OnPropertyChanged(nameof(DiscountDisplay));
     }
 
     private void OnPaymentMethodTapped(object sender, TappedEventArgs e)
@@ -185,18 +150,16 @@ public partial class PaymentPage : ContentPage
             return;
         }
 
-        var order = AppContext.Instance.SelectedOrder;
-        if (order == null)
+        if (SelectedTableOrder == null)
             return;
 
         decimal discountAmount = 0;
 
-        // Validate and apply discount
         discountAmount = discountCode switch
         {
-            "WELCOME10" => order.Subtotal * 0.1m, // 10%
-            "VIP20" => order.Subtotal * 0.2m,     // 20%
-            "SAVE50K" => 50000m,                   // Fixed 50k
+            "WELCOME10" => SelectedTableOrder.Subtotal * 0.1m,
+            "VIP20" => SelectedTableOrder.Subtotal * 0.2m,
+            "SAVE50K" => 50000m,
             _ => -1
         };
 
@@ -207,11 +170,11 @@ public partial class PaymentPage : ContentPage
             return;
         }
 
-        // Apply discount
-        order.Discount = (int)discountAmount;
+        SelectedTableOrder.Discount = (int)discountAmount;
         DiscountErrorLabel.IsVisible = false;
         DiscountCodeEntry.Text = "";
 
+        OnPropertyChanged(nameof(SelectedTableOrder));
         OnPropertyChanged(nameof(DiscountDisplay));
 
         MainThread.BeginInvokeOnMainThread(async () =>
@@ -228,45 +191,31 @@ public partial class PaymentPage : ContentPage
             return;
         }
 
-        if (_selectedTableIds.Count == 0)
+        if (SelectedTableOrder == null) return;
+
+        var order = SelectedTableOrder;
+
+        order.Status = OrderStatus.Paid;
+        order.PaymentMethod = _selectedPaymentMethod.Value;
+
+        var table = AppContext.Instance.Tables.FirstOrDefault(t => t.Number == order.TableNumber);
+        if (table != null)
         {
-            await DisplayAlert("Lỗi", "Vui lòng chọn ít nhất một bàn để thanh toán", "OK");
-            return;
+            table.Status = TableStatus.NeedsClearing;
+            table.CurrentOrderId = null;
+            table.HasOrdered = false;
+            table.OrderTotal = string.Empty;
+            table.OrderItemCount = 0;
+
+            ActivityLogService.Instance.LogPayment(table.Number.ToString());
         }
 
-        // Process payment for all selected tables
-        var ordersToProcess = AppContext.Instance.Orders
-            .Where(o => _selectedTableIds.Contains(o.Id) && o.Status == OrderStatus.Active)
-            .ToList();
+        AppContext.Instance.SelectedOrder = null;
+        AppContext.Instance.SelectedTable = null;
 
-        foreach (var order in ordersToProcess)
-        {
-            // Update order status
-            order.Status = OrderStatus.Paid;
-            order.PaymentMethod = _selectedPaymentMethod.Value;
+        await DisplayAlert("Thành công", $"✓ Đã thanh toán Bàn {order.TableNumber}\nSố tiền: {order.TotalDisplay}", "OK");
 
-            // Update table status
-            var table = AppContext.Instance.Tables.FirstOrDefault(t => t.Number == order.TableNumber);
-            if (table != null)
-            {
-                table.Status = TableStatus.NeedsClearing;
-                table.CurrentOrderId = null;
-
-                // Log payment activity for each table
-                ActivityLogService.Instance.LogPayment(table.Number.ToString());
-            }
-        }
-
-        // Show success message
-        var message = _selectedTableIds.Count > 1 
-            ? $"✓ Đã thanh toán {_selectedTableIds.Count} bàn\nTổng: {TotalAmountForSelectedTables}"
-            : $"✓ Đã thanh toán Bàn {_selectedTableOrder?.TableNumber}\nSố tiền: {_selectedTableOrder?.TotalDisplay}";
-
-        await DisplayAlert("Thành công", message, "OK");
-
-        // Refresh the page
         RefreshPage();
-        OnPropertyChanged(nameof(OrdersWithServedItems));
         AppContext.Instance.RefreshBadges();
     }
 }

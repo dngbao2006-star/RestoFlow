@@ -1,5 +1,6 @@
 using AppManagermentRestaurant.Models;
 using AppManagermentRestaurant.Services;
+using AppManagermentRestaurant.Constants;
 using System.Collections.ObjectModel;
 
 namespace AppManagermentRestaurant.Views.Pages;
@@ -9,9 +10,12 @@ public partial class OrderCreationPage : ContentPage
     private string _selectedFilter = "All";
     private string _searchText = "";
     private bool _isOrderReadOnly = false;
+    private bool _isLoadingData = false;
     private ObservableCollection<OrderItem> _existingItems = new();
     private ObservableCollection<OrderItem> _newItems = new();
-    private HashSet<int> _itemsSubmittedPreviously = new(); // Track items that were already submitted
+    private ObservableCollection<Table> _activeTables = new();
+    private Table _selectedActiveTable;
+    private HashSet<int> _itemsSubmittedPreviously = new();
 
     public OrderCreationPage()
     {
@@ -21,76 +25,101 @@ public partial class OrderCreationPage : ContentPage
         UpdatePageState();
     }
 
-    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+    protected override async void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
+        await LoadPageDataAsync();
+    }
 
-        // If a table has been selected, create a new order for it if needed
-        if (AppContext.Instance.SelectedTable != null)
+    private async Task LoadPageDataAsync()
+    {
+        _isLoadingData = true;
+        await Task.Yield();
+
+        // 1. Tải bàn Occupied và sắp xếp (Bàn số nhỏ nhất đứng đầu)
+        _activeTables.Clear();
+        var occupiedTables = AppContext.Instance.Tables
+            .Where(t => t.Status == TableStatus.Occupied)
+            .OrderBy(t => t.Number)
+            .ToList();
+
+        foreach (var t in occupiedTables)
         {
-            var table = AppContext.Instance.SelectedTable;
-            var existingOrder = AppContext.Instance.Orders.FirstOrDefault(o => o.TableId == table.Id && o.Status == OrderStatus.Active);
+            _activeTables.Add(t);
+        }
 
-            if (existingOrder != null)
-            {
-                AppContext.Instance.SelectedOrder = existingOrder;
-            }
-            else
-            {
-                // Create a new order for this table
-                var allOrders = AppContext.Instance.Orders.Concat(AppContext.Instance.OrderHistory).ToList();
-                var newOrder = new Order
-                {
-                    Id = allOrders.Any() ? allOrders.Max(o => o.Id) + 1 : 1,
-                    TableId = table.Id,
-                    TableNumber = table.Number,
-                    Status = OrderStatus.Active,
-                    CreatedAt = DateTime.Now,
-                    ServerName = AppContext.Instance.CurrentUser?.Name ?? "Staff",
-                    ServerId = AppContext.Instance.CurrentUser?.Id ?? 0,
-                    Items = new()
-                };
+        Table targetTable = null;
 
-                AppContext.Instance.Orders.Add(newOrder);
-                AppContext.Instance.SelectedOrder = newOrder;
-            }
-
-            // Notify UI that SelectedOrder has changed
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                OnPropertyChanged(nameof(SelectedOrder));
-                OnPropertyChanged(nameof(ExistingOrderInfo));
-            });
+        // 2. Xét xem có bàn nào đang được truyền từ trang sơ đồ qua không
+        if (AppContext.Instance.SelectedTable != null && AppContext.Instance.SelectedTable.Status == TableStatus.Occupied)
+        {
+            targetTable = _activeTables.FirstOrDefault(t => t.Id == AppContext.Instance.SelectedTable.Id);
         }
         else if (AppContext.Instance.SelectedOrder == null && AppContext.Instance.Orders.Any())
         {
-            // If no table selected but there are orders, use the first active order
             var activeOrder = AppContext.Instance.Orders.FirstOrDefault(o => o.Status == OrderStatus.Active);
             if (activeOrder != null)
             {
-                AppContext.Instance.SelectedOrder = activeOrder;
-                // Set the table as well for consistency
-                var table = AppContext.Instance.Tables.FirstOrDefault(t => t.Id == activeOrder.TableId);
-                if (table != null)
-                {
-                    AppContext.Instance.SelectedTable = table;
-                }
-
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    OnPropertyChanged(nameof(SelectedOrder));
-                    OnPropertyChanged(nameof(ExistingOrderInfo));
-                });
+                targetTable = _activeTables.FirstOrDefault(t => t.Id == activeOrder.TableId);
             }
         }
 
-        UpdatePageState();
+        // 3. TỰ ĐỘNG CHỌN BÀN SỐ NHỎ NHẤT (Nếu không có bàn nào đang chọn)
+        if (targetTable == null && _activeTables.Any())
+        {
+            targetTable = _activeTables.First(); // Ưu tiên T1, T2...
+        }
+
+        // 4. Ép SelectedActiveTable cập nhật
+        if (targetTable != null)
+        {
+            AppContext.Instance.SelectedTable = targetTable;
+            _selectedActiveTable = targetTable;
+            OnPropertyChanged(nameof(SelectedActiveTable));
+            SwitchTableData(targetTable);
+        }
+        else
+        {
+            AppContext.Instance.SelectedOrder = null;
+            UpdatePageState();
+        }
+
+        _isLoadingData = false;
     }
 
-    protected override void OnNavigatingFrom(NavigatingFromEventArgs args)
+    private void SwitchTableData(Table table)
     {
-        base.OnNavigatingFrom(args);
-        // Keep the state to allow transfer back to this page
+        var existingOrder = AppContext.Instance.Orders.FirstOrDefault(o => o.TableId == table.Id && o.Status == OrderStatus.Active);
+
+        if (existingOrder != null)
+        {
+            AppContext.Instance.SelectedOrder = existingOrder;
+        }
+        else
+        {
+            var allOrders = AppContext.Instance.Orders.Concat(AppContext.Instance.OrderHistory).ToList();
+            var newOrder = new Order
+            {
+                Id = allOrders.Any() ? allOrders.Max(o => o.Id) + 1 : 1,
+                TableId = table.Id,
+                TableNumber = table.Number,
+                Status = OrderStatus.Active,
+                CreatedAt = DateTime.Now,
+                ServerName = AppContext.Instance.CurrentUser?.Name ?? "Nhân viên",
+                ServerId = AppContext.Instance.CurrentUser?.Id ?? 0,
+                Items = new()
+            };
+
+            AppContext.Instance.Orders.Add(newOrder);
+            AppContext.Instance.SelectedOrder = newOrder;
+        }
+
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            OnPropertyChanged(nameof(SelectedOrder));
+            OnPropertyChanged(nameof(ExistingOrderInfo));
+            UpdatePageState();
+        });
     }
 
     private void UpdatePageState()
@@ -101,7 +130,6 @@ public partial class OrderCreationPage : ContentPage
             return;
         }
 
-        // Find the table for this order
         var table = AppContext.Instance.Tables.FirstOrDefault(t => t.Number == AppContext.Instance.SelectedOrder.TableNumber);
 
         if (table == null)
@@ -110,26 +138,37 @@ public partial class OrderCreationPage : ContentPage
             return;
         }
 
-        // If table is available, this is a new order (not read-only)
-        // If table is occupied or reserved, this is an existing order (read-only for existing items)
         _isOrderReadOnly = table.Status == TableStatus.Occupied || table.Status == TableStatus.Reserved;
-
         RefreshItemCollections();
     }
 
-    // Properties for binding to XAML
     public Order SelectedOrder => AppContext.Instance.SelectedOrder;
-
-    public IEnumerable<Models.MenuItem> FilteredMenuItems => AppContext.Instance.FilteredMenuItems;
-
+    public IEnumerable<Models.FoodItem> FilteredMenuItems => AppContext.Instance.FilteredMenuItems;
     public ObservableCollection<OrderItem> ExistingItems => _existingItems;
-
     public ObservableCollection<OrderItem> NewItems => _newItems;
+    public ObservableCollection<Table> ActiveTables => _activeTables;
+
+    public Table SelectedActiveTable
+    {
+        get => _selectedActiveTable;
+        set
+        {
+            if (_selectedActiveTable != value)
+            {
+                _selectedActiveTable = value;
+                OnPropertyChanged();
+
+                if (value != null && !_isLoadingData)
+                {
+                    AppContext.Instance.SelectedTable = value;
+                    SwitchTableData(value);
+                }
+            }
+        }
+    }
 
     public bool HasExistingItems => _existingItems.Count > 0;
-
     public bool HasNewItems => _newItems.Count > 0;
-
     public bool HasNoItems => (AppContext.Instance.SelectedOrder?.Items.Count ?? 0) == 0;
 
     public string ExistingOrderInfo
@@ -142,19 +181,14 @@ public partial class OrderCreationPage : ContentPage
         }
     }
 
-    /// <summary>
-    /// Refresh the ExistingItems and NewItems collections based on SelectedOrder
-    /// </summary>
     private void RefreshItemCollections()
     {
         _existingItems.Clear();
         _newItems.Clear();
 
         var order = AppContext.Instance.SelectedOrder;
-        if (order == null)
-            return;
+        if (order == null) return;
 
-        // Separate items into existing (submitted) and new (not yet submitted)
         foreach (var item in order.Items)
         {
             if (_itemsSubmittedPreviously.Contains(item.Id))
@@ -189,12 +223,10 @@ public partial class OrderCreationPage : ContentPage
 
     private void OnFilterClicked(object sender, EventArgs e)
     {
-        if (sender is not Button button)
-            return;
+        if (sender is not Button button) return;
 
         var category = button.CommandParameter as string;
-        if (string.IsNullOrEmpty(category))
-            return;
+        if (string.IsNullOrEmpty(category)) return;
 
         _selectedFilter = category;
         ApplyFilters();
@@ -207,13 +239,9 @@ public partial class OrderCreationPage : ContentPage
         var items = AppContext.Instance.MenuItems
             .Where(item =>
             {
-                // Lọc theo danh mục
                 var categoryMatch = _selectedFilter == "All" || item.Category == _selectedFilter;
-
-                // Tìm kiếm theo tên (case-insensitive)
-                var searchMatch = string.IsNullOrEmpty(_searchText) || 
+                var searchMatch = string.IsNullOrEmpty(_searchText) ||
                                  item.Name.ToLower().Contains(_searchText);
-
                 return categoryMatch && searchMatch;
             });
 
@@ -223,15 +251,52 @@ public partial class OrderCreationPage : ContentPage
         }
     }
 
+    private void OnFilterScrolled(object sender, ScrolledEventArgs e)
+    {
+        UpdateScrollButtonsVisibility();
+    }
+
+    private void OnFilterScrollViewSizeChanged(object sender, EventArgs e)
+    {
+        UpdateScrollButtonsVisibility();
+    }
+
+    private void UpdateScrollButtonsVisibility()
+    {
+        if (FilterScrollView.Width <= 0 || FilterScrollView.ContentSize.Width <= 0) return;
+
+        double maxScroll = FilterScrollView.ContentSize.Width - FilterScrollView.Width;
+
+        if (maxScroll <= 0)
+        {
+            BtnScrollLeft.IsVisible = false;
+            BtnScrollRight.IsVisible = false;
+        }
+        else
+        {
+            BtnScrollLeft.IsVisible = FilterScrollView.ScrollX > 2;
+            BtnScrollRight.IsVisible = FilterScrollView.ScrollX < (maxScroll - 2);
+        }
+    }
+
+    private void OnScrollLeftClicked(object sender, EventArgs e)
+    {
+        double target = Math.Max(0, FilterScrollView.ScrollX - 150);
+        FilterScrollView.ScrollToAsync(target, 0, true);
+    }
+
+    private void OnScrollRightClicked(object sender, EventArgs e)
+    {
+        double maxScroll = FilterScrollView.ContentSize.Width - FilterScrollView.Width;
+        double target = Math.Min(maxScroll, FilterScrollView.ScrollX + 150);
+        FilterScrollView.ScrollToAsync(target, 0, true);
+    }
+
     private void OnAddMenuItemClicked(object sender, EventArgs e)
     {
-        if (sender is not Button button)
+        if (sender is not Button button || button.CommandParameter is not Models.FoodItem menuItem || AppContext.Instance.SelectedOrder is null)
             return;
 
-        if (button.CommandParameter is not Models.MenuItem menuItem || AppContext.Instance.SelectedOrder is null)
-            return;
-
-        // Kiểm tra xem món có bị hết hàng không
         if (menuItem.OutOfStock)
         {
             MainThread.BeginInvokeOnMainThread(async () =>
@@ -246,10 +311,7 @@ public partial class OrderCreationPage : ContentPage
 
     private void OnDeleteItemClicked(object sender, EventArgs e)
     {
-        if (sender is not Button button)
-            return;
-
-        if (button.CommandParameter is not OrderItem orderItem || AppContext.Instance.SelectedOrder is null)
+        if (sender is not Button button || button.CommandParameter is not OrderItem orderItem || AppContext.Instance.SelectedOrder is null)
             return;
 
         var order = AppContext.Instance.SelectedOrder;
@@ -261,11 +323,7 @@ public partial class OrderCreationPage : ContentPage
 
     private void OnIncreaseQuantityClicked(object sender, EventArgs e)
     {
-        if (sender is not Button button)
-            return;
-
-        if (button.CommandParameter is not OrderItem orderItem)
-            return;
+        if (sender is not Button button || button.CommandParameter is not OrderItem orderItem) return;
 
         orderItem.Quantity++;
         AppContext.Instance.SelectedOrder?.NotifyItemsChanged();
@@ -275,37 +333,26 @@ public partial class OrderCreationPage : ContentPage
 
     private void OnDecreaseQuantityClicked(object sender, EventArgs e)
     {
-        if (sender is not Button button)
-            return;
-
-        if (button.CommandParameter is not OrderItem orderItem)
-            return;
+        if (sender is not Button button || button.CommandParameter is not OrderItem orderItem) return;
 
         if (orderItem.Quantity > 1)
         {
             orderItem.Quantity--;
-            AppContext.Instance.SelectedOrder?.NotifyItemsChanged();
-            AppContext.Instance.RefreshBadges();
-            RefreshItemCollections();
         }
         else
         {
-            // Nếu số lượng = 1, xóa hoàn toàn
             var order = AppContext.Instance.SelectedOrder;
             order?.Items.Remove(orderItem);
-            order?.NotifyItemsChanged();
-            AppContext.Instance.RefreshBadges();
-            RefreshItemCollections();
         }
+
+        AppContext.Instance.SelectedOrder?.NotifyItemsChanged();
+        AppContext.Instance.RefreshBadges();
+        RefreshItemCollections();
     }
 
     private async void OnNoteItemClicked(object sender, EventArgs e)
     {
-        if (sender is not ImageButton button)
-            return;
-
-        if (button.CommandParameter is not OrderItem orderItem)
-            return;
+        if (sender is not ImageButton button || button.CommandParameter is not OrderItem orderItem) return;
 
         var currentNote = orderItem.Notes ?? "";
         var newNote = await DisplayPromptAsync(
@@ -325,17 +372,13 @@ public partial class OrderCreationPage : ContentPage
 
     private void OnNoteEntryCompleted(object sender, EventArgs e)
     {
-        // This event is called when user finishes editing notes in the Entry field
-        // The binding automatically updates the Notes property, so no additional action needed
-        // But we can refresh UI if needed
         AppContext.Instance.RefreshBadges();
     }
 
-    private void AddItemToOrder(Models.MenuItem menuItem)
+    private void AddItemToOrder(Models.FoodItem menuItem)
     {
         var order = AppContext.Instance.SelectedOrder;
-        if (order == null)
-            return;
+        if (order == null) return;
 
         var existingItem = order.Items.FirstOrDefault(item => item.MenuItemId == menuItem.Id);
 
@@ -371,20 +414,16 @@ public partial class OrderCreationPage : ContentPage
         }
 
         var order = AppContext.Instance.SelectedOrder;
-        if (order == null)
-            return;
+        if (order == null) return;
 
-        // Hiển thị xác nhận
         var confirm = await DisplayAlert(
             "Xác nhận đơn hàng",
             $"Bàn {order.TableNumber}\nTổng: {order.TotalDisplay}\n\nGửi đơn lên bếp?",
             "Có",
             "Không");
 
-        if (!confirm)
-            return;
+        if (!confirm) return;
 
-        // Cập nhật trạng thái bàn
         var table = AppContext.Instance.Tables.FirstOrDefault(t => t.Number == order.TableNumber);
         if (table != null)
         {
@@ -393,88 +432,22 @@ public partial class OrderCreationPage : ContentPage
             AppContext.Instance.SelectedTable = table;
         }
 
-        // Only set NEW items to Pending status - don't re-submit old items
         foreach (var item in order.Items)
         {
             if (!_itemsSubmittedPreviously.Contains(item.Id))
             {
                 item.Status = DishStatus.Pending;
-                _itemsSubmittedPreviously.Add(item.Id); // Mark as submitted
+                _itemsSubmittedPreviously.Add(item.Id);
             }
         }
 
         AppContext.Instance.RefreshBadges();
-
-        // Log order creation activity
         ActivityLogService.Instance.LogOrderCreation(order.TableNumber.ToString());
 
-        // Auto-navigate to DishStatusPage after successful submission
         await MainThread.InvokeOnMainThreadAsync(async () =>
         {
             await DisplayAlert("Thành công", "Đơn hàng đã được gửi lên bếp", "OK");
-            await Shell.Current.GoToAsync("staff/tables");
+            await Shell.Current.GoToAsync(AppRoutes.Absolute(AppRoutes.TableMap));
         });
-    }
-
-    private async void OnTransferClicked(object sender, EventArgs e)
-    {
-        if (AppContext.Instance.SelectedOrder == null)
-            return;
-
-        var availableTables = AppContext.Instance.Tables
-            .Where(t => t.Status == TableStatus.Available)
-            .ToList();
-
-        if (availableTables.Count == 0)
-        {
-            await DisplayAlert("Chuyển bàn", "Không có bàn trống để chuyển", "OK");
-            return;
-        }
-
-        var tableNames = availableTables.Select(t => $"Bàn {t.Number}").ToArray();
-        var selectedTable = await DisplayActionSheet("Chọn bàn đích", "Hủy", null, tableNames);
-
-        if (selectedTable == null || selectedTable == "Hủy")
-            return;
-
-        var selectedTableNum = int.Parse(selectedTable.Replace("Bàn ", ""));
-        var targetTable = availableTables.FirstOrDefault(t => t.Number == selectedTableNum);
-
-        if (targetTable != null)
-        {
-            AppContext.Instance.TransferOrder(targetTable.Id);
-            await DisplayAlert("Thành công", $"Đơn hàng đã chuyển sang Bàn {targetTable.Number}", "OK");
-        }
-    }
-
-    private async void OnMergeClicked(object sender, EventArgs e)
-    {
-        if (AppContext.Instance.SelectedOrder == null)
-            return;
-
-        var otherOrders = AppContext.Instance.Orders
-            .Where(o => o.Id != AppContext.Instance.SelectedOrder.Id)
-            .ToList();
-
-        if (otherOrders.Count == 0)
-        {
-            await DisplayAlert("Ghép bàn", "Không có đơn hàng khác để ghép", "OK");
-            return;
-        }
-
-        var orderNames = otherOrders.Select(o => $"Bàn {o.TableNumber}").ToArray();
-        var selectedOrder = await DisplayActionSheet("Chọn bàn để ghép", "Hủy", null, orderNames);
-
-        if (selectedOrder == null || selectedOrder == "Hủy")
-            return;
-
-        var selectedTableNum = int.Parse(selectedOrder.Replace("Bàn ", ""));
-        var targetOrder = otherOrders.FirstOrDefault(o => o.TableNumber == selectedTableNum);
-
-        if (targetOrder != null)
-        {
-            AppContext.Instance.MergeOrder(targetOrder.Id);
-            await DisplayAlert("Thành công", $"Đã ghép bàn {targetOrder.TableNumber}\n\nTổng mới: {AppContext.Instance.SelectedOrder?.TotalDisplay}", "OK");
-        }
     }
 }

@@ -30,6 +30,16 @@
     <Color x:Key="White">#FFFFFF</Color>
     <Color x:Key="Black">#000000</Color>
 
+    <Color x:Key="SidebarBg">#2A4B82</Color>
+    <Color x:Key="SidebarActiveItem">#3C64A3</Color>
+    <Color x:Key="SidebarItemHover">#335891</Color>
+    <Color x:Key="SidebarUserCard">#223F6E</Color>
+    <Color x:Key="SidebarDivider">#3C64A3</Color>
+    <Color x:Key="SidebarTextPrimary">#FFFFFF</Color>
+    <Color x:Key="SidebarTextMuted">#B0C4DE</Color>
+    <Color x:Key="SidebarLogoBox">#3C64A3</Color>
+    <Color x:Key="SidebarBadge">#EF4444</Color>
+
     <SolidColorBrush x:Key="AppBackgroundBrush" Color="{StaticResource AppBackground}" />
     <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource Surface}" />
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}" />

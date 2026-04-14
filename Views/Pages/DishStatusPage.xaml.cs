@@ -1,5 +1,6 @@
 using AppManagermentRestaurant.Models;
 using AppManagermentRestaurant.Services;
+using AppManagermentRestaurant.Constants;
 using System.Collections.ObjectModel;
 
 namespace AppManagermentRestaurant.Views.Pages;
@@ -79,7 +80,7 @@ public partial class DishStatusPage : ContentPage
                         // Reset selection and navigate back
                         AppContext.Instance.SelectedTable = null;
                         AppContext.Instance.SelectedOrder = null;
-                        await Shell.Current.GoToAsync("staff/tables");
+                        await Shell.Current.GoToAsync(AppRoutes.Absolute(AppRoutes.TableMap));
                     }
                 });
             }
@@ -185,7 +186,7 @@ public partial class DishStatusPage : ContentPage
         AppContext.Instance.SelectedTable = null;
         AppContext.Instance.SelectedOrder = null;
         _selectedTableIdFilter = null;
-        await Shell.Current.GoToAsync("staff/tables");
+        await Shell.Current.GoToAsync(AppRoutes.Absolute(AppRoutes.TableMap));
     }
 
     private void OnClearTableFilterClicked(object sender, EventArgs e)

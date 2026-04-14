@@ -10,18 +10,24 @@ public class Table
     public TableStatus Status { get; set; }
     public int Capacity { get; set; }
     public int? CurrentOrderId { get; set; }
+
     public string? ReservedFor { get; set; }
     public DateTime? ReservedAt { get; set; }
+
+    public DateTime? ArrivalTime { get; set; }
+    public bool HasOrdered { get; set; }
+    public int OrderItemCount { get; set; }
+    public string OrderTotal { get; set; } = string.Empty;
 
     public string DisplayNumber => $"T{Number}";
 
     public string StatusLabel => Status switch
     {
-        TableStatus.Available => "Available",
-        TableStatus.Occupied => "Occupied",
-        TableStatus.Reserved => "Reserved",
-        TableStatus.NeedsClearing => "Needs Clearing",
-        _ => "Unknown"
+        TableStatus.Available => "Còn trống",
+        TableStatus.Occupied => "Có khách",
+        TableStatus.Reserved => "Đặt trước",
+        TableStatus.NeedsClearing => "Cần dọn",
+        _ => "Không xác định"
     };
 
     public Color StatusColor => Status switch
@@ -35,9 +41,20 @@ public class Table
 
     public string StatusBadgeText => StatusLabel.ToUpperInvariant();
 
+    public bool IsAvailable => Status == TableStatus.Available;
     public bool IsReserved => Status == TableStatus.Reserved;
     public bool IsOccupied => Status == TableStatus.Occupied;
     public bool IsNeedsClearing => Status == TableStatus.NeedsClearing;
 
-    public string ReservedAtDisplay => ReservedAt.HasValue ? ReservedAt.Value.ToString("HH:mm") : string.Empty;
+    public bool CanClearEmptyOccupied => Status == TableStatus.Occupied && !HasOrdered;
+    public bool CanPayOccupied => Status == TableStatus.Occupied && HasOrdered;
+
+    public string OccupiedDuration => ArrivalTime.HasValue
+        ? $"{(int)(DateTime.Now - ArrivalTime.Value).TotalMinutes} phút"
+        : string.Empty;
+
+    public string OrderStatusText => HasOrdered ? "Đã gọi món" : "Chưa gọi món";
+
+    public string ReservationGuestName => ReservedFor ?? string.Empty;
+    public string ReservationTime => ReservedAt.HasValue ? ReservedAt.Value.ToString("HH:mm") : string.Empty;
 }

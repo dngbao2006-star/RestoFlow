@@ -40,7 +40,7 @@ public static class NotificationService
     /// <summary>
     /// Shows a confirmation dialog and returns user's choice.
     /// </summary>
-    public static async Task<bool> ShowConfirmAsync(string title, string message = "", string acceptText = "Yes", string cancelText = "No")
+    public static async Task<bool> ShowConfirmAsync(string title, string message = "", string acceptText = "Đồng ý", string cancelText = "Hủy")
     {
         return await Application.Current!.MainPage!.DisplayAlert(title, message, acceptText, cancelText);
     }

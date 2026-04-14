@@ -14,9 +14,9 @@
             <VerticalStackLayout Padding="24" Spacing="20">
                 <!-- Header Section -->
                 <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
-                    <Label Text="Staff Management" Style="{StaticResource PageTitle}" />
+                    <Label Text="Quản lý nhân sự" Style="{StaticResource PageTitle}" />
                     <Button 
-                        Text="+ Add Employee" 
+                        Text="+ Thêm nhân viên" 
                         Clicked="OnAddEmployeeClicked"
                         Style="{StaticResource PrimaryButton}" />
                 </HorizontalStackLayout>
@@ -25,25 +25,25 @@
                 <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
                     <Border Style="{StaticResource CardBorder}">
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Total Staff" FontAttributes="Bold" FontSize="12" TextColor="{StaticResource TextMuted}" />
+                            <Label Text="Tổng nhân sự" FontAttributes="Bold" FontSize="12" TextColor="{StaticResource TextMuted}" />
                             <Label Text="{Binding TotalStaff}" FontSize="24" FontAttributes="Bold" />
                         </VerticalStackLayout>
                     </Border>
                     <Border Style="{StaticResource CardBorder}" Grid.Column="1">
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Active" FontAttributes="Bold" FontSize="12" TextColor="{StaticResource TextMuted}" />
+                            <Label Text="Đang hoạt động" FontAttributes="Bold" FontSize="12" TextColor="{StaticResource TextMuted}" />
                             <Label Text="{Binding ActiveStaff}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource Success}" />
                         </VerticalStackLayout>
                     </Border>
                     <Border Style="{StaticResource CardBorder}" Grid.Column="2">
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Managers" FontAttributes="Bold" FontSize="12" TextColor="{StaticResource TextMuted}" />
+                            <Label Text="Quản lý" FontAttributes="Bold" FontSize="12" TextColor="{StaticResource TextMuted}" />
                             <Label Text="{Binding ManagerCount}" FontSize="24" FontAttributes="Bold" />
                         </VerticalStackLayout>
                     </Border>
                     <Border Style="{StaticResource CardBorder}" Grid.Column="3">
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Locked" FontAttributes="Bold" FontSize="12" TextColor="{StaticResource TextMuted}" />
+                            <Label Text="Đã khóa" FontAttributes="Bold" FontSize="12" TextColor="{StaticResource TextMuted}" />
                             <Label Text="{Binding LockedStaff}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource Danger}" />
                         </VerticalStackLayout>
                     </Border>
@@ -58,7 +58,7 @@
                                 <Label Text="🔍" VerticalOptions="Center" FontSize="16" />
                                 <Entry 
                                     Grid.Column="1"
-                                    Placeholder="Search by name or email..."
+                                    Placeholder="Tìm theo tên hoặc email..."
                                     Text="{Binding SearchText}"
                                     FontSize="14" />
                                 <Button 
@@ -75,20 +75,20 @@
 
                         <!-- Role Filter -->
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Filter by Role" FontAttributes="Bold" FontSize="12" />
+                            <Label Text="Lọc theo vai trò" FontAttributes="Bold" FontSize="12" />
                             <HorizontalStackLayout Spacing="8">
                                 <Button 
-                                    Text="All Roles"
+                                    Text="Tất cả"
                                     Clicked="OnRoleFilterClicked"
                                     CommandParameter="All"
                                     Style="{StaticResource PillButton}" />
                                 <Button 
-                                    Text="Staff"
+                                    Text="Nhân viên"
                                     Clicked="OnRoleFilterClicked"
                                     CommandParameter="Staff"
                                     Style="{StaticResource PillButton}" />
                                 <Button 
-                                    Text="Manager"
+                                    Text="Quản lý"
                                     Clicked="OnRoleFilterClicked"
                                     CommandParameter="Manager"
                                     Style="{StaticResource PillButton}" />
@@ -97,25 +97,25 @@
 
                         <!-- Status Filter -->
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Filter by Status" FontAttributes="Bold" FontSize="12" />
+                            <Label Text="Lọc theo trạng thái" FontAttributes="Bold" FontSize="12" />
                             <HorizontalStackLayout Spacing="8">
                                 <Button 
-                                    Text="All Status"
+                                    Text="Tất cả"
                                     Clicked="OnStatusFilterClicked"
                                     CommandParameter="All"
                                     Style="{StaticResource PillButton}" />
                                 <Button 
-                                    Text="Active"
+                                    Text="Hoạt động"
                                     Clicked="OnStatusFilterClicked"
                                     CommandParameter="Active"
                                     Style="{StaticResource PillButton}" />
                                 <Button 
-                                    Text="Inactive"
+                                    Text="Ngừng hoạt động"
                                     Clicked="OnStatusFilterClicked"
                                     CommandParameter="Inactive"
                                     Style="{StaticResource PillButton}" />
                                 <Button 
-                                    Text="Locked"
+                                    Text="Đã khóa"
                                     Clicked="OnStatusFilterClicked"
                                     CommandParameter="Locked"
                                     Style="{StaticResource PillButton}" />
@@ -123,7 +123,7 @@
                         </VerticalStackLayout>
 
                         <Button 
-                            Text="Clear All Filters"
+                            Text="Xóa bộ lọc"
                             Clicked="OnClearFiltersClicked"
                             Style="{StaticResource SecondaryButton}"
                             Margin="0,8,0,0" />
@@ -131,7 +131,7 @@
                 </Border>
 
                 <!-- Staff List -->
-                <Label Text="{Binding FilteredStaff.Count, StringFormat='Showing {0} staff members'}" 
+                <Label Text="{Binding FilteredStaff.Count, StringFormat='Hiển thị {0} nhân sự'}" 
                        FontSize="12" TextColor="{StaticResource TextMuted}" FontAttributes="Bold" />
 
                 <CollectionView ItemsSource="{Binding FilteredStaff}" SelectionMode="None">
@@ -182,7 +182,7 @@
                                         Margin="12,0,0,0"
                                         VerticalOptions="Center">
                                         <Button 
-                                            Text="View"
+                                            Text="Xem"
                                             Clicked="OnViewStaffClicked"
                                             CommandParameter="{Binding .}"
                                             Style="{StaticResource SecondaryButton}"
@@ -201,7 +201,7 @@
                                     <Label 
                                         Grid.Row="1"
                                         Grid.ColumnSpan="3"
-                                        Text="{Binding LastLogin, StringFormat='Last login: {0:g}'}"
+                                        Text="{Binding LastLogin, StringFormat='Đăng nhập gần nhất: {0:g}'}"
                                         FontSize="10"
                                         TextColor="{StaticResource TextMuted}"
                                         Margin="0,8,0,0" />
@@ -223,7 +223,7 @@
             <VerticalStackLayout Spacing="16" IsVisible="{Binding SelectedStaff, Converter={StaticResource IsNotNullConverter}}">
                 <!-- Close Button -->
                 <HorizontalStackLayout Spacing="12" VerticalOptions="Start">
-                    <Label Text="Staff Details" FontAttributes="Bold" FontSize="16" />
+                    <Label Text="Chi tiết nhân sự" FontAttributes="Bold" FontSize="16" />
                     <Button 
                         Text="✕"
                         Clicked="OnCloseDetailsClicked"
@@ -269,16 +269,16 @@
                             <Label Grid.Row="0" Grid.Column="0" Text="Email:" FontAttributes="Bold" FontSize="11" />
                             <Label Grid.Row="0" Grid.Column="1" Text="{Binding SelectedStaff.Email}" FontSize="11" />
 
-                            <Label Grid.Row="1" Grid.Column="0" Text="Phone:" FontAttributes="Bold" FontSize="11" />
+                            <Label Grid.Row="1" Grid.Column="0" Text="Điện thoại:" FontAttributes="Bold" FontSize="11" />
                             <Label Grid.Row="1" Grid.Column="1" Text="{Binding SelectedStaff.Phone}" FontSize="11" />
 
-                            <Label Grid.Row="2" Grid.Column="0" Text="Role:" FontAttributes="Bold" FontSize="11" />
+                            <Label Grid.Row="2" Grid.Column="0" Text="Vai trò:" FontAttributes="Bold" FontSize="11" />
                             <Label Grid.Row="2" Grid.Column="1" Text="{Binding SelectedStaff.RoleLabel}" FontSize="11" />
 
-                            <Label Grid.Row="3" Grid.Column="0" Text="Status:" FontAttributes="Bold" FontSize="11" />
+                            <Label Grid.Row="3" Grid.Column="0" Text="Trạng thái:" FontAttributes="Bold" FontSize="11" />
                             <Label Grid.Row="3" Grid.Column="1" Text="{Binding SelectedStaff.StatusLabel}" FontSize="11" />
 
-                            <Label Grid.Row="4" Grid.Column="0" Text="Joined:" FontAttributes="Bold" FontSize="11" />
+                            <Label Grid.Row="4" Grid.Column="0" Text="Ngày vào làm:" FontAttributes="Bold" FontSize="11" />
                             <Label Grid.Row="4" Grid.Column="1" Text="{Binding SelectedStaff.JoinDate, StringFormat='{0:MMM d, yyyy}'}" FontSize="11" />
                         </Grid>
                     </VerticalStackLayout>
@@ -287,7 +287,7 @@
                 <!-- Permissions Section -->
                 <Border Style="{StaticResource CardBorder}" Padding="12">
                     <VerticalStackLayout Spacing="8">
-                        <Label Text="Permissions" FontAttributes="Bold" FontSize="12" />
+                        <Label Text="Quyền truy cập" FontAttributes="Bold" FontSize="12" />
                         <VerticalStackLayout 
                             Spacing="6"
                             BindableLayout.ItemsSource="{Binding SelectedStaff.Permissions}">
@@ -306,11 +306,11 @@
                 <!-- Action Buttons -->
                 <VerticalStackLayout Spacing="8">
                     <Button 
-                        Text="Edit Staff"
+                        Text="Chỉnh sửa"
                         Clicked="OnEditStaffClicked"
                         Style="{StaticResource PrimaryButton}" />
                     <Button 
-                        Text="Remove Staff"
+                        Text="Xóa nhân sự"
                         Clicked="OnDeleteStaffClicked"
                         Style="{StaticResource DangerButton}" />
                 </VerticalStackLayout>
@@ -327,11 +327,11 @@
                     FontSize="48"
                     HorizontalTextAlignment="Center" />
                 <Label 
-                    Text="Select a staff member" 
+                    Text="Chọn một nhân sự" 
                     FontAttributes="Bold" 
                     HorizontalTextAlignment="Center" />
                 <Label 
-                    Text="Choose from the list to view details"
+                    Text="Bấm vào danh sách bên trái để xem chi tiết"
                     FontSize="12" 
                     TextColor="{StaticResource TextMuted}"
                     HorizontalTextAlignment="Center" />

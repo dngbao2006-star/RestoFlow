@@ -8,7 +8,6 @@
 
     <Grid ColumnDefinitions="*,*">
 
-        <!-- Loading Overlay -->
         <Grid Grid.ColumnSpan="2" 
               IsVisible="{Binding IsLoading}" 
               BackgroundColor="#CC000000"
@@ -17,21 +16,18 @@
                 <ActivityIndicator IsRunning="{Binding IsLoading}" 
                                    Color="White" 
                                    Scale="2" />
-                <Label Text="Signing in..." 
+                <Label Text="Đang đăng nhập..." 
                        TextColor="White" 
                        FontSize="14"
                        HorizontalOptions="Center" />
             </VerticalStackLayout>
         </Grid>
 
-        <!-- ===== LEFT SIDE ===== -->
         <Grid Grid.Column="0" IsVisible="{OnIdiom Phone=False, Default=True}">
 
-            <!-- Background -->
             <Image Source="anhnenlogin.jpg"
                    Aspect="AspectFill"/>
 
-            <!-- Overlay -->
             <BoxView>
                 <BoxView.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -41,7 +37,6 @@
                 </BoxView.Background>
             </BoxView>
 
-            <!-- Content (CENTER) -->
             <VerticalStackLayout Padding="40"
                                  Spacing="16"
                                  VerticalOptions="Center">
@@ -56,42 +51,40 @@
                                FontAttributes="Bold"/>
                     </Border>
 
-                    <Label Text="Classic Restaurant"
+                    <Label Text="Nhà hàng đẳng cấp"
                            FontSize="22"
                            FontAttributes="Bold"
                            TextColor="White"/>
                 </HorizontalStackLayout>
 
-                <Label Text="Elevating Every Dining Experience"
+                <Label Text="Nâng tầm mọi trải nghiệm ẩm thực"
                        FontSize="34"
                        FontAttributes="Bold"
                        TextColor="White"
                        LineBreakMode="WordWrap"/>
 
-                <Label Text="A refined dining OS for teams who serve with precision and warmth."
+                <Label Text="Hệ thống quản lý nhà hàng thông minh và hiện đại"
                        FontSize="15"
                        TextColor="#E9EEF8"/>
             </VerticalStackLayout>
         </Grid>
 
-        <!-- ===== RIGHT SIDE ===== -->
         <Grid Grid.Column="1" BackgroundColor="White">
             <ScrollView>
                 <VerticalStackLayout Padding="40" Spacing="20">
 
-                    <Label Text="Welcome back"
+                    <Label Text="Chào mừng quay trở lại"
                            FontSize="28"
                            FontAttributes="Bold"/>
 
-                    <!-- Quick Access Buttons -->
                     <HorizontalStackLayout Spacing="10" Margin="0,10">
-                        <Button Text="Staff"
+                        <Button Text="Nhân viên"
                                 Background="#1B3A6B"
                                 TextColor="White"
                                 CornerRadius="8"
                                 HorizontalOptions="FillAndExpand"
                                 Clicked="OnSelectStaffRole"/>
-                        <Button Text="Manager"
+                        <Button Text="Quản lý"
                                 Background="#1B3A6B"
                                 TextColor="White"
                                 CornerRadius="8"
@@ -99,32 +92,41 @@
                                 Clicked="OnSelectManagerRole"/>
                     </HorizontalStackLayout>
 
-                    <!-- Email -->
                     <Border Stroke="#DDD" StrokeShape="RoundRectangle 12" Padding="12">
                         <Grid ColumnDefinitions="Auto,*">
-                            <Label Text="✉" TextColor="#777" FontSize="18"/>
+                            <Label Text="✉" TextColor="#777" FontSize="18" VerticalOptions="Center"/>
                             <Entry Grid.Column="1" 
                                    Text="{Binding Email}" 
-                                   Placeholder="Email address"
+                                   Placeholder="Địa chỉ email"
                                    IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanNegationConverter}}"/>
                         </Grid>
                     </Border>
 
-                    <!-- Error Message -->
+                    <Border Stroke="#DDD" StrokeShape="RoundRectangle 12" Padding="12">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <Label Text="🔒" TextColor="#777" FontSize="18" VerticalOptions="Center"/>
+                            <Entry Grid.Column="1" 
+                                   Text="{Binding Password}" 
+                                   Placeholder="Mật khẩu"
+                                   IsPassword="True"
+                                   IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanNegationConverter}}"/>
+                        </Grid>
+                    </Border>
+
                     <Label Text="{Binding ErrorMessage}"
                            TextColor="#EF4444"
                            FontSize="13"
                            IsVisible="{Binding HasError}"
                            Margin="0,-10,0,0"/>
 
-                    <Button Text="Forgot password?"
+                    <Button Text="Quên mật khẩu?"
                             BackgroundColor="Transparent"
                             TextColor="#1B3A6B"
                             FontAttributes="Bold"
                             HorizontalOptions="Start"
-                            Clicked="OnForgotPasswordTapped"/>  
+                            Clicked="OnForgotPasswordTapped"/>
 
-                    <Button Text="Sign In"
+                    <Button Text="Đăng nhập"
                             BackgroundColor="#1B3A6B"
                             TextColor="White"
                             CornerRadius="12"
@@ -132,15 +134,14 @@
                             IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanNegationConverter}}"
                             Clicked="OnSignInClicked"/>
 
-                    <!-- Demo -->
                     <Border Background="#F3EEE8"
                             StrokeThickness="0"
                             StrokeShape="RoundRectangle 12"
                             Padding="16">
                         <VerticalStackLayout>
-                            <Label Text="Demo accounts" FontAttributes="Bold"/>
-                            <Label Text="Staff: tuan.staff@goldenplate.vn"/>
-                            <Label Text="Manager: quan.manager@goldenplate.vn"/>
+                            <Label Text="Tài khoản demo" FontAttributes="Bold"/>
+                            <Label Text="Nhân viên: tuan.staff@goldenplate.vn"/>
+                            <Label Text="Quản lý: quan.manager@goldenplate.vn"/>
                         </VerticalStackLayout>
                     </Border>
 
