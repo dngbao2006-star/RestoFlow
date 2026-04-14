@@ -8,7 +8,12 @@ namespace AppManagermentRestaurant.Views.Pages;
 public partial class DishStatusPage : ContentPage
 {
     private DishStatus? _selectedStatusFilter;
-    private int? _selectedTableIdFilter;
+    // Đã gỡ bỏ _selectedTableIdFilter để bộ lọc luôn áp dụng lên toàn bộ danh sách
+
+    public bool IsPendingSelected => _selectedStatusFilter == DishStatus.Pending;
+    public bool IsPreparingSelected => _selectedStatusFilter == DishStatus.Preparing;
+    public bool IsReadySelected => _selectedStatusFilter == DishStatus.Ready;
+    public bool IsServedSelected => _selectedStatusFilter == DishStatus.Served;
 
     public DishStatusPage()
     {
@@ -21,7 +26,6 @@ public partial class DishStatusPage : ContentPage
 
     private void OnAppContextPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        // Refresh UI when AppContext properties change
         OnPropertyChanged(nameof(PendingDishCount));
         OnPropertyChanged(nameof(PreparingDishCount));
         OnPropertyChanged(nameof(ReadyDishCount));
@@ -30,7 +34,6 @@ public partial class DishStatusPage : ContentPage
         OnPropertyChanged(nameof(HasReadyItems));
         OnPropertyChanged(nameof(ReadyItemsCount));
         OnPropertyChanged(nameof(FilteredOrders));
-        OnPropertyChanged(nameof(SelectedTable));
     }
 
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
@@ -41,50 +44,16 @@ public partial class DishStatusPage : ContentPage
 
     private void RefreshPage()
     {
-        // Auto-filter to selected table if available
-        if (AppContext.Instance.SelectedTable != null)
-        {
-            _selectedTableIdFilter = AppContext.Instance.SelectedTable.Id;
-        }
-
+        // Đã xóa block code hiển thị DisplayAlert khó chịu "Hoàn thành đơn hàng"
         ApplyFilters();
         OnPropertyChanged(nameof(HasReadyItems));
         OnPropertyChanged(nameof(ReadyItemsCount));
-        OnPropertyChanged(nameof(SelectedTable));
         OnPropertyChanged(nameof(PendingDishCount));
         OnPropertyChanged(nameof(PreparingDishCount));
         OnPropertyChanged(nameof(ReadyDishCount));
         OnPropertyChanged(nameof(ServedDishCount));
         OnPropertyChanged(nameof(FilteredOrders));
         OnPropertyChanged(nameof(ReadyItems));
-
-        // Auto-navigate back to table selection if all items for selected table are served
-        if (AppContext.Instance.SelectedTable != null && _selectedTableIdFilter.HasValue)
-        {
-            var selectedTableOrders = AppContext.Instance.Orders.Where(o => o.TableId == _selectedTableIdFilter.Value);
-            var hasPendingOrPreparing = selectedTableOrders.Any(o => o.Items.Any(i => i.Status == DishStatus.Pending || i.Status == DishStatus.Preparing));
-
-            if (!hasPendingOrPreparing && selectedTableOrders.Any())
-            {
-                // All dishes done - update table status and show option to return
-                MainThread.BeginInvokeOnMainThread(async () =>
-                {
-                    var result = await DisplayAlert(
-                        "Hoàn thành đơn hàng",
-                        "Bàn đã xong. Quay lại để chọn bàn tiếp theo?",
-                        "Có",
-                        "Ở lại");
-
-                    if (result)
-                    {
-                        // Reset selection and navigate back
-                        AppContext.Instance.SelectedTable = null;
-                        AppContext.Instance.SelectedOrder = null;
-                        await Shell.Current.GoToAsync(AppRoutes.Absolute(AppRoutes.TableMap));
-                    }
-                });
-            }
-        }
     }
 
     public bool HasReadyItems => AppContext.Instance.ReadyDishCount > 0;
@@ -98,24 +67,16 @@ public partial class DishStatusPage : ContentPage
 
     public IEnumerable<OrderItem> ReadyItems => AppContext.Instance.ReadyItems;
 
-    public Table SelectedTable => AppContext.Instance.SelectedTable;
-
     public IEnumerable<Order> FilteredOrders
     {
         get
         {
             var orders = AppContext.Instance.Orders.AsEnumerable();
 
-            // Filter by status if selected
+            // Lọc chính xác trạng thái trên toàn bộ Orders, không bị chặn bởi table ID ẩn nữa
             if (_selectedStatusFilter != null)
             {
                 orders = orders.Where(o => o.Items.Any(item => item.Status == _selectedStatusFilter));
-            }
-
-            // Filter by selected table
-            if (_selectedTableIdFilter.HasValue)
-            {
-                orders = orders.Where(o => o.TableId == _selectedTableIdFilter.Value);
             }
 
             return orders;
@@ -136,7 +97,6 @@ public partial class DishStatusPage : ContentPage
             _ => null
         };
 
-        // Toggle filter: if same status clicked, remove filter
         if (_selectedStatusFilter == newStatus)
         {
             _selectedStatusFilter = null;
@@ -145,6 +105,11 @@ public partial class DishStatusPage : ContentPage
         {
             _selectedStatusFilter = newStatus;
         }
+
+        OnPropertyChanged(nameof(IsPendingSelected));
+        OnPropertyChanged(nameof(IsPreparingSelected));
+        OnPropertyChanged(nameof(IsReadySelected));
+        OnPropertyChanged(nameof(IsServedSelected));
 
         ApplyFilters();
     }
@@ -162,10 +127,8 @@ public partial class DishStatusPage : ContentPage
         if (button.CommandParameter is not OrderItem orderItem)
             return;
 
-        // Update status to Served
         orderItem.Status = DishStatus.Served;
 
-        // Notify UI with all relevant properties
         AppContext.Instance.RefreshBadges();
         MainThread.BeginInvokeOnMainThread(() =>
         {
@@ -179,20 +142,5 @@ public partial class DishStatusPage : ContentPage
             OnPropertyChanged(nameof(ReadyItemsCount));
             RefreshPage();
         });
-    }
-
-    private async void OnBackToTablesClicked(object sender, EventArgs e)
-    {
-        AppContext.Instance.SelectedTable = null;
-        AppContext.Instance.SelectedOrder = null;
-        _selectedTableIdFilter = null;
-        await Shell.Current.GoToAsync(AppRoutes.Absolute(AppRoutes.TableMap));
-    }
-
-    private void OnClearTableFilterClicked(object sender, EventArgs e)
-    {
-        AppContext.Instance.SelectedTable = null;
-        _selectedTableIdFilter = null;
-        RefreshPage();
     }
 }
