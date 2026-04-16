@@ -76,7 +76,12 @@
         <Border Grid.Row="3" Style="{StaticResource CardBorder}" Margin="24,12">
             <VerticalStackLayout Spacing="8">
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                    <Editor x:Name="MessageEditor" Placeholder="Nhập tin nhắn..." AutoSize="TextChanges" MaximumHeightRequest="100" />
+                     <Editor 
+                        x:Name="MessageEditor" 
+                        Placeholder="Nhập tin nhắn..." 
+                        AutoSize="TextChanges" 
+                        MaximumHeightRequest="100"
+                        TextChanged="OnTextChanged"/>
                     <Button x:Name="SendButton" Grid.Column="1" Text="Gửi" Style="{StaticResource PrimaryButton}" Padding="12,8" Clicked="OnSendMessageClicked" IsEnabled="False" VerticalOptions="End" />
                 </Grid>
                 <Label Text="Enter để gửi, Shift+Enter để xuống dòng" Style="{StaticResource MutedTextStyle}" FontSize="11" />

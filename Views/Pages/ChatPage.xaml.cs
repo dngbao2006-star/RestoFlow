@@ -5,15 +5,35 @@ namespace AppManagermentRestaurant.Views.Pages;
 
 public partial class ChatPage : ContentPage
 {
+    
+    private FirebaseChatService _chatService = new FirebaseChatService();
+
     public ChatPage()
     {
         InitializeComponent();
         BindingContext = this;
     }
 
+    
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
+
+        _chatService.ListenForMessages((msg) =>
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                // tránh duplicate
+                if (!AppContext.Instance.ChatMessages.Any(x => x.Id == msg.Id))
+                {
+                    msg.IsMine = msg.SenderId == AppContext.Instance.CurrentUser?.Id;
+
+                    AppContext.Instance.ChatMessages.Add(msg);
+                    ScrollToLatestMessage();
+                }
+            });
+        });
+
         RefreshPage();
     }
 
@@ -44,18 +64,12 @@ public partial class ChatPage : ContentPage
         SendMessage();
     }
 
+    
     private async void OnMessageEditorCompleted(object sender, EventArgs e)
     {
-        if (sender is Editor editor)
-        {
-            // Check if Shift+Enter was pressed (new line)
-            // Otherwise, send message on Enter
-            // Note: This is a simplified version - MAUI doesn't have built-in Shift+Enter detection in Editor
-            // For full implementation, you may need a custom control or KeyDown event
-        }
     }
 
-    private void SendMessage()
+    private async void SendMessage()
     {
         var message = MessageEditor.Text?.Trim();
 
@@ -65,7 +79,6 @@ public partial class ChatPage : ContentPage
             return;
         }
 
-        // Create new chat message
         var chatMessage = new ChatMessage
         {
             Id = Guid.NewGuid().GetHashCode(),
@@ -79,18 +92,15 @@ public partial class ChatPage : ContentPage
             IsSystem = false
         };
 
-        // Add to messages
-        AppContext.Instance.ChatMessages.Add(chatMessage);
+        await _chatService.SendMessage(chatMessage);
 
-        // Clear input
         MessageEditor.Text = "";
         SendButton.IsEnabled = false;
+    }
 
-        // Scroll to latest
-        ScrollToLatestMessage();
-
-        // Refresh UI
-        RefreshPage();
+    private void OnTextChanged(object sender, TextChangedEventArgs e)
+    {
+        SendButton.IsEnabled = !string.IsNullOrWhiteSpace(e.NewTextValue);
     }
 
     private void ScrollToLatestMessage()
