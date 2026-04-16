@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="AppManagermentRestaurant.Views.Pages.MenuManagementPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:AppManagermentRestaurant.Controls"
+    BackgroundColor="White"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+        <controls:AppHeaderView />
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="24" Spacing="20">
+                <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                    <Label Text="Quản lý thực đơn" Style="{StaticResource PageTitle}" />
+                    <Button Text="Thêm món" Style="{StaticResource PrimaryButton}" />
+                </HorizontalStackLayout>
+
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                    <Border Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Tổng số món" FontAttributes="Bold" />
+                            <Label Text="{Binding MenuItems.Count}" FontSize="22" FontAttributes="Bold" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Style="{StaticResource CardBorder}" Grid.Column="1">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Đang phục vụ" FontAttributes="Bold" />
+                            <Label Text="11" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Success}" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Style="{StaticResource CardBorder}" Grid.Column="2">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Hết món" FontAttributes="Bold" />
+                            <Label Text="1" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Danger}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="12">
+                        <Border Style="{StaticResource InputBorder}">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <Label Text="Tìm kiếm" TextColor="{StaticResource TextMuted}" VerticalOptions="Center" />
+                                <Entry Grid.Column="1" Placeholder="Tìm món ăn" />
+                            </Grid>
+                        </Border>
+                        <ScrollView Orientation="Horizontal">
+                            <HorizontalStackLayout Spacing="8">
+                                <Button Text="Tất cả" Style="{StaticResource PillButton}" />
+                                <Button Text="Khai vị" Style="{StaticResource PillButton}" />
+                                <Button Text="Món chính" Style="{StaticResource PillButton}" />
+                                <Button Text="Canh/Súp" Style="{StaticResource PillButton}" />
+                                <Button Text="Hải sản" Style="{StaticResource PillButton}" />
+                                <Button Text="Tráng miệng" Style="{StaticResource PillButton}" />
+                                <Button Text="Đồ uống" Style="{StaticResource PillButton}" />
+                            </HorizontalStackLayout>
+                        </ScrollView>
+                    </VerticalStackLayout>
+                </Border>
+
+                <CollectionView ItemsSource="{Binding MenuItems}" SelectionMode="None">
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical" Span="3" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource CardBorder}" Margin="0,0,12,12">
+                                <VerticalStackLayout Spacing="8">
+                                    <Grid HeightRequest="160">
+                                        <Image Source="{Binding Image}" Aspect="AspectFill" />
+                                        <Border Background="#99000000" Stroke="#00000000" StrokeThickness="0" IsVisible="{Binding OutOfStock}">
+                                            <Label Text="HẾT MÓN" TextColor="White" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                        </Border>
+                                    </Grid>
+                                    <Label Text="{Binding Name}" FontAttributes="Bold" />
+                                    <Label Text="{Binding Description}" Style="{StaticResource SecondaryTextStyle}" LineBreakMode="TailTruncation" />
+                                    <Label Text="{Binding Price, StringFormat='{0:0,0} VND'}" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
+                                    <HorizontalStackLayout Spacing="8">
+                                        <Button Text="Đổi trạng thái" Style="{StaticResource SecondaryButton}" />
+                                        <Button Text="Sửa" Style="{StaticResource SecondaryButton}" />
+                                        <Button Text="Xóa" Style="{StaticResource DangerButton}" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
+

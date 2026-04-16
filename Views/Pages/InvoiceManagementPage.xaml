@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="AppManagermentRestaurant.Views.Pages.InvoiceManagementPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:AppManagermentRestaurant.Controls"
+    BackgroundColor="White"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+        <controls:AppHeaderView />
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="24" Spacing="20">
+                <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                    <Label Text="Invoice Management" Style="{StaticResource PageTitle}" />
+                    <Border Style="{StaticResource BadgeBorder}">
+                        <Label Text="Manager Authorization Required" Style="{StaticResource BadgeText}" />
+                    </Border>
+                </HorizontalStackLayout>
+
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                    <Border Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Total Invoices" FontAttributes="Bold" />
+                            <Label Text="{Binding Invoices.Count}" FontSize="22" FontAttributes="Bold" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Style="{StaticResource CardBorder}" Grid.Column="1">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Total Revenue" FontAttributes="Bold" />
+                            <Label Text="{Binding Invoices[0].TotalDisplay}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Success}" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Style="{StaticResource CardBorder}" Grid.Column="2">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Total Discounts" FontAttributes="Bold" />
+                            <Label Text="120,000 VND" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Danger}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <Border Style="{StaticResource CardBorder}">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                        <Label Text="Search" TextColor="{StaticResource TextMuted}" VerticalOptions="Center" />
+                        <Entry Grid.Column="1" Placeholder="Search by table, server, invoice ID" />
+                    </Grid>
+                </Border>
+
+                <CollectionView ItemsSource="{Binding Invoices}" SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
+                                <VerticalStackLayout Spacing="8">
+                                    <HorizontalStackLayout Spacing="8">
+                                        <Label Text="Table" FontAttributes="Bold" />
+                                        <Label Text="{Binding TableNumber}" FontAttributes="Bold" />
+                                        <Label Text="#" Style="{StaticResource SecondaryTextStyle}" />
+                                        <Label Text="{Binding Id}" Style="{StaticResource SecondaryTextStyle}" />
+                                        <Label Text="{Binding TotalDisplay}" FontAttributes="Bold" TextColor="{StaticResource Primary}" HorizontalOptions="EndAndExpand" />
+                                    </HorizontalStackLayout>
+                                    <Label Text="{Binding CreatedAtDisplay}" Style="{StaticResource SecondaryTextStyle}" />
+                                    <HorizontalStackLayout Spacing="8">
+                                        <Button Text="Apply Discount" Style="{StaticResource SecondaryButton}" />
+                                        <Button Text="Print" Style="{StaticResource SecondaryButton}" />
+                                        <Button Text="Cancel" Style="{StaticResource DangerButton}" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
+

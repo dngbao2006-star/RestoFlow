@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="AppManagermentRestaurant.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:constants="clr-namespace:AppManagermentRestaurant.Constants"
+    xmlns:controls="clr-namespace:AppManagermentRestaurant.Controls"
+    xmlns:pages="clr-namespace:AppManagermentRestaurant.Views.Pages"
+    xmlns:converters="clr-namespace:AppManagermentRestaurant.Converters"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    x:Name="TheShell"
+    Title="Quản lý nhà hàng"
+    FlyoutBackgroundColor="{StaticResource SidebarBg}"
+    FlyoutBehavior="Locked"
+    FlyoutWidth="260">
+
+    <Shell.Resources>
+        <ResourceDictionary>
+            <converters:TitleToIconConverter     x:Key="TitleToIconConverter" />
+            <converters:TitleToBadgeCountConverter x:Key="TitleToBadgeCountConverter" />
+            <converters:TitleHasBadgeConverter   x:Key="TitleHasBadgeConverter" />
+            <toolkit:InvertedBoolConverter       x:Key="InvertedBoolConverter" />
+        </ResourceDictionary>
+    </Shell.Resources>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!--  NAV ITEM TEMPLATE                                              -->
+    <!--  expanded : Icon | Label | Badge                               -->
+    <!--  collapsed: Icon (centered)                                    -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <Shell.ItemTemplate>
+        <DataTemplate>
+            <Grid Padding="12,10" ColumnDefinitions="20,*,Auto"
+                  ColumnSpacing="10" MinimumHeightRequest="42">
+
+                <!-- Icon — luôn hiển thị -->
+                <Image Grid.Column="0"
+                WidthRequest="20" 
+                HeightRequest="20"
+                Aspect="AspectFit"
+                HorizontalOptions="Center" 
+                VerticalOptions="Center"
+                Source="{Binding Title, Converter={StaticResource TitleToIconConverter}}" />
+
+                
+
+                <!-- Nhãn — ẩn khi thu gọn -->
+                <Label Grid.Column="1"
+                       Text="{Binding Title}"
+                       FontFamily="Inter"
+                       FontSize="14"
+                       TextColor="White"
+                       VerticalOptions="Center"
+                       LineBreakMode="NoWrap"
+                       IsVisible="{Binding Path=IsSidebarExpanded,
+                                           Source={RelativeSource AncestorType={x:Type Shell}}}" />
+
+                <!-- Badge — chỉ hiện khi expanded VÀ hasBadge -->
+                <!-- Cách đơn giản nhất trong MAUI: dùng Grid chồng 2 Badge visibility layer -->
+                <Border Grid.Column="2"
+                        Background="{StaticResource SidebarBadge}"
+                        Stroke="Transparent" StrokeThickness="0"
+                        StrokeShape="RoundRectangle 10"
+                        WidthRequest="22" HeightRequest="20"
+                        HorizontalOptions="End" VerticalOptions="Center"
+                        IsVisible="{Binding Title, Converter={StaticResource TitleHasBadgeConverter}}">
+                    <Label Text="{Binding Title, Converter={StaticResource TitleToBadgeCountConverter}}"
+                           FontFamily="Inter" FontSize="11" FontAttributes="Bold"
+                           TextColor="White"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+
+            </Grid>
+        </DataTemplate>
+    </Shell.ItemTemplate>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!--  FLYOUT HEADER — Logo + Toggle + User card                     -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <Shell.FlyoutHeader>
+        <controls:SidebarHeaderView
+            IsExpanded="{Binding Path=IsSidebarExpanded,
+                                 Source={RelativeSource AncestorType={x:Type Shell}}}" />
+    </Shell.FlyoutHeader>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!--  STAFF — 7 mục                                                 -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <ShellContent
+        Title="Sơ đồ bàn"
+        Route="{x:Static constants:AppRoutes.TableMap}"
+        IsVisible="{Binding IsStaff}"
+        ContentTemplate="{DataTemplate pages:TableManagementPage}" />
+
+    <ShellContent
+        Title="Tạo đơn"
+        Route="{x:Static constants:AppRoutes.CreateOrder}"
+        IsVisible="{Binding IsStaff}"
+        ContentTemplate="{DataTemplate pages:OrderCreationPage}" />
+
+    <ShellContent
+        Title="Trạng thái món"
+        Route="{x:Static constants:AppRoutes.DishStatus}"
+        IsVisible="{Binding IsStaff}"
+        ContentTemplate="{DataTemplate pages:DishStatusPage}" />
+
+    <ShellContent
+        Title="Thanh toán"
+        Route="{x:Static constants:AppRoutes.Payment}"
+        IsVisible="{Binding IsStaff}"
+        ContentTemplate="{DataTemplate pages:PaymentPage}" />
+
+    <ShellContent
+        Title="Nhắn tin"
+        Route="{x:Static constants:AppRoutes.StaffChat}"
+        IsVisible="{Binding IsStaff}"
+        ContentTemplate="{DataTemplate pages:ChatPage}" />
+
+    <ShellContent
+        Title="Lịch sử đơn"
+        Route="{x:Static constants:AppRoutes.OrderHistory}"
+        IsVisible="{Binding IsStaff}"
+        ContentTemplate="{DataTemplate pages:OrderHistoryPage}" />
+
+    <ShellContent
+        Title="Tài khoản"
+        Route="{x:Static constants:AppRoutes.Account}"
+        IsVisible="{Binding IsStaff}"
+        ContentTemplate="{DataTemplate pages:AccountManagementPage}" />
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!--  MANAGER — 9 mục                                               -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <ShellContent
+        Title="Tổng quan"
+        Route="{x:Static constants:AppRoutes.Dashboard}"
+        IsVisible="{Binding IsManager}"
+        ContentTemplate="{DataTemplate pages:DashboardPage}" />
+
+    <ShellContent
+        Title="Nhân sự"
+        Route="{x:Static constants:AppRoutes.HR}"
+        IsVisible="{Binding IsManager}"
+        ContentTemplate="{DataTemplate pages:HRManagementPage}" />
+
+    <ShellContent
+        Title="Thực đơn"
+        Route="{x:Static constants:AppRoutes.Menu}"
+        IsVisible="{Binding IsManager}"
+        ContentTemplate="{DataTemplate pages:MenuManagementPage}" />
+
+    <ShellContent
+        Title="Sơ đồ khu vực"
+        Route="{x:Static constants:AppRoutes.Layout}"
+        IsVisible="{Binding IsManager}"
+        ContentTemplate="{DataTemplate pages:LayoutManagementPage}" />
+
+    <ShellContent
+        Title="Doanh thu"
+        Route="{x:Static constants:AppRoutes.Revenue}"
+        IsVisible="{Binding IsManager}"
+        ContentTemplate="{DataTemplate pages:RevenuePage}" />
+
+    <ShellContent
+        Title="Hóa đơn"
+        Route="{x:Static constants:AppRoutes.Invoice}"
+        IsVisible="{Binding IsManager}"
+        ContentTemplate="{DataTemplate pages:InvoiceManagementPage}" />
+
+    <ShellContent
+        Title="Nhắn tin"
+        Route="{x:Static constants:AppRoutes.ManagementChat}"
+        IsVisible="{Binding IsManager}"
+        ContentTemplate="{DataTemplate pages:ChatPage}" />
+
+    <ShellContent
+        Title="Thông báo"
+        Route="{x:Static constants:AppRoutes.Notifications}"
+        IsVisible="{Binding IsManager}"
+        ContentTemplate="{DataTemplate pages:NotificationsManagementPage}" />
+
+    <ShellContent
+        Title="Cấu hình hệ thống"
+        Route="{x:Static constants:AppRoutes.SystemConfig}"
+        IsVisible="{Binding IsManager}"
+        ContentTemplate="{DataTemplate pages:SystemConfigPage}" />
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!--  FLYOUT FOOTER — Nút đăng xuất                                 -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <Shell.FlyoutFooter>
+        <VerticalStackLayout Spacing="0">
+            <!-- Divider -->
+            <BoxView HeightRequest="1" Color="{StaticResource SidebarDivider}" />
+
+            <!-- Nút đăng xuất: full-width, bo tròn 12px -->
+            <Border Background="Transparent"
+                    Stroke="Transparent" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="12,10"
+                    Margin="12,8,12,16"
+                    HorizontalOptions="Fill">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnSignOutTapped" />
+                </Border.GestureRecognizers>
+
+                <Grid ColumnDefinitions="20,*" ColumnSpacing="10">
+                    <!-- LogOut icon -->
+                    <Path Grid.Column="0"
+                          Fill="#EF6C6C"
+                          WidthRequest="20" HeightRequest="20"
+                          Aspect="Uniform"
+                          HorizontalOptions="Center" VerticalOptions="Center"
+                          Data="M16,17V15H7V9H16V7L21,12L16,17M14,2A2,2 0 0,1 16,4V6H14V4H5V20H14V18H16V20A2,2 0 0,1 14,22H5A2,2 0 0,1 3,20V4A2,2 0 0,1 5,2H14Z" />
+
+                    <!-- Text — ẩn khi thu gọn -->
+                    <Label Grid.Column="1"
+                           Text="Đăng xuất"
+                           FontFamily="Inter"
+                           FontSize="14"
+                           FontAttributes="Bold"
+                           TextColor="#EF6C6C"
+                           VerticalOptions="Center"
+                           IsVisible="{Binding Path=IsSidebarExpanded,
+                                               Source={RelativeSource AncestorType={x:Type Shell}}}" />
+                </Grid>
+            </Border>
+        </VerticalStackLayout>
+    </Shell.FlyoutFooter>
+
+</Shell>

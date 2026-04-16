@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <Color x:Key="AppBackground">#F5F0E8</Color>
+    <Color x:Key="Surface">#FDFAF6</Color>
+    <Color x:Key="Primary">#1B3A6B</Color>
+    <Color x:Key="PrimaryAccent">#4A90D9</Color>
+    <Color x:Key="SecondarySurface">#EDE8DC</Color>
+
+    <Color x:Key="TextPrimary">#1A1209</Color>
+    <Color x:Key="TextSecondary">#7B6A57</Color>
+    <Color x:Key="TextMuted">#C5B8A8</Color>
+
+    <Color x:Key="BorderLight">#268B6E50</Color>
+    <Color x:Key="BorderStrong">#408B6E50</Color>
+
+    <Color x:Key="Success">#22C55E</Color>
+    <Color x:Key="Warning">#F59E0B</Color>
+    <Color x:Key="Danger">#EF4444</Color>
+    <Color x:Key="DangerDark">#D4183D</Color>
+    <Color x:Key="Info">#4A90D9</Color>
+
+    <Color x:Key="TableAvailable">#22C55E</Color>
+    <Color x:Key="TableOccupied">#EF4444</Color>
+    <Color x:Key="TableReserved">#F59E0B</Color>
+    <Color x:Key="TableNeedsClearing">#6B7280</Color>
+
+    <Color x:Key="White">#FFFFFF</Color>
+    <Color x:Key="Black">#000000</Color>
+
+    <Color x:Key="SidebarBg">#2A4B82</Color>
+    <Color x:Key="SidebarActiveItem">#3C64A3</Color>
+    <Color x:Key="SidebarItemHover">#335891</Color>
+    <Color x:Key="SidebarUserCard">#223F6E</Color>
+    <Color x:Key="SidebarDivider">#3C64A3</Color>
+    <Color x:Key="SidebarTextPrimary">#FFFFFF</Color>
+    <Color x:Key="SidebarTextMuted">#B0C4DE</Color>
+    <Color x:Key="SidebarLogoBox">#3C64A3</Color>
+    <Color x:Key="SidebarBadge">#EF4444</Color>
+
+    <SolidColorBrush x:Key="AppBackgroundBrush" Color="{StaticResource AppBackground}" />
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource Surface}" />
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}" />
+    <SolidColorBrush x:Key="SecondarySurfaceBrush" Color="{StaticResource SecondarySurface}" />
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimary}" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondary}" />
+    <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMuted}" />
+    <SolidColorBrush x:Key="BorderLightBrush" Color="{StaticResource BorderLight}" />
+    <SolidColorBrush x:Key="BorderStrongBrush" Color="{StaticResource BorderStrong}" />
+</ResourceDictionary>

@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="AppManagermentRestaurant.Views.Pages.OrderCreationPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:AppManagermentRestaurant.Controls"
+    xmlns:helpers="clr-namespace:AppManagermentRestaurant.Helpers"
+    BackgroundColor="White"
+    Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <helpers:BoolToOpacityConverter x:Key="BoolToOpacityConverter" />
+        <helpers:BooleanNegationConverter x:Key="InvertedBoolConverter" />
+        <helpers:HasValueConverter x:Key="HasValueConverter" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,300" ColumnSpacing="20">
+        <controls:AppHeaderView Grid.ColumnSpan="2" />
+
+        <ScrollView Grid.Row="1" Grid.Column="0">
+            <VerticalStackLayout Padding="24" Spacing="20">
+
+                <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                    <Label Text="Bàn" Style="{StaticResource SectionTitle}" />
+                    <Label Text="{Binding SelectedOrder.TableNumber}" Style="{StaticResource SectionTitle}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
+                    <Label Text="•" Style="{StaticResource SectionTitle}" />
+                    <Label Text="{Binding ExistingOrderInfo}" Style="{StaticResource SecondaryTextStyle}" />
+                </HorizontalStackLayout>
+
+                <VerticalStackLayout Spacing="8" Margin="0,0,0,5">
+                    <Label Text="Chọn bàn để lên đơn:" FontAttributes="Bold" FontSize="13" TextColor="{StaticResource SecondaryTextStyle}" />
+
+                    <Border Stroke="#6366F1" StrokeThickness="1" StrokeShape="RoundRectangle 8" BackgroundColor="White" HorizontalOptions="Start" WidthRequest="340" HeightRequest="42" Padding="0">
+                        <Grid>
+                            <Picker ItemsSource="{Binding ActiveTables}"
+                                    ItemDisplayBinding="{Binding Number, StringFormat='Bàn {0}'}"
+                                    SelectedItem="{Binding SelectedActiveTable}"
+                                    BackgroundColor="Transparent"
+                                    TextColor="{StaticResource TextPrimary}"
+                                    FontAttributes="Bold"
+                                    FontSize="14"
+                                    VerticalOptions="FillAndExpand" 
+                                    HorizontalOptions="FillAndExpand"
+                                    Margin="24,0,24,0"/>
+
+                            <Grid ColumnDefinitions="Auto,*,Auto" InputTransparent="True" Padding="12,0">
+                                <Ellipse Grid.Column="0" Fill="#22C55E" WidthRequest="8" HeightRequest="8" VerticalOptions="Center" />
+                                <Label Grid.Column="2" Text="▼" FontSize="11" TextColor="#6B7280" VerticalOptions="Center"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </VerticalStackLayout>
+
+                <Border Style="{StaticResource InputBorder}">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                        <Label Text="🔍" VerticalOptions="Center" FontSize="16" />
+                        <Entry Grid.Column="1" Placeholder="Tìm kiếm món ăn..." TextChanged="OnSearchTextChanged" x:Name="SearchEntry" />
+                    </Grid>
+                </Border>
+
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5" VerticalOptions="Center">
+                    <Button x:Name="BtnScrollLeft" Grid.Column="0" Text="&lt;" WidthRequest="30" Padding="0" BackgroundColor="Transparent" TextColor="#333333" FontSize="18" FontAttributes="Bold" Clicked="OnScrollLeftClicked" IsVisible="False" />
+
+                    <ScrollView x:Name="FilterScrollView" Grid.Column="1" Orientation="Horizontal" Scrolled="OnFilterScrolled" SizeChanged="OnFilterScrollViewSizeChanged">
+                        <HorizontalStackLayout Spacing="8">
+                            <Button Text="📋 Tất cả" Style="{StaticResource PillButton}" Clicked="OnFilterClicked" CommandParameter="All" />
+                            <Button Text="🥗 Khai vị" Style="{StaticResource PillButton}" Clicked="OnFilterClicked" CommandParameter="Appetizers" />
+                            <Button Text="🍖 Món chính" Style="{StaticResource PillButton}" Clicked="OnFilterClicked" CommandParameter="Main Course" />
+                            <Button Text="🍲 Canh" Style="{StaticResource PillButton}" Clicked="OnFilterClicked" CommandParameter="Soups" />
+                            <Button Text="🦐 Hải sản" Style="{StaticResource PillButton}" Clicked="OnFilterClicked" CommandParameter="Seafood" />
+                            <Button Text="🍰 Tráng miệng" Style="{StaticResource PillButton}" Clicked="OnFilterClicked" CommandParameter="Desserts" />
+                            <Button Text="🥤 Nước uống" Style="{StaticResource PillButton}" Clicked="OnFilterClicked" CommandParameter="Drinks" />
+                        </HorizontalStackLayout>
+                    </ScrollView>
+
+                    <Button x:Name="BtnScrollRight" Grid.Column="2" Text="&gt;" WidthRequest="30" Padding="0" BackgroundColor="Transparent" TextColor="#333333" FontSize="18" FontAttributes="Bold" Clicked="OnScrollRightClicked" IsVisible="False" />
+                </Grid>
+
+                <CollectionView ItemsSource="{Binding FilteredMenuItems}" SelectionMode="None">
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical" Span="2" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource CardBorder}" Margin="0,0,12,12" Opacity="{Binding OutOfStock, Converter={StaticResource BoolToOpacityConverter}}" Stroke="{Binding IsInCart, StringFormat='Navy|Transparent'}" StrokeThickness="2.5">
+                                <VerticalStackLayout Spacing="8">
+                                    <Grid HeightRequest="128">
+                                        <Image Source="{Binding Image}" Aspect="AspectFill" />
+                                        <Border Background="#CC000000" Stroke="#00000000" StrokeThickness="0" IsVisible="{Binding OutOfStock}" Padding="4">
+                                            <Label Text="HẾT MÓN" TextColor="#FFFF0000" FontAttributes="Bold" FontSize="14" HorizontalOptions="Center" VerticalOptions="Center" />
+                                        </Border>
+                                    </Grid>
+                                    <Label Text="{Binding Name}" FontAttributes="Bold" FontSize="13" />
+                                    <Label Text="{Binding Price, StringFormat='{0:0,0} VND'}" TextColor="{StaticResource Primary}" FontAttributes="Bold" FontSize="12" />
+                                    <Button Text="+ Thêm" Style="{StaticResource PrimaryButton}" Clicked="OnAddMenuItemClicked" CommandParameter="{Binding .}" IsEnabled="{Binding OutOfStock, Converter={StaticResource InvertedBoolConverter}}" Padding="8,6" FontSize="12" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource CardBorder}" Margin="0,24,24,24">
+            <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="16">
+                <HorizontalStackLayout Grid.Row="0" Spacing="8" VerticalOptions="Center">
+                    <Label Text="📋 Tóm tắt đơn" Style="{StaticResource SectionTitle}" FontSize="18" />
+                    <Border Style="{StaticResource BadgeBorder}">
+                        <Label Text="{Binding SelectedOrder.ItemsCount}" Style="{StaticResource BadgeText}" />
+                    </Border>
+                </HorizontalStackLayout>
+
+                <ScrollView Grid.Row="1">
+                    <VerticalStackLayout Spacing="12">
+                        <VerticalStackLayout Spacing="8" IsVisible="{Binding HasExistingItems}">
+                            <Label Text="📦 Đã gọi trước" FontAttributes="Bold" FontSize="11" Style="{StaticResource SecondaryTextStyle}" />
+                            <CollectionView ItemsSource="{Binding ExistingItems}" SelectionMode="None">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource InputBorder}" Padding="8" Margin="0,0,0,8" Background="#F5F5F5">
+                                            <HorizontalStackLayout Spacing="8">
+                                                <Image Source="{Binding Image}" HeightRequest="36" WidthRequest="36" Aspect="AspectFill" />
+                                                <VerticalStackLayout Spacing="2" HorizontalOptions="FillAndExpand">
+                                                    <Label Text="{Binding Name}" FontAttributes="Bold" FontSize="11" LineBreakMode="TailTruncation" />
+                                                    <Label Text="{Binding Notes, StringFormat='📝 {0}'}" Style="{StaticResource SecondaryTextStyle}" FontSize="8" IsVisible="{Binding Notes, Converter={StaticResource HasValueConverter}}" />
+                                                </VerticalStackLayout>
+                                                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="End">
+                                                    <Label Text="{Binding Quantity, StringFormat='x{0}'}" FontAttributes="Bold" FontSize="11" />
+                                                    <Label Text="{Binding LineTotalDisplay}" Style="{StaticResource SecondaryTextStyle}" FontSize="9" />
+                                                </VerticalStackLayout>
+                                            </HorizontalStackLayout>
+                                        </Border>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="8" IsVisible="{Binding HasNewItems}">
+                            <Label Text="➕ Gọi thêm" FontAttributes="Bold" FontSize="11" Style="{StaticResource SecondaryTextStyle}" />
+                            <CollectionView ItemsSource="{Binding NewItems}" SelectionMode="None">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Style="{StaticResource InputBorder}" Padding="8" Margin="0,0,0,12" Stroke="{StaticResource Primary}" StrokeThickness="1">
+                                            <VerticalStackLayout Spacing="6">
+                                                <HorizontalStackLayout Spacing="8">
+                                                    <Image Source="{Binding Image}" HeightRequest="40" WidthRequest="40" Aspect="AspectFill" />
+                                                    <VerticalStackLayout Spacing="1" HorizontalOptions="FillAndExpand">
+                                                        <Label Text="{Binding Name}" FontAttributes="Bold" FontSize="12" LineBreakMode="TailTruncation" />
+                                                        <Label Text="{Binding Notes, StringFormat='📝 {0}'}" Style="{StaticResource SecondaryTextStyle}" FontSize="9" IsVisible="{Binding Notes, Converter={StaticResource HasValueConverter}}" TextColor="{StaticResource Warning}" />
+                                                        <Label Text="{Binding Price, StringFormat='{0:0,0} VND'}" Style="{StaticResource SecondaryTextStyle}" FontSize="10" />
+                                                    </VerticalStackLayout>
+                                                </HorizontalStackLayout>
+
+                                                <Border Style="{StaticResource InputBorder}" Padding="8" Margin="0,4,0,0">
+                                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                                        <Label Text="📝" VerticalOptions="Center" FontSize="14" />
+                                                        <Entry Grid.Column="1" Text="{Binding Notes}" Placeholder="Ghi chú (không cay, ít đường...)" FontSize="11" Completed="OnNoteEntryCompleted" />
+                                                    </Grid>
+                                                </Border>
+
+                                                <HorizontalStackLayout Spacing="6" Margin="0,4,0,0">
+                                                    <HorizontalStackLayout Spacing="4" HorizontalOptions="StartAndExpand">
+                                                        <Button Text="−" FontSize="14" Padding="3" HeightRequest="28" WidthRequest="28" Clicked="OnDecreaseQuantityClicked" CommandParameter="{Binding .}" />
+                                                        <Label Text="{Binding Quantity}" FontAttributes="Bold" VerticalOptions="Center" HorizontalOptions="Center" MinimumWidthRequest="24" FontSize="12" />
+                                                        <Button Text="+" FontSize="14" Padding="3" HeightRequest="28" WidthRequest="28" Clicked="OnIncreaseQuantityClicked" CommandParameter="{Binding .}" />
+                                                    </HorizontalStackLayout>
+                                                    <Label Text="{Binding LineTotalDisplay}" FontAttributes="Bold" HorizontalOptions="FillAndExpand" FontSize="12" HorizontalTextAlignment="End" />
+                                                    <Button Text="✕" FontSize="14" TextColor="{StaticResource Danger}" Padding="4" HeightRequest="28" WidthRequest="28" Clicked="OnDeleteItemClicked" CommandParameter="{Binding .}" />
+                                                </HorizontalStackLayout>
+                                            </VerticalStackLayout>
+                                        </Border>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+
+                        <Label Text="😕 Chưa có món nào được thêm" Style="{StaticResource MutedTextStyle}" HorizontalOptions="Center" IsVisible="{Binding HasNoItems}" Margin="0,20" />
+                    </VerticalStackLayout>
+                </ScrollView>
+
+                <Border Grid.Row="2" Style="{StaticResource InputBorder}">
+                    <VerticalStackLayout Spacing="6">
+                        <HorizontalStackLayout>
+                            <Label Text="Cộng tiền hàng" Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
+                            <Label Text="{Binding SelectedOrder.Subtotal, StringFormat='{0:0,0} VND'}" FontAttributes="Bold" HorizontalOptions="EndAndExpand" FontSize="12" />
+                        </HorizontalStackLayout>
+                        <HorizontalStackLayout IsVisible="{Binding SelectedOrder.HasDiscount}">
+                            <Label Text="Giảm giá" Style="{StaticResource SecondaryTextStyle}" FontSize="12" TextColor="{StaticResource Success}" />
+                            <Label Text="{Binding SelectedOrder.Discount, StringFormat='- {0:0,0} VND'}" TextColor="{StaticResource Success}" HorizontalOptions="EndAndExpand" FontSize="12" FontAttributes="Bold" />
+                        </HorizontalStackLayout>
+                        <BoxView HeightRequest="1" Color="{StaticResource BorderLight}" Margin="0,4" />
+                        <HorizontalStackLayout>
+                            <Label Text="Tổng cộng" FontAttributes="Bold" FontSize="16" />
+                            <Label Text="{Binding SelectedOrder.TotalDisplay}" FontAttributes="Bold" FontSize="16" TextColor="{StaticResource Primary}" HorizontalOptions="EndAndExpand" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Button Grid.Row="3" Text="✓ Gửi lên bếp" Style="{StaticResource PrimaryButton}" Clicked="OnSubmitOrderClicked" Padding="16,12" FontSize="14" FontAttributes="Bold" />
+            </Grid>
+        </Border>
+    </Grid>
+</ContentPage>
