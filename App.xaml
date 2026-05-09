@@ -1,0 +1,63 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:AppManagermentRestaurant"
+             xmlns:helpers="clr-namespace:AppManagermentRestaurant.Helpers"
+             x:Class="AppManagermentRestaurant.App">
+
+    <Application.Resources>
+        <ResourceDictionary>
+
+            <!-- IMPORT STYLE -->
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- CONVERTER -->
+            <helpers:BooleanNegationConverter x:Key="BooleanNegationConverter" />
+            <helpers:StatusFilterColorConverter x:Key="StatusFilterColorConverter" />
+            <helpers:OpacityConverter x:Key="OpacityConverter" />
+
+            <!-- 🔥 TABLE CARD STYLE (THÊM Ở ĐÂY) -->
+            <Style x:Key="TableCardStyle" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource Surface}" />
+                <Setter Property="Stroke" Value="{Binding StatusColor}" />
+                <Setter Property="StrokeThickness" Value="2" />
+                <Setter Property="StrokeShape" Value="RoundRectangle 16" />
+                <Setter Property="Padding" Value="10" />
+                <Setter Property="HeightRequest" Value="130" />
+                <Setter Property="Margin" Value="4" />
+
+                <Setter Property="Content">
+                    <Setter.Value>
+                        <VerticalStackLayout Spacing="6" VerticalOptions="Center">
+
+                            <HorizontalStackLayout Spacing="6">
+                                <Label Text="{Binding DisplayNumber}" FontAttributes="Bold"/>
+                                <Ellipse Fill="{Binding StatusColor}" WidthRequest="10" HeightRequest="10"/>
+                            </HorizontalStackLayout>
+
+                            <Border Stroke="{Binding StatusColor}"
+                                    StrokeThickness="1"
+                                    StrokeShape="RoundRectangle 10"
+                                    Padding="4">
+                                <Label Text="{Binding StatusLabel}"
+                                       FontSize="11"
+                                       TextColor="{Binding StatusColor}"/>
+                            </Border>
+
+                            <HorizontalStackLayout Spacing="4">
+                                <Label Text="Seats" FontSize="11"/>
+                                <Label Text="{Binding Capacity}" FontAttributes="Bold" FontSize="11"/>
+                            </HorizontalStackLayout>
+
+                        </VerticalStackLayout>
+                    </Setter.Value>
+                </Setter>
+
+            </Style>
+
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

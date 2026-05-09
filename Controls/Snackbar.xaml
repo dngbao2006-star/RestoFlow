@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AppManagermentRestaurant.Controls.Snackbar">
+
+    <Border x:Name="SnackbarBorder"
+            Background="{StaticResource Primary}"
+            StrokeThickness="0"
+            Padding="16,12"
+            Margin="12"
+            IsVisible="False"
+            ZIndex="1000">
+
+        <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+            <Label Text="{Binding Message, Source={RelativeSource AncestorType={x:Type ContentView}}}"
+                   TextColor="White"
+                   FontSize="14"
+                   HorizontalOptions="FillAndExpand"
+                   VerticalOptions="Center"
+                   LineBreakMode="TailTruncation" />
+
+            <Button Text="{Binding ActionText, Source={RelativeSource AncestorType={x:Type ContentView}}}"
+                    Command="{Binding ActionCommand, Source={RelativeSource AncestorType={x:Type ContentView}}}"
+                    TextColor="White"
+                    BackgroundColor="Transparent"
+                    FontSize="12"
+                    FontAttributes="Bold"
+                    Padding="8,4"
+                    IsVisible="{Binding ActionText, Source={RelativeSource AncestorType={x:Type ContentView}}, Converter={StaticResource HasValueConverter}}" />
+        </HorizontalStackLayout>
+
+    </Border>
+
+</ContentView>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    NotificationPopup.xaml
+
+    THAY ĐỔI SO VỚI PHIÊN BẢN CŨ:
+    ─ Đã XOÁ: HorizontalOptions="End" VerticalOptions="Start"
+      Lý do: Hai thuộc tính này chỉ căn nội dung BÊN TRONG overlay toàn màn hình,
+      không định vị popup tương đối với button. Để popup ở đúng vị trí dropdown,
+      cần gán Anchor = button trong code-behind — đã làm trong AppHeaderView.xaml.cs.
+
+    ─ Dim đã được xử lý bởi NoDimPopupHandler.cs ở tầng platform Windows.
+-->
+<toolkit:Popup
+    x:Class="AppManagermentRestaurant.Controls.Popups.NotificationPopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    Color="Transparent"
+    CanBeDismissedByTappingOutsideOfPopup="True">
+
+    <Border
+        BackgroundColor="#FDFAF6"
+        Stroke="#E7DECF"
+        StrokeThickness="1"
+        StrokeShape="RoundRectangle 16"
+        Padding="0"
+        WidthRequest="320"
+        MaximumHeightRequest="420"
+        Shadow="{Shadow Brush=Black, Offset='0,8', Radius=20, Opacity=0.18}">
+
+        <Grid RowDefinitions="Auto,*">
+
+            <!-- Header -->
+            <Grid Padding="16" RowDefinitions="Auto,Auto" RowSpacing="10">
+                <Label
+                    Text="Thông báo"
+                    FontSize="15"
+                    FontAttributes="Bold"
+                    TextColor="#1A1209" />
+                <BoxView Grid.Row="1" HeightRequest="1" Color="#EFE4D5" />
+            </Grid>
+
+            <!-- Danh sách thông báo -->
+            <CollectionView
+                Grid.Row="1"
+                ItemsSource="{Binding Notifications}"
+                SelectionMode="None"
+                MaximumHeightRequest="340">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid RowDefinitions="Auto,Auto" RowSpacing="0">
+                            <Border
+                                Padding="16"
+                                BackgroundColor="{Binding RowBackgroundColor}"
+                                StrokeThickness="0">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                    <Border
+                                        WidthRequest="32"
+                                        HeightRequest="32"
+                                        StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 16"
+                                        BackgroundColor="{Binding IconBackgroundColor}">
+                                        <Label
+                                            Text="{Binding IconGlyph}"
+                                            FontSize="15"
+                                            TextColor="{Binding IconColor}"
+                                            HorizontalOptions="Center"
+                                            VerticalOptions="Center" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="3">
+                                        <Label
+                                            Text="{Binding Title}"
+                                            FontSize="13"
+                                            FontAttributes="Bold"
+                                            TextColor="#1A1209" />
+                                        <Label
+                                            Text="{Binding Message}"
+                                            FontSize="12"
+                                            TextColor="#7B6A57"
+                                            LineHeight="1.4" />
+                                        <Label
+                                            Text="{Binding TimestampDisplay}"
+                                            FontSize="11"
+                                            TextColor="#C5B8A8" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                            <BoxView Grid.Row="1" HeightRequest="1" Color="#EFE4D5" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+    </Border>
+</toolkit:Popup>
