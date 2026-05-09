@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="AppManagermentRestaurant.Views.Pages.DishStatusPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:AppManagermentRestaurant.Controls"
+    BackgroundColor="White"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+        <controls:AppHeaderView />
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="24" Spacing="20">
+                <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                    <Label Text="Trạng thái món ăn" Style="{StaticResource PageTitle}" />
+                </HorizontalStackLayout>
+
+                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
+                    <Border Style="{StaticResource CardBorder}" Background="White">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding IsPendingSelected}" Value="True">
+                                <Setter Property="Background" Value="#E0E0E0" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnStatusCardTapped" CommandParameter="Pending" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Chờ xử lý" FontAttributes="Bold" />
+                            <Label Text="{Binding PendingDishCount}" FontSize="26" FontAttributes="Bold" TextColor="{StaticResource Warning}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Style="{StaticResource CardBorder}" Grid.Column="1" Background="White">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding IsPreparingSelected}" Value="True">
+                                <Setter Property="Background" Value="#E0E0E0" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnStatusCardTapped" CommandParameter="Preparing" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Đang làm" FontAttributes="Bold" />
+                            <Label Text="{Binding PreparingDishCount}" FontSize="26" FontAttributes="Bold" TextColor="{StaticResource Info}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Style="{StaticResource CardBorder}" Grid.Column="2" Background="White">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding IsReadySelected}" Value="True">
+                                <Setter Property="Background" Value="#E0E0E0" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnStatusCardTapped" CommandParameter="Ready" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Sẵn sàng" FontAttributes="Bold" />
+                            <Label Text="{Binding ReadyDishCount}" FontSize="26" FontAttributes="Bold" TextColor="{StaticResource Success}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Style="{StaticResource CardBorder}" Grid.Column="3" Background="White">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding IsServedSelected}" Value="True">
+                                <Setter Property="Background" Value="#E0E0E0" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnStatusCardTapped" CommandParameter="Served" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Đã phục vụ" FontAttributes="Bold" />
+                            <Label Text="{Binding ServedDishCount}" FontSize="26" FontAttributes="Bold" TextColor="{StaticResource TextSecondary}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <Border Style="{StaticResource CardBorder}" Background="#E8F7EE" Stroke="{StaticResource Success}" StrokeThickness="2" IsVisible="{Binding HasReadyItems}">
+                    <VerticalStackLayout Spacing="10">
+                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                            <Label Text="🔔" FontSize="20" />
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Có món sẵn sàng phục vụ!" FontAttributes="Bold" TextColor="{StaticResource Success}" FontSize="16" />
+                                <Label Text="{Binding ReadyItemsCount, StringFormat='{0} món cần mang ra'}" Style="{StaticResource SecondaryTextStyle}" />
+                            </VerticalStackLayout>
+                        </HorizontalStackLayout>
+
+                        <CollectionView ItemsSource="{Binding ReadyItems}" SelectionMode="None">
+                            <CollectionView.ItemsLayout>
+                                <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="12" VerticalItemSpacing="12" />
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource InputBorder}" Padding="10">
+                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                            <Image Grid.Column="0" Source="{Binding Image}" HeightRequest="40" WidthRequest="40" Aspect="AspectFill" VerticalOptions="Center" />
+                                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                                <Label Text="{Binding Name}" FontAttributes="Bold" />
+                                                <HorizontalStackLayout Spacing="8">
+                                                    <Label Text="{Binding Quantity, StringFormat='x{0}'}" Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
+                                                    <Label Text="{Binding TableNumberDisplay, StringFormat='Bàn {0}'}" Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
+                                                </HorizontalStackLayout>
+                                            </VerticalStackLayout>
+                                            <Button Grid.Column="2" Text="Phục vụ" Style="{StaticResource PrimaryButton}" Padding="12,6" Clicked="OnServeClicked" CommandParameter="{Binding .}" VerticalOptions="Center" HorizontalOptions="End" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label Text="Danh sách đơn hàng" Style="{StaticResource SectionTitle}" FontSize="18" />
+
+                <CollectionView ItemsSource="{Binding FilteredOrders}" SelectionMode="None">
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical" Span="3" HorizontalItemSpacing="16" VerticalItemSpacing="16" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource CardBorder}" Padding="16" StrokeThickness="0" StrokeShape="RoundRectangle 16">
+                                <VerticalStackLayout Spacing="14">
+
+                                    <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                                        <Label Text="{Binding TableNumber, StringFormat='BÀN {0}'}" FontAttributes="Bold" FontSize="16" TextColor="#333333" />
+                                        <Label Text="|" FontSize="16" TextColor="#D1D5DB" />
+                                        <Label Text="{Binding CreatedAtDisplay}" FontSize="14" TextColor="#6B7280" VerticalOptions="Center" />
+                                    </HorizontalStackLayout>
+
+                                    <Label Text="CHI TIẾT ĐƠN HÀNG" FontSize="12" FontAttributes="Bold" TextColor="#9CA3AF" Margin="0,4,0,0"/>
+
+                                    <Border Background="#F3F4F6" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="12">
+                                        <ScrollView MaximumHeightRequest="250">
+                                            <CollectionView ItemsSource="{Binding Items}" SelectionMode="None">
+                                                <CollectionView.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Padding="0,8">
+
+                                                            <Border Grid.Column="0" Background="#1E3A8A" StrokeThickness="0" StrokeShape="RoundRectangle 14" WidthRequest="28" HeightRequest="28" VerticalOptions="Center">
+                                                                <Label Text="{Binding Quantity}" TextColor="White" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                                            </Border>
+
+                                                            <Label Grid.Column="1" Text="{Binding Name}" FontAttributes="Bold" FontSize="14" TextColor="#1F2937" VerticalOptions="Center" />
+
+                                                            <Border Grid.Column="2" Background="{Binding StatusColor}" StrokeThickness="0" StrokeShape="RoundRectangle 8" Padding="10,6" VerticalOptions="Center" HorizontalOptions="End">
+                                                                <Label Text="{Binding StatusLabel}" TextColor="White" FontSize="11" FontAttributes="Bold" />
+                                                            </Border>
+
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </CollectionView.ItemTemplate>
+                                            </CollectionView>
+                                        </ScrollView>
+                                    </Border>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

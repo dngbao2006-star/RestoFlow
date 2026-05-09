@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="AppManagermentRestaurant.Views.Pages.ChatPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:AppManagermentRestaurant.Controls"
+    xmlns:helpers="clr-namespace:AppManagermentRestaurant.Helpers"
+    BackgroundColor="White"
+    Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <helpers:BooleanNegationConverter x:Key="BoolNegationConverter" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+        <controls:AppHeaderView Grid.Row="0" />
+
+        <!-- Online Users Count -->
+        <HorizontalStackLayout Grid.Row="1" Padding="24,12" Spacing="8" VerticalOptions="Center">
+            <Label Text="💬" FontSize="16" />
+            <Label Text="{Binding ChatTitle}" Style="{StaticResource SectionTitle}" FontSize="18" />
+            <HorizontalStackLayout HorizontalOptions="EndAndExpand" Spacing="4" VerticalOptions="Center">
+                <Label Text="●" FontSize="12" TextColor="{StaticResource Success}" />
+                <Label Text="{Binding OnlineMembersCount, StringFormat='{0} thành viên'}" Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
+            </HorizontalStackLayout>
+        </HorizontalStackLayout>
+
+        <!-- Messages List -->
+        <CollectionView x:Name="MessagesList" Grid.Row="2" ItemsSource="{Binding ChatMessages}" SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <VerticalStackLayout Spacing="6" Padding="12,4">
+                        <!-- System Message -->
+                        <Border IsVisible="{Binding IsSystem}" HorizontalOptions="Center" Background="{StaticResource Info}" Stroke="{StaticResource Info}" StrokeThickness="0" StrokeShape="RoundRectangle 20" Padding="12,6">
+                            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                                <Label Text="🔔" FontSize="14" />
+                                <Label Text="{Binding Message}" Style="{StaticResource SecondaryTextStyle}" FontSize="12" TextColor="White" />
+                            </HorizontalStackLayout>
+                        </Border>
+
+                        <!-- Regular Message -->
+                        <Grid IsVisible="{Binding IsSystem, Converter={StaticResource BoolNegationConverter}}" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" Margin="0,0,0,4">
+                            <!-- Left (Other's message) -->
+                            <VerticalStackLayout Grid.Column="0" IsVisible="{Binding IsMine, Converter={StaticResource BoolNegationConverter}}" VerticalOptions="Start" Spacing="4">
+                                <Border Background="{StaticResource SecondarySurface}" Stroke="{StaticResource BorderLight}" StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="10" HorizontalOptions="Start">
+                                    <VerticalStackLayout Spacing="4">
+                                        <HorizontalStackLayout Spacing="6">
+                                            <Label Text="{Binding SenderName}" FontAttributes="Bold" FontSize="13" />
+                                            <Border IsVisible="{Binding IsManager}" Background="{StaticResource Primary}" Stroke="{StaticResource Primary}" StrokeThickness="0" StrokeShape="RoundRectangle 8" Padding="6,2">
+                                                <Label Text="QL" FontSize="10" TextColor="White" FontAttributes="Bold" />
+                                            </Border>
+                                        </HorizontalStackLayout>
+                                        <Label Text="{Binding Message}" FontSize="14" />
+                                        <Label Text="{Binding TimestampDisplay}" Style="{StaticResource MutedTextStyle}" FontSize="10" />
+                                    </VerticalStackLayout>
+                                </Border>
+                                <Label Text="{Binding SenderName}" FontSize="11" FontAttributes="Bold" Margin="0,-2,0,0" />
+                            </VerticalStackLayout>
+
+                            <!-- Right (My message) -->
+                            <VerticalStackLayout Grid.Column="2" IsVisible="{Binding IsMine}" VerticalOptions="Start" Spacing="4" HorizontalOptions="EndAndExpand">
+                                <Border Background="{StaticResource Primary}" Stroke="{StaticResource Primary}" StrokeThickness="0" StrokeShape="RoundRectangle 16" Padding="10" HorizontalOptions="End">
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="{Binding Message}" FontSize="14" TextColor="White" />
+                                        <Label Text="{Binding TimestampDisplay}" Style="{StaticResource MutedTextStyle}" FontSize="10" TextColor="#CCCCCC" />
+                                    </VerticalStackLayout>
+                                </Border>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Message Input -->
+        <Border Grid.Row="3" Style="{StaticResource CardBorder}" Margin="24,12">
+            <VerticalStackLayout Spacing="8">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <Editor x:Name="MessageEditor"
+                            Placeholder="Nhập tin nhắn..."
+                            AutoSize="TextChanges"
+                            MaximumHeightRequest="100"
+                            TextChanged="OnMessageTextChanged" />       
+                    <Button x:Name="SendButton" Grid.Column="1" Text="Gửi" Style="{StaticResource PrimaryButton}" Padding="12,8" Clicked="OnSendMessageClicked" VerticalOptions="End" />
+                </Grid>
+                <Label Text="Enter để gửi, Shift+Enter để xuống dòng" Style="{StaticResource MutedTextStyle}" FontSize="11" />
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
+</ContentPage>
+
