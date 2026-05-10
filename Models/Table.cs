@@ -19,12 +19,24 @@ public class Table
     public int OrderItemCount { get; set; }
     public string OrderTotal { get; set; } = string.Empty;
 
-    public string DisplayNumber => $"T{Number}";
+    public string DisplayNumber => $"Bàn T{Number}";
+
+    // ── BỔ SUNG ICON THEO YÊU CẦU ───────────────────────────────────────────
+    public string StatusIcon => Status switch
+    {
+        TableStatus.Available => "✅",
+        TableStatus.Occupied when HasOrdered => "🍲", // Icon nồi/kitchen lid
+        TableStatus.Occupied => "👤",
+        TableStatus.Reserved => "🕒",
+        TableStatus.NeedsClearing => "🧹",
+        _ => "❓"
+    };
 
     public string StatusLabel => Status switch
     {
         TableStatus.Available => "Còn trống",
-        TableStatus.Occupied => "Có khách",
+        TableStatus.Occupied when HasOrdered => "Đã gọi món",
+        TableStatus.Occupied => "Chưa gọi món",
         TableStatus.Reserved => "Đặt trước",
         TableStatus.NeedsClearing => "Cần dọn",
         _ => "Không xác định"
@@ -33,7 +45,8 @@ public class Table
     public Color StatusColor => Status switch
     {
         TableStatus.Available => Color.FromArgb("#22C55E"),
-        TableStatus.Occupied => Color.FromArgb("#EF4444"),
+        TableStatus.Occupied when HasOrdered => Color.FromArgb("#3B82F6"), // Xanh dương
+        TableStatus.Occupied => Color.FromArgb("#EF4444"),                 // Đỏ
         TableStatus.Reserved => Color.FromArgb("#F59E0B"),
         TableStatus.NeedsClearing => Color.FromArgb("#6B7280"),
         _ => Color.FromArgb("#7B6A57")
@@ -54,7 +67,8 @@ public class Table
         : string.Empty;
 
     public string OrderStatusText => HasOrdered ? "Đã gọi món" : "Chưa gọi món";
-
     public string ReservationGuestName => ReservedFor ?? string.Empty;
-    public string ReservationTime => ReservedAt.HasValue ? ReservedAt.Value.ToString("HH:mm") : string.Empty;
+    public string ReservationTime => ReservedAt.HasValue
+        ? ReservedAt.Value.ToString("HH:mm")
+        : string.Empty;
 }

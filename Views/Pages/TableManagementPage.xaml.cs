@@ -97,7 +97,7 @@ public partial class TableManagementPage : ContentPage
             {
                 var targetTable = availableTables.First(t => t.DisplayNumber == selectedTableName);
 
-                targetTable.Status = TableStatus.Occupied;
+                targetTable.Status = currentTable.Status;
                 targetTable.CurrentOrderId = currentTable.CurrentOrderId;
                 targetTable.ArrivalTime = currentTable.ArrivalTime;
                 targetTable.HasOrdered = currentTable.HasOrdered;
@@ -134,7 +134,6 @@ public partial class TableManagementPage : ContentPage
         }
     }
 
-    // HÀM MỚI BỔ SUNG CHO NÚT "GỌI MÓN" Ở BÀN ĐỎ CHƯA CÓ ĐƠN
     private async void OnOrderTableClicked(object sender, EventArgs e)
     {
         if (sender is Button btn && btn.CommandParameter is Table table)
@@ -148,7 +147,7 @@ public partial class TableManagementPage : ContentPage
     {
         if (sender is Button btn && btn.CommandParameter is Table table)
         {
-            bool confirm = await DisplayAlert("Làm trống bàn", $"Bàn {table.Number} chưa gọi món. Bạn muốn làm trống bàn (trở về màu xanh)?", "Đồng ý", "Hủy");
+            bool confirm = await DisplayAlert("Làm trống bàn", $"Bàn {table.Number} chưa gọi món. Bạn muốn làm trống bàn?", "Đồng ý", "Hủy");
             if (confirm)
             {
                 table.Status = TableStatus.Available;
@@ -226,7 +225,8 @@ public class TableFilterViewModel : ObservableObject
     }
 
     public int AvailableCount => GetFilteredTables(t => t.Status == TableStatus.Available).Count();
-    public int OccupiedCount => GetFilteredTables(t => t.Status == TableStatus.Occupied).Count();
+    public int OccupiedCount => GetFilteredTables(t => t.Status == TableStatus.Occupied && !t.HasOrdered).Count();
+    public int OrderedCount => GetFilteredTables(t => t.Status == TableStatus.Occupied && t.HasOrdered).Count();
     public int ReservedCount => GetFilteredTables(t => t.Status == TableStatus.Reserved).Count();
     public int NeedsClearingCount => GetFilteredTables(t => t.Status == TableStatus.NeedsClearing).Count();
 
@@ -284,7 +284,12 @@ public class TableFilterViewModel : ObservableObject
 
         if (!string.IsNullOrEmpty(SelectedStatusFilter))
         {
-            tables = tables.Where(t => GetStatusString(t.Status) == SelectedStatusFilter);
+            if (SelectedStatusFilter == "Ordered")
+                tables = tables.Where(t => t.Status == TableStatus.Occupied && t.HasOrdered);
+            else if (SelectedStatusFilter == "Occupied")
+                tables = tables.Where(t => t.Status == TableStatus.Occupied && !t.HasOrdered);
+            else
+                tables = tables.Where(t => GetStatusString(t.Status) == SelectedStatusFilter);
         }
 
         if (!string.IsNullOrEmpty(SearchQuery))
@@ -306,7 +311,6 @@ public class TableFilterViewModel : ObservableObject
     private static string GetStatusString(TableStatus status) => status switch
     {
         TableStatus.Available => "Available",
-        TableStatus.Occupied => "Occupied",
         TableStatus.Reserved => "Reserved",
         TableStatus.NeedsClearing => "NeedsClearing",
         _ => string.Empty
@@ -328,6 +332,7 @@ public class TableFilterViewModel : ObservableObject
         OnPropertyChanged(nameof(HasFilteredTables));
         OnPropertyChanged(nameof(AvailableCount));
         OnPropertyChanged(nameof(OccupiedCount));
+        OnPropertyChanged(nameof(OrderedCount));
         OnPropertyChanged(nameof(ReservedCount));
         OnPropertyChanged(nameof(NeedsClearingCount));
     }
