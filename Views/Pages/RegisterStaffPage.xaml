@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage 
+    x:Class="AppManagermentRestaurant.Views.Pages.RegisterStaffPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Thêm nhân sự mới"
+    BackgroundColor="#F8F9FA">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="30" Spacing="20" MaximumWidthRequest="500" HorizontalOptions="Center">
+
+            <Label Text="Tạo tài khoản" FontSize="28" FontAttributes="Bold" TextColor="#1B3A6B" HorizontalOptions="Center" Margin="0,0,0,10"/>
+
+            <Border Stroke="#DDD" StrokeShape="RoundRectangle 12" Padding="12" BackgroundColor="White">
+                <Grid ColumnDefinitions="Auto,*">
+                    <Label Text="👤" TextColor="#777" FontSize="18" VerticalOptions="Center"/>
+                    <Entry Grid.Column="1" Text="{Binding FullName}" Placeholder="Họ và tên" />
+                </Grid>
+            </Border>
+
+            <Border Stroke="#DDD" StrokeShape="RoundRectangle 12" Padding="12" BackgroundColor="White">
+                <Grid ColumnDefinitions="Auto,*">
+                    <Label Text="✉" TextColor="#777" FontSize="18" VerticalOptions="Center"/>
+                    <Entry Grid.Column="1" Text="{Binding Email}" Placeholder="Địa chỉ Email" Keyboard="Email" />
+                </Grid>
+            </Border>
+
+            <Border Stroke="#DDD" StrokeShape="RoundRectangle 12" Padding="12" BackgroundColor="White">
+                <Grid ColumnDefinitions="Auto,*">
+                    <Label Text="🔒" TextColor="#777" FontSize="18" VerticalOptions="Center"/>
+                    <Entry Grid.Column="1" Text="{Binding Password}" Placeholder="Mật khẩu (từ 6 ký tự)" IsPassword="True" />
+                </Grid>
+            </Border>
+
+            <Border Stroke="#DDD" StrokeShape="RoundRectangle 12" Padding="4,0" BackgroundColor="White">
+                <Grid ColumnDefinitions="Auto,*">
+                    <Label Text="💼" TextColor="#777" FontSize="18" VerticalOptions="Center" Margin="12,0,0,0"/>
+                    <Picker Grid.Column="1" Title="Chọn chức vụ" SelectedIndex="{Binding SelectedRoleIndex}">
+                        <Picker.ItemsSource>
+                            <x:Array Type="{x:Type x:String}">
+                                <x:String>Nhân viên</x:String>
+                                <x:String>Quản lý</x:String>
+                            </x:Array>
+                        </Picker.ItemsSource>
+                    </Picker>
+                </Grid>
+            </Border>
+
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" Color="#1B3A6B" />
+
+            <Label Text="{Binding StatusMessage}" 
+                   TextColor="{Binding IsError, Converter={StaticResource BooleanNegationConverter}}" 
+                   HorizontalOptions="Center" 
+                   FontAttributes="Bold"/>
+
+            <Button Text="Tạo tài khoản" 
+                    Command="{Binding RegisterCommand}" 
+                    BackgroundColor="#1B3A6B" 
+                    TextColor="White" 
+                    CornerRadius="12" 
+                    HeightRequest="50" 
+                    FontAttributes="Bold"
+                    Margin="0,10,0,0"
+                    IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanNegationConverter}}"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

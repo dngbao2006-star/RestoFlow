@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AppManagermentRestaurant.Controls.ModalDialogView">
+
+    <Grid 
+        x:Name="OverlayGrid"
+        IsVisible="{Binding IsVisible, Source={RelativeSource AncestorType={x:Type ContentView}}}">
+
+        <!-- Modal Content -->
+        <Border 
+            x:Name="ModalBorder"
+            Style="{StaticResource ModalBorder}"
+            VerticalOptions="Center"
+            HorizontalOptions="Center"
+            Margin="20"
+            MaximumWidthRequest="500">
+
+            <VerticalStackLayout Spacing="20">
+                
+                <!-- Header Section -->
+                <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Spacing="4" Grid.Column="0">
+                        <Label 
+                            x:Name="TitleLabel"
+                            Text="Dialog Title"
+                            Style="{StaticResource SectionTitle}"
+                            FontSize="18" />
+                        <Label 
+                            x:Name="SubtitleLabel"
+                            Text=""
+                            Style="{StaticResource SecondaryTextStyle}"
+                            IsVisible="False" />
+                    </VerticalStackLayout>
+
+                    <Button 
+                        Grid.Column="1"
+                        Text="✕"
+                        Style="{StaticResource IconButton}"
+                        Clicked="OnCloseClicked"
+                        Padding="6" />
+                </Grid>
+
+                <!-- Content Section -->
+                <ContentPresenter 
+                    x:Name="ContentPresenter" />
+
+                <!-- Footer Section -->
+                <HorizontalStackLayout 
+                    x:Name="FooterLayout"
+                    Spacing="12"
+                    HorizontalOptions="End">
+                    
+                    <Button 
+                        x:Name="CancelButton"
+                        Text="Cancel"
+                        Style="{StaticResource SecondaryButton}"
+                        Clicked="OnCancelClicked" />
+                    
+                    <Button 
+                        x:Name="ConfirmButton"
+                        Text="Confirm"
+                        Style="{StaticResource PrimaryButton}"
+                        Clicked="OnConfirmClicked" />
+                </HorizontalStackLayout>
+
+            </VerticalStackLayout>
+        </Border>
+
+    </Grid>
+
+</ContentView>

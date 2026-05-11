@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage 
+    x:Class="AppManagermentRestaurant.Views.Pages.LoginPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    BackgroundColor="White"
+    Shell.NavBarIsVisible="False">
+
+    <Grid ColumnDefinitions="*,*">
+
+        <Grid Grid.ColumnSpan="2" 
+              IsVisible="{Binding IsLoading}" 
+              BackgroundColor="#CC000000"
+              ZIndex="100">
+            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="12">
+                <ActivityIndicator IsRunning="{Binding IsLoading}" Color="White" Scale="2" />
+                <Label Text="Đang đăng nhập..." TextColor="White" FontSize="14" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <Grid Grid.Column="0" IsVisible="{OnIdiom Phone=False, Default=True}">
+            <Image Source="anhnenlogin.jpg" Aspect="AspectFill"/>
+            <BoxView>
+                <BoxView.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#661B3A6B" Offset="0"/>
+                        <GradientStop Color="#221B3A6B" Offset="1"/>
+                    </LinearGradientBrush>
+                </BoxView.Background>
+            </BoxView>
+            <VerticalStackLayout Padding="40" Spacing="16" VerticalOptions="Center">
+                <HorizontalStackLayout Spacing="10">
+                    <Border Background="White" StrokeThickness="0" StrokeShape="RoundRectangle 20" Padding="10,5">
+                        <Label Text="Chef" TextColor="#1B3A6B" FontAttributes="Bold"/>
+                    </Border>
+                    <Label Text="Nhà hàng đẳng cấp" FontSize="22" FontAttributes="Bold" TextColor="White"/>
+                </HorizontalStackLayout>
+                <Label Text="Nâng tầm mọi trải nghiệm ẩm thực" FontSize="34" FontAttributes="Bold" TextColor="White" LineBreakMode="WordWrap"/>
+                <Label Text="Hệ thống quản lý nhà hàng thông minh và hiện đại" FontSize="15" TextColor="#E9EEF8"/>
+            </VerticalStackLayout>
+        </Grid>
+
+        <Grid Grid.Column="1" BackgroundColor="White">
+            <ScrollView>
+                <VerticalStackLayout Padding="40" Spacing="20">
+                    <Label Text="Chào mừng quay trở lại" FontSize="28" FontAttributes="Bold"/>
+
+                    <HorizontalStackLayout Spacing="10" Margin="0,10">
+                        <Button Text="Nhân viên" Background="#1B3A6B" TextColor="White" CornerRadius="8" HorizontalOptions="FillAndExpand" Command="{Binding SelectStaffRoleCommand}"/>
+                        <Button Text="Quản lý" Background="#1B3A6B" TextColor="White" CornerRadius="8" HorizontalOptions="FillAndExpand" Command="{Binding SelectManagerRoleCommand}"/>
+                    </HorizontalStackLayout>
+
+                    <Border Stroke="#DDD" StrokeShape="RoundRectangle 12" Padding="12">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <Label Text="✉" TextColor="#777" FontSize="18" VerticalOptions="Center"/>
+                            <Entry Grid.Column="1" Text="{Binding Email}" Placeholder="Địa chỉ email" IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanNegationConverter}}"/>
+                        </Grid>
+                    </Border>
+
+                    <Border Stroke="#DDD" StrokeShape="RoundRectangle 12" Padding="12">
+                        <Grid ColumnDefinitions="Auto,*">
+                            <Label Text="🔒" TextColor="#777" FontSize="18" VerticalOptions="Center"/>
+                            <Entry Grid.Column="1" Text="{Binding Password}" Placeholder="Mật khẩu" IsPassword="True" IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanNegationConverter}}"/>
+                        </Grid>
+                    </Border>
+
+                    <Label Text="{Binding ErrorMessage}" TextColor="#EF4444" FontSize="13" IsVisible="{Binding HasError}" Margin="0,-10,0,0"/>
+
+                    <Button Text="Quên mật khẩu?" BackgroundColor="Transparent" TextColor="#1B3A6B" FontAttributes="Bold" HorizontalOptions="Start" Command="{Binding ForgotPasswordCommand}"/>
+
+                    <Button Text="Đăng nhập" BackgroundColor="#1B3A6B" TextColor="White" CornerRadius="12" HeightRequest="50" IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanNegationConverter}}" Command="{Binding SignInCommand}"/>
+
+                    <Border Background="#F3EEE8" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="16">
+                        <VerticalStackLayout>
+                            <Label Text="Tài khoản demo" FontAttributes="Bold"/>
+                            <Label Text="Nhân viên: tuan.staff@goldenplate.vn"/>
+                            <Label Text="Quản lý: quan.manager@goldenplate.vn"/>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+            </ScrollView>
+        </Grid>
+    </Grid>
+</ContentPage>

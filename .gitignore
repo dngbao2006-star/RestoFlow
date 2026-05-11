@@ -1,0 +1,25 @@
+## .NET MAUI / Xamarin
+bin/
+obj/
+*.user
+*.suo
+*.userprefs
+*.pidb
+*.vs/
+.vs/
+*.DotSettings.user
+
+## Build
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+bld/
+
+## NuGet
+*.nupkg
+**/[Pp]ackages/*
+
+## Seed script (one-time use)
+seed_firebase.ps1

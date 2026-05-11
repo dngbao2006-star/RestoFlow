@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="AppManagermentRestaurant.Views.Pages.SystemConfigPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:AppManagermentRestaurant.Controls"
+    BackgroundColor="White"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+        <controls:AppHeaderView />
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="24" Spacing="20" WidthRequest="768" HorizontalOptions="Center">
+                <Label Text="System Configuration" Style="{StaticResource PageTitle}" />
+
+                <ScrollView Orientation="Horizontal">
+                    <HorizontalStackLayout Spacing="8">
+                        <Button Text="Restaurant Info" Style="{StaticResource PillButton}" />
+                        <Button Text="Payment and QR" Style="{StaticResource PillButton}" />
+                        <Button Text="Invoice Settings" Style="{StaticResource PillButton}" />
+                    </HorizontalStackLayout>
+                </ScrollView>
+
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Restaurant Info" Style="{StaticResource SectionTitle}" FontSize="20" />
+                        <Border Style="{StaticResource InputBorder}">
+                            <Entry Placeholder="Restaurant Name" Text="Classic Restaurant" />
+                        </Border>
+                        <Border Style="{StaticResource InputBorder}">
+                            <Entry Placeholder="Phone" Text="0900 999 888" />
+                        </Border>
+                        <Border Style="{StaticResource InputBorder}">
+                            <Entry Placeholder="Email" Text="hello@goldenplate.vn" />
+                        </Border>
+                        <Border Style="{StaticResource InputBorder}">
+                            <Entry Placeholder="Tax ID" Text="0312345678" />
+                        </Border>
+                        <Border Style="{StaticResource InputBorder}">
+                            <Editor Placeholder="Full Address" AutoSize="TextChanges" Text="District 1, Ho Chi Minh City" />
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Payment and QR" Style="{StaticResource SectionTitle}" FontSize="20" />
+                        <Border Style="{StaticResource InputBorder}">
+                            <Entry Placeholder="Bank Name" Text="Vietcombank" />
+                        </Border>
+                        <Border Style="{StaticResource InputBorder}">
+                            <Entry Placeholder="Account Number" Text="1024688888" />
+                        </Border>
+                        <Border Style="{StaticResource InputBorder}">
+                            <Entry Placeholder="Account Name" Text="The Golden Plate" />
+                        </Border>
+                        <Border Style="{StaticResource InputBorder}">
+                            <Entry Placeholder="Branch" Text="Ben Thanh" />
+                        </Border>
+                        <Border Background="White" Stroke="{StaticResource BorderLight}" StrokeThickness="1" StrokeShape="RoundRectangle 12" Padding="20">
+                            <Label Text="QR PREVIEW" HorizontalOptions="Center" TextColor="{StaticResource Primary}" FontAttributes="Bold" />
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Invoice Settings" Style="{StaticResource SectionTitle}" FontSize="20" />
+                        <Border Style="{StaticResource InputBorder}">
+                            <Entry Placeholder="VAT Rate (%)" Text="8" Keyboard="Numeric" />
+                        </Border>
+                        <Border Style="{StaticResource InputBorder}">
+                            <Editor Placeholder="Footer Note" AutoSize="TextChanges" Text="Thank you for dining with us." />
+                        </Border>
+                        <Border Background="{StaticResource AppBackground}" Stroke="{StaticResource BorderStrong}" StrokeThickness="1" StrokeShape="RoundRectangle 12" Padding="16">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Invoice Preview" FontAttributes="Bold" />
+                                <Label Text="The Golden Plate" FontFamily="{StaticResource DisplayFont}" FontSize="16" />
+                                <Label Text="District 1, Ho Chi Minh City" Style="{StaticResource SecondaryTextStyle}" />
+                                <Label Text="VAT: 8%" Style="{StaticResource SecondaryTextStyle}" />
+                            </VerticalStackLayout>
+                        </Border>
+                        <Button Text="Save Changes" Style="{StaticResource PrimaryButton}" />
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
+

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="AppManagermentRestaurant.Views.Pages.RevenuePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:AppManagermentRestaurant.Controls"
+    BackgroundColor="White"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+        <controls:AppHeaderView />
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="24" Spacing="20">
+                <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                    <Label Text="Revenue and Reports" Style="{StaticResource PageTitle}" />
+                    <Button Text="Export PDF" Style="{StaticResource SecondaryButton}" />
+                    <Button Text="Export Excel" Style="{StaticResource PrimaryButton}" />
+                </HorizontalStackLayout>
+
+                <ScrollView Orientation="Horizontal">
+                    <HorizontalStackLayout Spacing="8">
+                        <Button Text="Today" Style="{StaticResource PillButton}" />
+                        <Button Text="This Week" Style="{StaticResource PillButton}" />
+                        <Button Text="This Year" Style="{StaticResource PillButton}" />
+                    </HorizontalStackLayout>
+                </ScrollView>
+
+                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
+                    <Border Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Total Revenue" FontAttributes="Bold" />
+                            <Label Text="{Binding TotalRevenueDisplay}" FontSize="22" FontAttributes="Bold" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Style="{StaticResource CardBorder}" Grid.Column="1">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Avg / Day" FontAttributes="Bold" />
+                            <Label Text="{Binding AvgPerDayDisplay}" FontSize="22" FontAttributes="Bold" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Style="{StaticResource CardBorder}" Grid.Column="2">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Total Orders" FontAttributes="Bold" />
+                            <Label Text="128" FontSize="22" FontAttributes="Bold" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Style="{StaticResource CardBorder}" Grid.Column="3">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Avg Order Value" FontAttributes="Bold" />
+                            <Label Text="{Binding AvgOrderValueDisplay}" FontSize="22" FontAttributes="Bold" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Border Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="Revenue Chart" Style="{StaticResource SectionTitle}" FontSize="20" />
+                            <CollectionView ItemsSource="{Binding RevenueWeekly}" SelectionMode="None">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Padding="0,4">
+                                            <Label Text="{Binding Label}" Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
+                                            <Label Grid.Column="1" Text="{Binding ValueDisplay}" FontAttributes="Bold" HorizontalOptions="End" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="Revenue by Dish" Style="{StaticResource SectionTitle}" FontSize="20" />
+                            <CollectionView ItemsSource="{Binding TopDishes}" SelectionMode="None">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnDefinitions="*,Auto" Padding="0,4">
+                                            <Label Text="{Binding Name}" />
+                                            <Label Grid.Column="1" Text="{Binding RevenueDisplay}" FontAttributes="Bold" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Best-Selling Dishes" Style="{StaticResource SectionTitle}" FontSize="20" />
+                        <CollectionView ItemsSource="{Binding TopDishes}" SelectionMode="None">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="Auto,*,Auto" Padding="0,6">
+                                        <Border Background="{StaticResource Primary}" Stroke="{StaticResource Primary}" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="6">
+                                            <Label Text="#" TextColor="White" FontSize="12" />
+                                        </Border>
+                                        <Label Grid.Column="1" Text="{Binding Name}" />
+                                        <Label Grid.Column="2" Text="{Binding ShareDisplay}" FontAttributes="Bold" />
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
+

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AppManagermentRestaurant.Controls.ChipView">
+
+    <Border 
+        x:Name="ChipBorder"
+        Padding="12,6"
+        StrokeThickness="1">
+
+        <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+            <Label 
+                x:Name="ChipLabel"
+                Text="Chip"
+                FontSize="12"
+                VerticalOptions="Center" />
+
+            <Button 
+                x:Name="RemoveButton"
+                Text="✕"
+                BackgroundColor="Transparent"
+                TextColor="{Binding TextColor, Source={RelativeSource AncestorType={x:Type Border}}}"
+                Padding="0"
+                FontSize="12"
+                IsVisible="False"
+                Clicked="OnRemoveClicked" />
+        </HorizontalStackLayout>
+
+    </Border>
+
+</ContentView>

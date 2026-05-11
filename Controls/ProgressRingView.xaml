@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AppManagermentRestaurant.Controls.ProgressRingView">
+
+    <Grid WidthRequest="100" HeightRequest="100" HorizontalOptions="Center" VerticalOptions="Center">
+        
+        <!-- Background Circle -->
+        <Ellipse 
+            Fill="Transparent"
+            Stroke="{StaticResource BorderLight}"
+            StrokeThickness="4" />
+
+        <!-- Progress Circle (animated via code-behind) -->
+        <Path 
+            x:Name="ProgressPath"
+            Stroke="{StaticResource Primary}"
+            StrokeThickness="4"
+            StrokeLineCap="Round" />
+
+        <!-- Center Content -->
+        <Grid>
+            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                <Label 
+                    x:Name="PercentageLabel"
+                    Text="0%"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center" />
+                <Label 
+                    x:Name="SubtitleLabel"
+                    Text=""
+                    FontSize="10"
+                    Style="{StaticResource MutedTextStyle}"
+                    HorizontalOptions="Center"
+                    IsVisible="False" />
+            </VerticalStackLayout>
+        </Grid>
+
+    </Grid>
+
+</ContentView>

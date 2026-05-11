@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="AppManagermentRestaurant.Views.Pages.OrderHistoryPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:AppManagermentRestaurant.Controls"
+    BackgroundColor="White"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+        <controls:AppHeaderView />
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="24" Spacing="20">
+                <!-- Header with title and stats -->
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <Label Text="Lịch sử đơn hàng" Style="{StaticResource PageTitle}" VerticalOptions="Start" />
+                    <VerticalStackLayout Grid.Column="1" Spacing="4" HorizontalOptions="End">
+                        <Label Text="{Binding FilteredOrdersTotal, StringFormat='Tổng: {0}'}" FontAttributes="Bold" TextColor="{StaticResource Primary}" FontSize="14" HorizontalOptions="End" />
+                        <Label Text="{Binding FilteredOrdersCount, StringFormat='{0} đơn'}" Style="{StaticResource SecondaryTextStyle}" HorizontalOptions="End" />
+                    </VerticalStackLayout>
+                </Grid>
+
+                <!-- Search and filters -->
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="12">
+                        <Border Style="{StaticResource InputBorder}">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                <Label Text="🔍" TextColor="{StaticResource TextMuted}" VerticalOptions="Center" />
+                                <Entry x:Name="SearchEntry" Grid.Column="1" Placeholder="Tìm theo số bàn hoặc nhân viên" TextChanged="OnSearchTextChanged" />
+                            </Grid>
+                        </Border>
+                        <HorizontalStackLayout Spacing="8">
+                            <Button Text="Hôm nay" x:Name="TodayButton" Style="{StaticResource PillButton}" Clicked="OnTimeFilterClicked" />
+                            <Button Text="Tuần này" x:Name="WeekButton" Style="{StaticResource PillButton}" Clicked="OnTimeFilterClicked" />
+                            <Button Text="Tháng này" x:Name="MonthButton" Style="{StaticResource PillButton}" Clicked="OnTimeFilterClicked" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Order list -->
+                <CollectionView x:Name="OrdersList" ItemsSource="{Binding FilteredOrders}" SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
+                                <VerticalStackLayout Spacing="0">
+                                    <!-- Order header (clickable) -->
+                                    <Border Stroke="Transparent" Padding="16,12" StrokeThickness="0">
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                            <VerticalStackLayout Spacing="6">
+                                                <!-- Table number and total -->
+                                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                                    <Label Text="{Binding TableDisplay, StringFormat='Bàn {0}'}" FontAttributes="Bold" FontSize="16" />
+                                                    <HorizontalStackLayout Grid.Column="2" Spacing="6" HorizontalOptions="End">
+                                                        <Label Text="Đã thanh toán" Background="#4CAF50" TextColor="White" Padding="6,2" FontSize="11" />
+                                                    </HorizontalStackLayout>
+                                                </Grid>
+                                                <!-- Payment method and time -->
+                                                <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="12">
+                                                    <Label Text="{Binding PaymentMethod, StringFormat='💳 {0}'}" Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
+                                                    <Label Grid.Column="1" Text="{Binding CreatedAtDisplay, StringFormat='🕐 {0}'}" Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
+                                                    <Label Grid.Column="2" Text="{Binding ItemsCount, StringFormat='{0} món'}" HorizontalOptions="End" Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
+                                                </Grid>
+                                                <!-- Staff name -->
+                                                <Label Text="{Binding StaffName, StringFormat='👤 {0}'}" Style="{StaticResource MutedTextStyle}" FontSize="11" />
+                                            </VerticalStackLayout>
+                                            <Label Grid.Column="1" Text="{Binding TotalDisplay}" FontAttributes="Bold" FontSize="16" TextColor="{StaticResource Primary}" VerticalOptions="Start" />
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Expandable details -->
+                                    <BoxView HeightRequest="1" Color="#E0E0E0" IsVisible="{Binding IsExpanded}" />
+                                    <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="12" Padding="16">
+                                        <!-- Items list -->
+                                        <VerticalStackLayout Spacing="8">
+                                            <CollectionView ItemsSource="{Binding Items}" SelectionMode="None">
+                                                <CollectionView.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" Padding="0,4">
+                                                            <Image Grid.Column="0" Source="{Binding Image}" WidthRequest="32" HeightRequest="32" Aspect="AspectFill" />
+                                                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                                                <Label Text="{Binding Name}" FontAttributes="Bold" FontSize="13" />
+                                                                <Label Text="{Binding Notes}" Style="{StaticResource MutedTextStyle}" FontSize="11" />
+                                                            </VerticalStackLayout>
+                                                            <VerticalStackLayout Grid.Column="2" Spacing="2" HorizontalOptions="End">
+                                                                <Label Text="{Binding LineTotalDisplay}" FontAttributes="Bold" TextColor="{StaticResource Primary}" HorizontalOptions="End" />
+                                                                <Label Text="{Binding Quantity, StringFormat='x{0}'}" Style="{StaticResource SecondaryTextStyle}" FontSize="11" HorizontalOptions="End" />
+                                                            </VerticalStackLayout>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </CollectionView.ItemTemplate>
+                                            </CollectionView>
+                                        </VerticalStackLayout>
+
+                                        <!-- Discount info if applicable -->
+                                        <BoxView HeightRequest="1" Color="#E0E0E0" />
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" IsVisible="{Binding HasDiscount}">
+                                            <Label Text="{Binding DiscountCodeDisplay}" Style="{StaticResource SecondaryTextStyle}" />
+                                            <Label Grid.Column="1" Text="{Binding DiscountAmount, StringFormat='- {0}'}" FontAttributes="Bold" TextColor="#FF9800" />
+                                        </Grid>
+
+                                        <!-- Total -->
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                            <Label Text="Tổng đã thanh toán" FontAttributes="Bold" FontSize="14" />
+                                            <Label Grid.Column="1" Text="{Binding TotalDisplay}" FontAttributes="Bold" FontSize="14" TextColor="{StaticResource Primary}" />
+                                        </Grid>
+
+                                        <!-- Action buttons -->
+                                        <HorizontalStackLayout Spacing="8">
+                                            <Button Text="📄 Xem hóa đơn" Style="{StaticResource SecondaryButton}" Clicked="OnViewInvoiceClicked" CommandParameter="{Binding .}" />
+                                            <Button Text="🖨️ In hóa đơn" Style="{StaticResource SecondaryButton}" Clicked="OnPrintInvoiceClicked" CommandParameter="{Binding .}" />
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
+
+                                    <!-- Tap gesture for expand/collapse -->
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnOrderTapped" CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
+
