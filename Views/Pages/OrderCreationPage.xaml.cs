@@ -410,6 +410,43 @@ public partial class OrderCreationPage : ContentPage
         RefreshItemCollections();
     }
 
+    private void MergeOrderItems(Order order)
+    {
+        var grouped = order.Items
+            .GroupBy(i => i.MenuItemId)
+            .ToList();
+
+        // Nếu không có item trùng nào thì không cần merge
+        if (grouped.All(g => g.Count() == 1)) return;
+
+        var mergedItems = new List<OrderItem>();
+
+        foreach (var group in grouped)
+        {
+            var first = group.First();
+            var totalQty = group.Sum(i => i.Quantity);
+
+            // Gộp notes từ các entry khác nhau
+            var allNotes = group
+                .Where(i => !string.IsNullOrWhiteSpace(i.Notes))
+                .Select(i => i.Notes!)
+                .Distinct()
+                .ToList();
+
+            first.Quantity = totalQty;
+            first.Notes = allNotes.Count > 0 ? string.Join("; ", allNotes) : null;
+            mergedItems.Add(first);
+        }
+
+        order.Items.Clear();
+        foreach (var item in mergedItems)
+        {
+            order.Items.Add(item);
+        }
+
+        order.NotifyItemsChanged();
+    }
+
     private async void OnSubmitOrderClicked(object sender, EventArgs e)
     {
         if (AppContext.Instance.SelectedOrder?.Items.Count == 0)
@@ -429,6 +466,9 @@ public partial class OrderCreationPage : ContentPage
 
         if (!confirm) return;
 
+        // Gộp các món trùng MenuItemId lại thành 1 entry duy nhất
+        MergeOrderItems(order);
+
         var table = AppContext.Instance.Tables.FirstOrDefault(t => t.Number == order.TableNumber);
         if (table != null)
         {
@@ -442,14 +482,12 @@ public partial class OrderCreationPage : ContentPage
         }
 
         // Sync order + items to Firebase
+        _itemsSubmittedPreviously.Clear();
         _ = _firebase.CreateOrderAsync(order);
         foreach (var item in order.Items)
         {
-            if (!_itemsSubmittedPreviously.Contains(item.Id))
-            {
-                item.Status = DishStatus.Pending;
-                _itemsSubmittedPreviously.Add(item.Id);
-            }
+            item.Status = DishStatus.Pending;
+            _itemsSubmittedPreviously.Add(item.Id);
             _ = _firebase.SaveOrderItemAsync(order, item);
         }
 
