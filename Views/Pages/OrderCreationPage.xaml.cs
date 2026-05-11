@@ -381,14 +381,18 @@ public partial class OrderCreationPage : ContentPage
         var order = AppContext.Instance.SelectedOrder;
         if (order == null) return;
 
-        var existingItem = order.Items.FirstOrDefault(item => item.MenuItemId == menuItem.Id);
+        // Tìm item chưa submit (đang trong phần "Gọi thêm") để cộng dồn
+        var unsubmittedItem = order.Items.FirstOrDefault(item =>
+            item.MenuItemId == menuItem.Id && !_itemsSubmittedPreviously.Contains(item.Id));
 
-        if (existingItem != null)
+        if (unsubmittedItem != null)
         {
-            existingItem.Quantity++;
+            // Món này đang nằm trong "Gọi thêm" → cộng dồn số lượng
+            unsubmittedItem.Quantity++;
         }
         else
         {
+            // Món mới hoặc món đã submit trước đó → tạo entry riêng
             order.Items.Add(new OrderItem
             {
                 Id = order.Items.Any() ? order.Items.Max(i => i.Id) + 1 : 1,
