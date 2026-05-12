@@ -446,9 +446,14 @@ public partial class OrderCreationPage : ContentPage
 
         order.NotifyItemsChanged();
     }
+    private bool _isSubmitting = false;
 
     private async void OnSubmitOrderClicked(object sender, EventArgs e)
     {
+        //Kiem tra bam gui don lien tuc
+        if (_isSubmitting) return;
+        _isSubmitting = true;
+
         if (AppContext.Instance.SelectedOrder?.Items.Count == 0)
         {
             await DisplayAlert("Thông báo", "Vui lòng thêm ít nhất một món trước khi gửi", "OK");
@@ -499,5 +504,6 @@ public partial class OrderCreationPage : ContentPage
             await DisplayAlert("Thành công", "Đơn hàng đã được gửi lên bếp", "OK");
             await Shell.Current.GoToAsync(AppRoutes.Absolute(AppRoutes.TableMap));
         });
+        _isSubmitting = false;
     }
 }
