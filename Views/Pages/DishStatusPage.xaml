@@ -8,159 +8,374 @@
     Shell.NavBarIsVisible="False">
 
     <Grid RowDefinitions="Auto,*">
+
+        <!-- Header -->
         <controls:AppHeaderView />
 
+        <!-- Content -->
         <ScrollView Grid.Row="1">
+
             <VerticalStackLayout Padding="24" Spacing="20">
+
+                <!-- Title -->
                 <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
-                    <Label Text="Trạng thái món ăn" Style="{StaticResource PageTitle}" />
+                    <Label Text="Trạng thái món ăn"
+                           Style="{StaticResource PageTitle}" />
                 </HorizontalStackLayout>
 
-                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
-                    <Border Style="{StaticResource CardBorder}" Background="White">
+                <!-- STATUS SUMMARY -->
+                <Grid ColumnDefinitions="*,*,*,*"
+                      ColumnSpacing="12">
+
+                    <!-- Pending -->
+                    <Border Style="{StaticResource CardBorder}"
+                            Background="White"
+                            Padding="16">
+
                         <Border.Triggers>
-                            <DataTrigger TargetType="Border" Binding="{Binding IsPendingSelected}" Value="True">
-                                <Setter Property="Background" Value="#E0E0E0" />
+                            <DataTrigger TargetType="Border"
+                                         Binding="{Binding IsPendingSelected}"
+                                         Value="True">
+                                <Setter Property="Background"
+                                        Value="#E0E0E0" />
                             </DataTrigger>
                         </Border.Triggers>
+
                         <Border.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnStatusCardTapped" CommandParameter="Pending" />
+                            <TapGestureRecognizer
+                                Tapped="OnStatusCardTapped"
+                                CommandParameter="Pending" />
                         </Border.GestureRecognizers>
+
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Chờ xử lý" FontAttributes="Bold" />
-                            <Label Text="{Binding PendingDishCount}" FontSize="26" FontAttributes="Bold" TextColor="{StaticResource Warning}" />
+                            <Label Text="Chờ xử lý"
+                                   FontAttributes="Bold"
+                                   LineBreakMode="WordWrap"/>
+                            <Label Text="{Binding PendingDishCount}"
+                                   FontSize="26"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource Warning}" />
                         </VerticalStackLayout>
                     </Border>
 
-                    <Border Style="{StaticResource CardBorder}" Grid.Column="1" Background="White">
+                    <!-- Preparing -->
+                    <Border Grid.Column="1"
+                            Style="{StaticResource CardBorder}"
+                            Background="White"
+                            Padding="16">
+
                         <Border.Triggers>
-                            <DataTrigger TargetType="Border" Binding="{Binding IsPreparingSelected}" Value="True">
-                                <Setter Property="Background" Value="#E0E0E0" />
+                            <DataTrigger TargetType="Border"
+                                         Binding="{Binding IsPreparingSelected}"
+                                         Value="True">
+                                <Setter Property="Background"
+                                        Value="#E0E0E0" />
                             </DataTrigger>
                         </Border.Triggers>
+
                         <Border.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnStatusCardTapped" CommandParameter="Preparing" />
+                            <TapGestureRecognizer
+                                Tapped="OnStatusCardTapped"
+                                CommandParameter="Preparing" />
                         </Border.GestureRecognizers>
+
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Đang làm" FontAttributes="Bold" />
-                            <Label Text="{Binding PreparingDishCount}" FontSize="26" FontAttributes="Bold" TextColor="{StaticResource Info}" />
+                            <Label Text="Đang làm"
+                                   FontAttributes="Bold"/>
+                            <Label Text="{Binding PreparingDishCount}"
+                                   FontSize="26"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource Info}" />
                         </VerticalStackLayout>
                     </Border>
 
-                    <Border Style="{StaticResource CardBorder}" Grid.Column="2" Background="White">
+                    <!-- Ready -->
+                    <Border Grid.Column="2"
+                            Style="{StaticResource CardBorder}"
+                            Background="White"
+                            Padding="16">
+
                         <Border.Triggers>
-                            <DataTrigger TargetType="Border" Binding="{Binding IsReadySelected}" Value="True">
-                                <Setter Property="Background" Value="#E0E0E0" />
+                            <DataTrigger TargetType="Border"
+                                         Binding="{Binding IsReadySelected}"
+                                         Value="True">
+                                <Setter Property="Background"
+                                        Value="#E0E0E0" />
                             </DataTrigger>
                         </Border.Triggers>
+
                         <Border.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnStatusCardTapped" CommandParameter="Ready" />
+                            <TapGestureRecognizer
+                                Tapped="OnStatusCardTapped"
+                                CommandParameter="Ready" />
                         </Border.GestureRecognizers>
+
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Sẵn sàng" FontAttributes="Bold" />
-                            <Label Text="{Binding ReadyDishCount}" FontSize="26" FontAttributes="Bold" TextColor="{StaticResource Success}" />
+                            <Label Text="Sẵn sàng"
+                                   FontAttributes="Bold"/>
+                            <Label Text="{Binding ReadyDishCount}"
+                                   FontSize="26"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource Success}" />
                         </VerticalStackLayout>
                     </Border>
 
-                    <Border Style="{StaticResource CardBorder}" Grid.Column="3" Background="White">
+                    <!-- Served -->
+                    <Border Grid.Column="3"
+                            Style="{StaticResource CardBorder}"
+                            Background="White"
+                            Padding="16">
+
                         <Border.Triggers>
-                            <DataTrigger TargetType="Border" Binding="{Binding IsServedSelected}" Value="True">
-                                <Setter Property="Background" Value="#E0E0E0" />
+                            <DataTrigger TargetType="Border"
+                                         Binding="{Binding IsServedSelected}"
+                                         Value="True">
+                                <Setter Property="Background"
+                                        Value="#E0E0E0" />
                             </DataTrigger>
                         </Border.Triggers>
+
                         <Border.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnStatusCardTapped" CommandParameter="Served" />
+                            <TapGestureRecognizer
+                                Tapped="OnStatusCardTapped"
+                                CommandParameter="Served" />
                         </Border.GestureRecognizers>
+
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Đã phục vụ" FontAttributes="Bold" />
-                            <Label Text="{Binding ServedDishCount}" FontSize="26" FontAttributes="Bold" TextColor="{StaticResource TextSecondary}" />
+                            <Label Text="Đã phục vụ"
+                                   FontAttributes="Bold"
+                                   LineBreakMode="WordWrap"/>
+                            <Label Text="{Binding ServedDishCount}"
+                                   FontSize="26"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource TextSecondary}" />
                         </VerticalStackLayout>
                     </Border>
+
                 </Grid>
 
-                <Border Style="{StaticResource CardBorder}" Background="#E8F7EE" Stroke="{StaticResource Success}" StrokeThickness="2" IsVisible="{Binding HasReadyItems}">
+                <!-- READY ALERT -->
+                <Border Style="{StaticResource CardBorder}"
+                        Background="#E8F7EE"
+                        Stroke="{StaticResource Success}"
+                        StrokeThickness="2"
+                        IsVisible="{Binding HasReadyItems}">
+
                     <VerticalStackLayout Spacing="10">
-                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                            <Label Text="🔔" FontSize="20" />
+
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="🔔"
+                                   FontSize="20" />
+
                             <VerticalStackLayout Spacing="2">
-                                <Label Text="Có món sẵn sàng phục vụ!" FontAttributes="Bold" TextColor="{StaticResource Success}" FontSize="16" />
-                                <Label Text="{Binding ReadyItemsCount, StringFormat='{0} món cần mang ra'}" Style="{StaticResource SecondaryTextStyle}" />
+                                <Label Text="Có món sẵn sàng phục vụ!"
+                                       FontSize="16"
+                                       FontAttributes="Bold"
+                                       TextColor="{StaticResource Success}" />
+
+                                <Label Text="{Binding ReadyItemsCount, StringFormat='{0} món cần mang ra'}"
+                                       Style="{StaticResource SecondaryTextStyle}" />
                             </VerticalStackLayout>
                         </HorizontalStackLayout>
 
-                        <CollectionView ItemsSource="{Binding ReadyItems}" SelectionMode="None">
+                        <!-- Ready items -->
+                        <CollectionView ItemsSource="{Binding ReadyItems}"
+                                        SelectionMode="None">
+
                             <CollectionView.ItemsLayout>
-                                <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="12" VerticalItemSpacing="12" />
+                                <GridItemsLayout Orientation="Vertical"
+                                                 Span="2"
+                                                 HorizontalItemSpacing="12"
+                                                 VerticalItemSpacing="12"/>
                             </CollectionView.ItemsLayout>
+
                             <CollectionView.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Style="{StaticResource InputBorder}" Padding="10">
-                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-                                            <Image Grid.Column="0" Source="{Binding Image}" HeightRequest="40" WidthRequest="40" Aspect="AspectFill" VerticalOptions="Center" />
-                                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                                                <Label Text="{Binding Name}" FontAttributes="Bold" />
+
+                                    <Border Style="{StaticResource InputBorder}"
+                                            Padding="10">
+
+                                        <Grid ColumnDefinitions="Auto,*,Auto"
+                                              ColumnSpacing="10">
+
+                                            <Image Grid.Column="0"
+                                                   Source="{Binding Image}"
+                                                   WidthRequest="42"
+                                                   HeightRequest="42"
+                                                   Aspect="AspectFill"/>
+
+                                            <VerticalStackLayout Grid.Column="1"
+                                                                 Spacing="2">
+
+                                                <Label Text="{Binding Name}"
+                                                       FontAttributes="Bold"
+                                                       MaxLines="2"
+                                                       LineBreakMode="TailTruncation"/>
+
                                                 <HorizontalStackLayout Spacing="8">
-                                                    <Label Text="{Binding Quantity, StringFormat='x{0}'}" Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
-                                                    <Label Text="{Binding TableNumberDisplay, StringFormat='Bàn {0}'}" Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
+                                                    <Label Text="{Binding Quantity, StringFormat='x{0}'}"
+                                                           FontSize="12"
+                                                           Style="{StaticResource SecondaryTextStyle}" />
+
+                                                    <Label Text="{Binding TableNumberDisplay, StringFormat='Bàn {0}'}"
+                                                           FontSize="12"
+                                                           Style="{StaticResource SecondaryTextStyle}" />
                                                 </HorizontalStackLayout>
+
                                             </VerticalStackLayout>
-                                            <Button Grid.Column="2" Text="Phục vụ" Style="{StaticResource PrimaryButton}" Padding="12,6" Clicked="OnServeClicked" CommandParameter="{Binding .}" VerticalOptions="Center" HorizontalOptions="End" />
+
+                                            <Button Grid.Column="2"
+                                                    Text="Phục vụ"
+                                                    Padding="12,6"
+                                                    Style="{StaticResource PrimaryButton}"
+                                                    Clicked="OnServeClicked"
+                                                    CommandParameter="{Binding .}" />
+
                                         </Grid>
+
                                     </Border>
+
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
+
                         </CollectionView>
+
                     </VerticalStackLayout>
+
                 </Border>
 
-                <Label Text="Danh sách đơn hàng" Style="{StaticResource SectionTitle}" FontSize="18" />
+                <!-- ORDER LIST -->
+                <Label Text="Danh sách đơn hàng"
+                       Style="{StaticResource SectionTitle}"
+                       FontSize="18" />
 
-                <CollectionView ItemsSource="{Binding FilteredOrders}" SelectionMode="None">
+                <CollectionView ItemsSource="{Binding FilteredOrders}"
+                                SelectionMode="None">
+
                     <CollectionView.ItemsLayout>
-                        <GridItemsLayout Orientation="Vertical" Span="3" HorizontalItemSpacing="16" VerticalItemSpacing="16" />
+                        <GridItemsLayout Orientation="Vertical"
+                                         Span="3"
+                                         HorizontalItemSpacing="16"
+                                         VerticalItemSpacing="16"/>
                     </CollectionView.ItemsLayout>
+
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
-                            <Border Style="{StaticResource CardBorder}" Padding="16" StrokeThickness="0" StrokeShape="RoundRectangle 16">
+
+                            <!-- CARD -->
+                            <Border Style="{StaticResource CardBorder}"
+                                    Padding="16"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 16"
+                                    HeightRequest="420">
+
                                 <VerticalStackLayout Spacing="14">
 
-                                    <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                                        <Label Text="{Binding TableNumber, StringFormat='BÀN {0}'}" FontAttributes="Bold" FontSize="16" TextColor="#333333" />
-                                        <Label Text="|" FontSize="16" TextColor="#D1D5DB" />
-                                        <Label Text="{Binding CreatedAtDisplay}" FontSize="14" TextColor="#6B7280" VerticalOptions="Center" />
+                                    <!-- HEADER -->
+                                    <HorizontalStackLayout Spacing="8">
+
+                                        <Label Text="{Binding TableNumber, StringFormat='BÀN {0}'}"
+                                               FontSize="16"
+                                               FontAttributes="Bold"
+                                               TextColor="#333333"/>
+
+                                        <Label Text="|"
+                                               TextColor="#D1D5DB"/>
+
+                                        <Label Text="{Binding CreatedAtDisplay}"
+                                               FontSize="14"
+                                               TextColor="#6B7280"/>
+
                                     </HorizontalStackLayout>
 
-                                    <Label Text="CHI TIẾT ĐƠN HÀNG" FontSize="12" FontAttributes="Bold" TextColor="#9CA3AF" Margin="0,4,0,0"/>
+                                    <Label Text="CHI TIẾT ĐƠN HÀNG"
+                                           FontSize="12"
+                                           FontAttributes="Bold"
+                                           TextColor="#9CA3AF"/>
 
-                                    <Border Background="#F3F4F6" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="12">
-                                        <ScrollView MaximumHeightRequest="250">
-                                            <CollectionView ItemsSource="{Binding Items}" SelectionMode="None">
-                                                <CollectionView.ItemTemplate>
+                                    <!-- SCROLLABLE ITEM LIST -->
+                                    <Border Background="#F3F4F6"
+                                            Padding="12"
+                                            StrokeThickness="0"
+                                            StrokeShape="RoundRectangle 12"
+                                            HeightRequest="320">
+
+                                        <ScrollView>
+
+                                            <VerticalStackLayout
+                                                BindableLayout.ItemsSource="{Binding Items}"
+                                                Spacing="10">
+
+                                                <BindableLayout.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Padding="0,8">
 
-                                                            <Border Grid.Column="0" Background="#1E3A8A" StrokeThickness="0" StrokeShape="RoundRectangle 14" WidthRequest="28" HeightRequest="28" VerticalOptions="Center">
-                                                                <Label Text="{Binding Quantity}" TextColor="White" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                                        <Grid ColumnDefinitions="Auto,*,Auto"
+                                                              ColumnSpacing="10">
+
+                                                            <!-- Quantity -->
+                                                            <Border Grid.Column="0"
+                                                                    Background="#1E3A8A"
+                                                                    WidthRequest="28"
+                                                                    HeightRequest="28"
+                                                                    StrokeThickness="0"
+                                                                    StrokeShape="RoundRectangle 14">
+
+                                                                <Label Text="{Binding Quantity}"
+                                                                       TextColor="White"
+                                                                       FontSize="13"
+                                                                       FontAttributes="Bold"
+                                                                       HorizontalOptions="Center"
+                                                                       VerticalOptions="Center"/>
                                                             </Border>
 
-                                                            <Label Grid.Column="1" Text="{Binding Name}" FontAttributes="Bold" FontSize="14" TextColor="#1F2937" VerticalOptions="Center" />
+                                                            <!-- Name -->
+                                                            <Label Grid.Column="1"
+                                                                   Text="{Binding Name}"
+                                                                   FontSize="14"
+                                                                   FontAttributes="Bold"
+                                                                   TextColor="#1F2937"
+                                                                   LineBreakMode="WordWrap"
+                                                                   MaxLines="2"
+                                                                   VerticalOptions="Center"/>
 
-                                                            <Border Grid.Column="2" Background="{Binding StatusColor}" StrokeThickness="0" StrokeShape="RoundRectangle 8" Padding="10,6" VerticalOptions="Center" HorizontalOptions="End">
-                                                                <Label Text="{Binding StatusLabel}" TextColor="White" FontSize="11" FontAttributes="Bold" />
+                                                            <!-- Status -->
+                                                            <Border Grid.Column="2"
+                                                                    Background="{Binding StatusColor}"
+                                                                    Padding="10,6"
+                                                                    StrokeThickness="0"
+                                                                    StrokeShape="RoundRectangle 8"
+                                                                    VerticalOptions="Center">
+
+                                                                <Label Text="{Binding StatusLabel}"
+                                                                       TextColor="White"
+                                                                       FontSize="11"
+                                                                       FontAttributes="Bold"/>
                                                             </Border>
 
                                                         </Grid>
+
                                                     </DataTemplate>
-                                                </CollectionView.ItemTemplate>
-                                            </CollectionView>
+                                                </BindableLayout.ItemTemplate>
+
+                                            </VerticalStackLayout>
+
                                         </ScrollView>
+
                                     </Border>
+
                                 </VerticalStackLayout>
+
                             </Border>
+
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
+
                 </CollectionView>
+
             </VerticalStackLayout>
+
         </ScrollView>
+
     </Grid>
+
 </ContentPage>
