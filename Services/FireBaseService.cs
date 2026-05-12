@@ -309,7 +309,25 @@ namespace AppManagermentRestaurant.Services
             };
             await firebaseClient.Child("OrderItems").Child(key).PutAsync(data);
         }
-       
+
+        public async Task<List<DishReady>> GetDishReadyAsync()
+        {
+            var result = await firebaseClient
+                .Child("DishReady")
+                .OnceAsync<DishReady>();
+
+            return result
+                .Select(x => x.Object)
+                .ToList();
+        }
+
+        public async Task DeleteDishReadyAsync(int id)
+        {
+            await firebaseClient
+                .Child("DishReady")
+                .Child($"ready_{id}")
+                .DeleteAsync();
+        }
 
     }
 }

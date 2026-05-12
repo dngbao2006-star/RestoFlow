@@ -8,7 +8,11 @@ namespace AppManagermentRestaurant.Views.Pages;
 public partial class DishStatusPage : ContentPage
 {
     private DishStatus? _selectedStatusFilter;
-    // Đã gỡ bỏ _selectedTableIdFilter để bộ lọc luôn áp dụng lên toàn bộ danh sách
+
+    private FirebaseService firebase = new FirebaseService();
+
+    public ObservableCollection<DishReady> ReadyDishList { get; set; }
+        = new ObservableCollection<DishReady>();
 
     public bool IsPendingSelected => _selectedStatusFilter == DishStatus.Pending;
     public bool IsPreparingSelected => _selectedStatusFilter == DishStatus.Preparing;
@@ -20,7 +24,6 @@ public partial class DishStatusPage : ContentPage
         InitializeComponent();
         BindingContext = this;
 
-        // Subscribe to AppContext changes
         AppContext.Instance.PropertyChanged += OnAppContextPropertyChanged;
     }
 
@@ -30,22 +33,40 @@ public partial class DishStatusPage : ContentPage
         OnPropertyChanged(nameof(PreparingDishCount));
         OnPropertyChanged(nameof(ReadyDishCount));
         OnPropertyChanged(nameof(ServedDishCount));
-        OnPropertyChanged(nameof(ReadyItems));
         OnPropertyChanged(nameof(HasReadyItems));
         OnPropertyChanged(nameof(ReadyItemsCount));
         OnPropertyChanged(nameof(FilteredOrders));
     }
 
-    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+    protected override async void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
+
+        await LoadDishReady();
+
         MainThread.BeginInvokeOnMainThread(RefreshPage);
+    }
+
+    private async Task LoadDishReady()
+    {
+        ReadyDishList.Clear();
+
+        var data = await firebase.GetDishReadyAsync();
+
+        foreach (var item in data)
+        {
+            ReadyDishList.Add(item);
+        }
+
+        OnPropertyChanged(nameof(ReadyDishList));
+        OnPropertyChanged(nameof(HasReadyItems));
+        OnPropertyChanged(nameof(ReadyItemsCount));
     }
 
     private void RefreshPage()
     {
-        // Đã xóa block code hiển thị DisplayAlert khó chịu "Hoàn thành đơn hàng"
         ApplyFilters();
+
         OnPropertyChanged(nameof(HasReadyItems));
         OnPropertyChanged(nameof(ReadyItemsCount));
         OnPropertyChanged(nameof(PendingDishCount));
@@ -53,19 +74,17 @@ public partial class DishStatusPage : ContentPage
         OnPropertyChanged(nameof(ReadyDishCount));
         OnPropertyChanged(nameof(ServedDishCount));
         OnPropertyChanged(nameof(FilteredOrders));
-        OnPropertyChanged(nameof(ReadyItems));
+        OnPropertyChanged(nameof(ReadyDishList));
     }
 
-    public bool HasReadyItems => AppContext.Instance.ReadyDishCount > 0;
+    public bool HasReadyItems => ReadyDishList.Count > 0;
 
-    public int ReadyItemsCount => AppContext.Instance.ReadyItems.Count();
+    public int ReadyItemsCount => ReadyDishList.Count;
 
     public int PendingDishCount => AppContext.Instance.PendingDishCount;
     public int PreparingDishCount => AppContext.Instance.PreparingDishCount;
-    public int ReadyDishCount => AppContext.Instance.ReadyDishCount;
+    public int ReadyDishCount => ReadyDishList.Count;
     public int ServedDishCount => AppContext.Instance.ServedDishCount;
-
-    public IEnumerable<OrderItem> ReadyItems => AppContext.Instance.ReadyItems;
 
     public IEnumerable<Order> FilteredOrders
     {
@@ -73,10 +92,10 @@ public partial class DishStatusPage : ContentPage
         {
             var orders = AppContext.Instance.Orders.AsEnumerable();
 
-            // Lọc chính xác trạng thái trên toàn bộ Orders, không bị chặn bởi table ID ẩn nữa
             if (_selectedStatusFilter != null)
             {
-                orders = orders.Where(o => o.Items.Any(item => item.Status == _selectedStatusFilter));
+                orders = orders.Where(o =>
+                    o.Items.Any(item => item.Status == _selectedStatusFilter));
             }
 
             return orders;
@@ -98,13 +117,9 @@ public partial class DishStatusPage : ContentPage
         };
 
         if (_selectedStatusFilter == newStatus)
-        {
             _selectedStatusFilter = null;
-        }
         else
-        {
             _selectedStatusFilter = newStatus;
-        }
 
         OnPropertyChanged(nameof(IsPendingSelected));
         OnPropertyChanged(nameof(IsPreparingSelected));
@@ -119,27 +134,25 @@ public partial class DishStatusPage : ContentPage
         OnPropertyChanged(nameof(FilteredOrders));
     }
 
-    private void OnServeClicked(object sender, EventArgs e)
+    private async void OnServeClicked(object sender, EventArgs e)
     {
         if (sender is not Button button)
             return;
 
-        if (button.CommandParameter is not OrderItem orderItem)
+        if (button.CommandParameter is not DishReady item)
             return;
 
-        orderItem.Status = DishStatus.Served;
+        await firebase.DeleteDishReadyAsync(item.Id);
 
-        AppContext.Instance.RefreshBadges();
+        await LoadDishReady();
+
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            OnPropertyChanged(nameof(PendingDishCount));
-            OnPropertyChanged(nameof(PreparingDishCount));
-            OnPropertyChanged(nameof(ReadyDishCount));
-            OnPropertyChanged(nameof(ServedDishCount));
-            OnPropertyChanged(nameof(FilteredOrders));
-            OnPropertyChanged(nameof(ReadyItems));
+            OnPropertyChanged(nameof(ReadyDishList));
             OnPropertyChanged(nameof(HasReadyItems));
             OnPropertyChanged(nameof(ReadyItemsCount));
+            OnPropertyChanged(nameof(ReadyDishCount));
+
             RefreshPage();
         });
     }

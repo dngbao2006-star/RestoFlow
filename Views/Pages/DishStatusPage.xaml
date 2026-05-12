@@ -178,8 +178,8 @@
                             </VerticalStackLayout>
                         </HorizontalStackLayout>
 
-                        <!-- Ready items -->
-                        <CollectionView ItemsSource="{Binding ReadyItems}"
+                        <!-- READY ITEMS FROM FIREBASE -->
+                        <CollectionView ItemsSource="{Binding ReadyDishList}"
                                         SelectionMode="None">
 
                             <CollectionView.ItemsLayout>
@@ -198,32 +198,40 @@
                                         <Grid ColumnDefinitions="Auto,*,Auto"
                                               ColumnSpacing="10">
 
+                                            <!-- Image -->
                                             <Image Grid.Column="0"
                                                    Source="{Binding Image}"
                                                    WidthRequest="42"
                                                    HeightRequest="42"
                                                    Aspect="AspectFill"/>
 
+                                            <!-- Info -->
                                             <VerticalStackLayout Grid.Column="1"
                                                                  Spacing="2">
 
-                                                <Label Text="{Binding Name}"
+                                                <!-- Dish name from Firebase -->
+                                                <Label Text="{Binding DishName}"
                                                        FontAttributes="Bold"
                                                        MaxLines="2"
                                                        LineBreakMode="TailTruncation"/>
 
                                                 <HorizontalStackLayout Spacing="8">
+
+                                                    <!-- Quantity -->
                                                     <Label Text="{Binding Quantity, StringFormat='x{0}'}"
                                                            FontSize="12"
                                                            Style="{StaticResource SecondaryTextStyle}" />
 
-                                                    <Label Text="{Binding TableNumberDisplay, StringFormat='Bàn {0}'}"
+                                                    <!-- FIXED: lấy trực tiếp TableNumber từ Firebase -->
+                                                    <Label Text="{Binding TableNumber, StringFormat='Bàn {0}'}"
                                                            FontSize="12"
                                                            Style="{StaticResource SecondaryTextStyle}" />
+
                                                 </HorizontalStackLayout>
 
                                             </VerticalStackLayout>
 
+                                            <!-- Button -->
                                             <Button Grid.Column="2"
                                                     Text="Phục vụ"
                                                     Padding="12,6"
@@ -262,7 +270,6 @@
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
 
-                            <!-- CARD -->
                             <Border Style="{StaticResource CardBorder}"
                                     Padding="16"
                                     StrokeThickness="0"
@@ -271,7 +278,6 @@
 
                                 <VerticalStackLayout Spacing="14">
 
-                                    <!-- HEADER -->
                                     <HorizontalStackLayout Spacing="8">
 
                                         <Label Text="{Binding TableNumber, StringFormat='BÀN {0}'}"
@@ -293,7 +299,6 @@
                                            FontAttributes="Bold"
                                            TextColor="#9CA3AF"/>
 
-                                    <!-- SCROLLABLE ITEM LIST -->
                                     <Border Background="#F3F4F6"
                                             Padding="12"
                                             StrokeThickness="0"
@@ -312,7 +317,6 @@
                                                         <Grid ColumnDefinitions="Auto,*,Auto"
                                                               ColumnSpacing="10">
 
-                                                            <!-- Quantity -->
                                                             <Border Grid.Column="0"
                                                                     Background="#1E3A8A"
                                                                     WidthRequest="28"
@@ -328,7 +332,6 @@
                                                                        VerticalOptions="Center"/>
                                                             </Border>
 
-                                                            <!-- Name -->
                                                             <Label Grid.Column="1"
                                                                    Text="{Binding Name}"
                                                                    FontSize="14"
@@ -338,7 +341,6 @@
                                                                    MaxLines="2"
                                                                    VerticalOptions="Center"/>
 
-                                                            <!-- Status -->
                                                             <Border Grid.Column="2"
                                                                     Background="{Binding StatusColor}"
                                                                     Padding="10,6"
