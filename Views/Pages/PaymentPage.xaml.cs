@@ -10,6 +10,8 @@ public partial class PaymentPage : ContentPage
     private PaymentMethod? _selectedPaymentMethod;
     private Order? _selectedTableOrder;
     private readonly FirebaseService _firebase = new();
+    private string? _qrImageUrl;
+    private bool _isQrLoading;
 
     private ObservableCollection<Order> _activeOrders = new();
 
@@ -88,7 +90,18 @@ public partial class PaymentPage : ContentPage
                 OnPropertyChanged(nameof(HasSelectedOrder));
                 OnPropertyChanged(nameof(CanConfirmPayment));
                 OnPropertyChanged(nameof(TransferContent));
+                OnPropertyChanged(nameof(InvoiceCode));
                 OnPropertyChanged(nameof(DiscountDisplay));
+
+                // Reset cash entry khi đổi bàn
+                if (CashReceivedEntry != null)
+                    CashReceivedEntry.Text = "";
+                if (ChangeAmountLabel != null)
+                    ChangeAmountLabel.Text = "0 đ";
+                if (CashErrorLabel != null)
+                    CashErrorLabel.IsVisible = false;
+
+                UpdateQrCode();
             }
         }
     }
@@ -99,6 +112,18 @@ public partial class PaymentPage : ContentPage
     public bool IsQRSelected => _selectedPaymentMethod == PaymentMethod.Qr;
     public bool IsCashSelected => _selectedPaymentMethod == PaymentMethod.Cash;
     public bool CanConfirmPayment => _selectedPaymentMethod.HasValue && SelectedTableOrder != null;
+
+    public string? QrImageUrl
+    {
+        get => _qrImageUrl;
+        set { _qrImageUrl = value; OnPropertyChanged(nameof(QrImageUrl)); }
+    }
+
+    public bool IsQrLoading
+    {
+        get => _isQrLoading;
+        set { _isQrLoading = value; OnPropertyChanged(nameof(IsQrLoading)); }
+    }
 
     public string TransferContent
     {
@@ -112,6 +137,15 @@ public partial class PaymentPage : ContentPage
         }
     }
 
+    private string BuildInvoiceCode()
+    {
+        if (SelectedTableOrder == null) return "";
+        var ts = DateTime.Now.ToString("ddMMyyHHmm");
+        return $"HD{SelectedTableOrder.Id:D3}B{SelectedTableOrder.TableNumber}{ts}";
+    }
+
+    public string InvoiceCode => BuildInvoiceCode();
+
     public string DiscountDisplay
     {
         get
@@ -121,6 +155,21 @@ public partial class PaymentPage : ContentPage
 
             return Formatters.FormatCurrency(SelectedTableOrder.Discount);
         }
+    }
+
+    private void UpdateQrCode()
+    {
+        if (SelectedTableOrder == null || !IsQRSelected)
+        {
+            QrImageUrl = null;
+            return;
+        }
+
+        IsQrLoading = true;
+        var amount = SelectedTableOrder.Total;
+        var info = BuildInvoiceCode();
+        IsQrLoading = false;
+        QrImageUrl = VietQRService.BuildQrImageUrl(amount, info);
     }
 
     private void OnPaymentMethodTapped(object sender, TappedEventArgs e)
@@ -138,6 +187,65 @@ public partial class PaymentPage : ContentPage
         OnPropertyChanged(nameof(IsQRSelected));
         OnPropertyChanged(nameof(IsCashSelected));
         OnPropertyChanged(nameof(CanConfirmPayment));
+
+        // Highlight border
+        QrBorder.Stroke = IsQRSelected ? Color.FromArgb("#6366F1") : (Color)Application.Current.Resources["BorderLight"];
+        QrBorder.StrokeThickness = IsQRSelected ? 3 : 2;
+        CashBorder.Stroke = IsCashSelected ? Color.FromArgb("#6366F1") : (Color)Application.Current.Resources["BorderLight"];
+        CashBorder.StrokeThickness = IsCashSelected ? 3 : 2;
+
+        // Reset cash entry khi đổi phương thức
+        if (CashReceivedEntry != null)
+            CashReceivedEntry.Text = "";
+        if (ChangeAmountLabel != null)
+            ChangeAmountLabel.Text = "0 đ";
+        if (CashErrorLabel != null)
+            CashErrorLabel.IsVisible = false;
+
+        UpdateQrCode();
+    }
+
+    private bool _isFormattingCash;
+
+    private void OnCashReceivedChanged(object sender, TextChangedEventArgs e)
+    {
+        if (_isFormattingCash || SelectedTableOrder == null) return;
+
+        var entry = (Entry)sender;
+        var raw = (e.NewTextValue ?? "").Replace(".", "").Replace("đ", "").Replace(" ", "");
+
+        if (string.IsNullOrEmpty(raw))
+        {
+            ChangeAmountLabel.Text = "0 đ";
+            CashErrorLabel.IsVisible = false;
+            return;
+        }
+
+        if (!decimal.TryParse(raw, out var cashReceived))
+            return;
+
+        var total = SelectedTableOrder.Total;
+        var change = cashReceived - total;
+
+        if (change >= 0)
+        {
+            ChangeAmountLabel.Text = $"{change:N0} đ".Replace(",", ".");
+            ChangeAmountLabel.TextColor = (Color)Application.Current.Resources["Success"];
+            CashErrorLabel.IsVisible = false;
+        }
+        else
+        {
+            ChangeAmountLabel.Text = "0 đ";
+            CashErrorLabel.Text = $"Còn thiếu {Math.Abs(change):N0} đ".Replace(",", ".");
+            CashErrorLabel.IsVisible = true;
+        }
+
+        // Format with dots
+        _isFormattingCash = true;
+        var formatted = $"{cashReceived:N0}".Replace(",", ".") + " đ";
+        entry.Text = formatted;
+        entry.CursorPosition = formatted.Length - 2; // Before " đ"
+        _isFormattingCash = false;
     }
 
     private void OnApplyDiscountClicked(object sender, EventArgs e)
@@ -177,6 +285,7 @@ public partial class PaymentPage : ContentPage
 
         OnPropertyChanged(nameof(SelectedTableOrder));
         OnPropertyChanged(nameof(DiscountDisplay));
+        UpdateQrCode();
 
         MainThread.BeginInvokeOnMainThread(async () =>
         {
@@ -193,6 +302,26 @@ public partial class PaymentPage : ContentPage
         }
 
         if (SelectedTableOrder == null) return;
+
+        // Chặn thanh toán tiền mặt khi chưa đủ tiền
+        if (_selectedPaymentMethod == PaymentMethod.Cash)
+        {
+            var rawCash = (CashReceivedEntry.Text ?? "").Replace(".", "").Replace("đ", "").Replace(" ", "");
+            if (!decimal.TryParse(rawCash, out var cashAmount) || cashAmount < SelectedTableOrder.Total)
+            {
+                await DisplayAlert("Lỗi", "Số tiền khách đưa chưa đủ để thanh toán.", "OK");
+                return;
+            }
+        }
+
+        // Hộp thoại xác nhận
+        var methodName = _selectedPaymentMethod == PaymentMethod.Qr ? "QR chuyển khoản" : "Tiền mặt";
+        var confirm = await DisplayAlert(
+            "Xác nhận thanh toán",
+            $"Bàn {SelectedTableOrder.TableNumber} — {SelectedTableOrder.TotalDisplay}\nPhương thức: {methodName}\n\nBạn có chắc chắn muốn thanh toán?",
+            "Xác nhận", "Hủy");
+
+        if (!confirm) return;
 
         var order = SelectedTableOrder;
 

@@ -58,9 +58,10 @@
                     </Border>
 
                     <Border Stroke="#DDD" StrokeShape="RoundRectangle 12" Padding="12">
-                        <Grid ColumnDefinitions="Auto,*">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
                             <Label Text="🔒" TextColor="#777" FontSize="18" VerticalOptions="Center"/>
-                            <Entry Grid.Column="1" Text="{Binding Password}" Placeholder="Mật khẩu" IsPassword="True" IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanNegationConverter}}"/>
+                            <Entry x:Name="PasswordEntry" Grid.Column="1" Text="{Binding Password}" Placeholder="Mật khẩu" IsPassword="True" ReturnType="Done" Completed="OnPasswordCompleted" IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanNegationConverter}}"/>
+                            <ImageButton x:Name="EyeButton" Grid.Column="2" Source="eye_open.png" WidthRequest="28" HeightRequest="28" BackgroundColor="Transparent" Padding="2" VerticalOptions="Center" Clicked="OnTogglePasswordClicked"/>
                         </Grid>
                     </Border>
 
@@ -73,8 +74,8 @@
                     <Border Background="#F3EEE8" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="16">
                         <VerticalStackLayout>
                             <Label Text="Tài khoản demo" FontAttributes="Bold"/>
-                            <Label Text="Nhân viên: tuan.staff@goldenplate.vn"/>
-                            <Label Text="Quản lý: quan.manager@goldenplate.vn"/>
+                            <Label Text="Nhân viên: 24520222@gm.uit.edu.vn"/>
+                            <Label Text="Quản lý: 24520147@gm.uit.edu.vn"/>
                         </VerticalStackLayout>
                     </Border>
                 </VerticalStackLayout>

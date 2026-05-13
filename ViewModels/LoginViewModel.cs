@@ -34,14 +34,14 @@ namespace AppManagermentRestaurant.ViewModels
         [RelayCommand]
         private void SelectStaffRole()
         {
-            Email = "tuan.staff@goldenplate.vn";
+            Email = "24520222@gm.uit.edu.vn";
             ClearMessages();
         }
 
         [RelayCommand]
         private void SelectManagerRole()
         {
-            Email = "admin@test.com"; // Email Admin test của bạn
+            Email = "24520147@gm.uit.edu.vn";
             ClearMessages();
         }
 

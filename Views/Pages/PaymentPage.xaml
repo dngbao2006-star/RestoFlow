@@ -140,7 +140,7 @@
                 <Label Text="Phương thức thanh toán" Style="{StaticResource SectionTitle}" FontSize="20" />
 
                 <VerticalStackLayout Spacing="12">
-                    <Border Stroke="{StaticResource BorderLight}" StrokeThickness="2" Padding="16" StrokeShape="RoundRectangle 12" Background="{StaticResource Surface}">
+                    <Border x:Name="QrBorder" Stroke="{StaticResource BorderLight}" StrokeThickness="2" Padding="16" StrokeShape="RoundRectangle 12" Background="{StaticResource Surface}">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnPaymentMethodTapped" CommandParameter="QR" />
                         </Border.GestureRecognizers>
@@ -155,7 +155,7 @@
                         </HorizontalStackLayout>
                     </Border>
 
-                    <Border Stroke="{StaticResource BorderLight}" StrokeThickness="2" Padding="16" StrokeShape="RoundRectangle 12" Background="{StaticResource Surface}">
+                    <Border x:Name="CashBorder" Stroke="{StaticResource BorderLight}" StrokeThickness="2" Padding="16" StrokeShape="RoundRectangle 12" Background="{StaticResource Surface}">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Tapped="OnPaymentMethodTapped" CommandParameter="Cash" />
                         </Border.GestureRecognizers>
@@ -175,16 +175,16 @@
                     <VerticalStackLayout Spacing="16">
                         <Label Text="Mã QR thanh toán" FontAttributes="Bold" FontSize="16" />
                         <Border Background="{StaticResource Surface}" Stroke="{StaticResource BorderLight}" StrokeThickness="2" StrokeShape="RoundRectangle 12" Padding="24" HorizontalOptions="Center" WidthRequest="280" HeightRequest="280">
-                            <VerticalStackLayout Spacing="12" HorizontalOptions="Center" VerticalOptions="Center">
-                                <Label Text="[QR CODE]" HorizontalOptions="Center" VerticalOptions="Center" TextColor="{StaticResource Primary}" FontAttributes="Bold" FontSize="32" />
-                                <Label Text="Mã QR được tạo tự động" HorizontalOptions="Center" Style="{StaticResource MutedTextStyle}" FontSize="10" />
-                            </VerticalStackLayout>
+                            <Grid>
+                                <ActivityIndicator IsRunning="{Binding IsQrLoading}" IsVisible="{Binding IsQrLoading}" HorizontalOptions="Center" VerticalOptions="Center" Color="{StaticResource Primary}" />
+                                <Image Source="{Binding QrImageUrl}" Aspect="AspectFit" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Grid>
                         </Border>
 
                         <Border Style="{StaticResource InputBorder}">
                             <VerticalStackLayout Spacing="8">
                                 <Label Text="Thông tin chuyển khoản" FontAttributes="Bold" FontSize="12" />
-                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" RowSpacing="6">
+                                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="6">
                                     <Label Grid.Row="0" Grid.Column="0" Text="🏦" FontSize="12" VerticalOptions="Center" />
                                     <HorizontalStackLayout Grid.Row="0" Grid.Column="1" Spacing="8">
                                         <Label Text="Ngân hàng:" FontAttributes="Bold" />
@@ -193,12 +193,12 @@
                                     <Label Grid.Row="1" Grid.Column="0" Text="🏷️" FontSize="12" VerticalOptions="Center" />
                                     <HorizontalStackLayout Grid.Row="1" Grid.Column="1" Spacing="8">
                                         <Label Text="Số tài khoản:" FontAttributes="Bold" />
-                                        <Label Text="1024688888" />
+                                        <Label Text="1034973536" />
                                     </HorizontalStackLayout>
                                     <Label Grid.Row="2" Grid.Column="0" Text="👤" FontSize="12" VerticalOptions="Center" />
                                     <HorizontalStackLayout Grid.Row="2" Grid.Column="1" Spacing="8">
                                         <Label Text="Chủ tài khoản:" FontAttributes="Bold" />
-                                        <Label Text="Nhà hàng Dĩa Vàng" />
+                                        <Label Text="DANG NGUYEN GIA BAO" />
                                     </HorizontalStackLayout>
                                 </Grid>
                                 <BoxView HeightRequest="1" Color="{StaticResource BorderLight}" Margin="0,4" />
@@ -209,9 +209,36 @@
                                         <Label Text="{Binding SelectedTableOrder.TotalDisplay}" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
                                     </HorizontalStackLayout>
                                 </Grid>
-                                <Label Text="{Binding TransferContent}" Style="{StaticResource MutedTextStyle}" FontSize="10" />
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                    <Label Grid.Column="0" Text="📝" FontSize="12" VerticalOptions="Center" />
+                                    <HorizontalStackLayout Grid.Column="1" Spacing="8">
+                                        <Label Text="Nội dung:" FontAttributes="Bold" />
+                                        <Label Text="{Binding InvoiceCode}" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
+                                    </HorizontalStackLayout>
+                                </Grid>
                             </VerticalStackLayout>
                         </Border>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource CardBorder}" IsVisible="{Binding IsCashSelected}">
+                    <VerticalStackLayout Spacing="16">
+                        <Label Text="Thanh toán tiền mặt" FontAttributes="Bold" FontSize="16" />
+
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" RowDefinitions="Auto,Auto,Auto" RowSpacing="12">
+                            <Label Grid.Row="0" Grid.Column="0" Text="💰 Cần thanh toán:" FontAttributes="Bold" VerticalOptions="Center" />
+                            <Label Grid.Row="0" Grid.Column="1" Text="{Binding SelectedTableOrder.TotalDisplay}" FontAttributes="Bold" FontSize="18" TextColor="{StaticResource Primary}" VerticalOptions="Center" />
+
+                            <Label Grid.Row="1" Grid.Column="0" Text="💵 Tiền khách đưa:" FontAttributes="Bold" VerticalOptions="Center" />
+                            <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource InputBorder}" Padding="8">
+                                <Entry x:Name="CashReceivedEntry" Placeholder="Nhập số tiền" Keyboard="Numeric" BackgroundColor="Transparent" FontSize="16" FontAttributes="Bold" TextChanged="OnCashReceivedChanged" />
+                            </Border>
+
+                            <Label Grid.Row="2" Grid.Column="0" Text="🔄 Tiền thối lại:" FontAttributes="Bold" VerticalOptions="Center" />
+                            <Label x:Name="ChangeAmountLabel" Grid.Row="2" Grid.Column="1" Text="0 đ" FontAttributes="Bold" FontSize="18" TextColor="{StaticResource Success}" VerticalOptions="Center" />
+                        </Grid>
+
+                        <Label x:Name="CashErrorLabel" TextColor="{StaticResource Danger}" IsVisible="False" FontSize="12" FontAttributes="Bold" />
                     </VerticalStackLayout>
                 </Border>
 
