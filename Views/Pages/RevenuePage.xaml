@@ -16,10 +16,14 @@
                 <!-- ── Tiêu đề + Nút xuất ─────────────────────── -->
                 <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
                     <Label Text="Doanh thu &amp; Báo cáo" Style="{StaticResource PageTitle}" />
-                    <Button Text="📄 Xuất báo cáo" Style="{StaticResource SecondaryButton}"
+                    <Button Text="📄 Chia sẻ báo cáo" Style="{StaticResource SecondaryButton}"
                             Command="{Binding ExportTextCommand}" />
-                    <Button Text="📊 Xuất CSV" Style="{StaticResource PrimaryButton}"
+                    <Button Text="📊 Chia sẻ CSV" Style="{StaticResource SecondaryButton}"
                             Command="{Binding ExportCsvCommand}" />
+                    <Button Text="💾 Tải báo cáo" Style="{StaticResource PrimaryButton}"
+                            Command="{Binding SaveTextCommand}" />
+                    <Button Text="💾 Tải CSV" Style="{StaticResource PrimaryButton}"
+                            Command="{Binding SaveCsvCommand}" />
                 </HorizontalStackLayout>
 
                 <!-- ── Bộ lọc thời gian ────────────────────────── -->

@@ -213,4 +213,110 @@ public class RevenueViewModel : ObservableObject
         "year" => "Cả năm",
         _ => "Tuần này"
     };
+
+    // ── Save CSV trực tiếp ─────────────────────────────────────────
+
+    private async Task SaveCsvAsync()
+    {
+        try
+        {
+            var invoices = Ctx.Invoices;
+            if (invoices.Count == 0)
+            {
+                await Shell.Current.DisplayAlert("Thông báo", "Không có hóa đơn nào để tải.", "OK");
+                return;
+            }
+
+            var lines = new List<string>
+            {
+                "Mã HĐ,Bàn,Nhân viên,Tổng tiền,Giảm giá,Phương thức,Ngày tạo"
+            };
+
+            foreach (var inv in invoices)
+            {
+                var method = inv.PaymentMethod == PaymentMethod.Cash ? "Tiền mặt" : "QR Code";
+                lines.Add($"{inv.Id},{inv.TableNumber},{inv.ServerName},{inv.Total},{inv.Discount},{method},{inv.CreatedAt:dd/MM/yyyy HH:mm}");
+            }
+
+            var content = string.Join("\n", lines);
+            var fileName = $"bao_cao_doanh_thu_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+
+            var result = await FileSaver.Default.SaveAsync(fileName, stream, CancellationToken.None);
+            if (result.IsSuccessful)
+                await Shell.Current.DisplayAlert("Thành công", $"Đã lưu file tại:\n{result.FilePath}", "OK");
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert("Lỗi", $"Không thể lưu file: {ex.Message}", "OK");
+        }
+    }
+
+    // ── Save Text Report trực tiếp ─────────────────────────────────
+
+    private async Task SaveTextAsync()
+    {
+        try
+        {
+            var content = BuildTextReport();
+            var fileName = $"bao_cao_doanh_thu_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+
+            var result = await FileSaver.Default.SaveAsync(fileName, stream, CancellationToken.None);
+            if (result.IsSuccessful)
+                await Shell.Current.DisplayAlert("Thành công", $"Đã lưu file tại:\n{result.FilePath}", "OK");
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert("Lỗi", $"Không thể lưu file: {ex.Message}", "OK");
+        }
+    }
+
+    // ── Tạo nội dung text report (dùng chung cho Export và Save) ──
+
+    private string BuildTextReport()
+    {
+        var invoices = Ctx.Invoices;
+        var totalRevenue = invoices.Sum(i => i.Total);
+        var totalDiscount = invoices.Sum(i => i.Discount);
+        var avgOrder = invoices.Count > 0 ? totalRevenue / invoices.Count : 0;
+
+        var report = new List<string>
+        {
+            "╔══════════════════════════════════════════╗",
+            "║       BÁO CÁO DOANH THU GOLDEN PLATE    ║",
+            "╚══════════════════════════════════════════╝",
+            "",
+            $"Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm}",
+            $"Kỳ báo cáo: {GetPeriodLabel()}",
+            "",
+            "── TỔNG QUAN ─────────────────────────────",
+            $"  Tổng doanh thu:     {Formatters.FormatCurrency(totalRevenue)}",
+            $"  Tổng giảm giá:      {Formatters.FormatCurrency(totalDiscount)}",
+            $"  Doanh thu thuần:    {Formatters.FormatCurrency(totalRevenue - totalDiscount)}",
+            $"  Tổng hóa đơn:       {invoices.Count}",
+            $"  Giá trị TB/đơn:     {Formatters.FormatCurrency(avgOrder)}",
+            "",
+            "── TOP MÓN BÁN CHẠY ─────────────────────"
+        };
+
+        for (var i = 0; i < Ctx.TopDishes.Count; i++)
+        {
+            var dish = Ctx.TopDishes[i];
+            report.Add($"  {i + 1}. {dish.Name,-28} {dish.RevenueDisplay,14}  ({dish.ShareDisplay})");
+        }
+
+        report.Add("");
+        report.Add("── CHI TIẾT HÓA ĐƠN ─────────────────────");
+        foreach (var inv in invoices)
+        {
+            var method = inv.PaymentMethod == PaymentMethod.Cash ? "Tiền mặt" : "QR Code";
+            report.Add($"  #{inv.Id}  Bàn {inv.TableNumber,-4} {inv.TotalDisplay,14}  {method,-10}  {inv.CreatedAt:dd/MM/yyyy}");
+        }
+
+        report.Add("");
+        report.Add("═══════════════════════════════════════════");
+
+        return string.Join("\n", report);
+    }
 }
