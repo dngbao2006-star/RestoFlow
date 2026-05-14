@@ -1,4 +1,3 @@
-
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -18,14 +17,58 @@ namespace AppManagermentRestaurant.Services
         private static readonly HttpClient client = new HttpClient();
         public event Action<string, PresenceModel>? PresenceChanged;
 
-        // FirebaseClient để tương tác với Realtime Database
         private readonly FirebaseClient firebaseClient = new FirebaseClient(FIREBASE_URL);
+
+        public async Task<bool> CheckEmailExistsAsync(string email)
+        {
+            try
+            {
+                string endpoint = $"{GOOGLE_AUTH_URL}:createAuthUri?key={WEB_API_KEY}";
+                var payload = new { identifier = email, continueUri = "http://localhost" };
+                var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+                HttpResponseMessage res = await client.PostAsync(endpoint, content);
+                if (res.IsSuccessStatusCode)
+                {
+                    string result = await res.Content.ReadAsStringAsync();
+                    using JsonDocument doc = JsonDocument.Parse(result);
+                    if (doc.RootElement.TryGetProperty("registered", out JsonElement registeredElement))
+                    {
+                        return registeredElement.GetBoolean();
+                    }
+                }
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> SendPasswordResetEmailAsync(string email)
+        {
+            try
+            {
+                string resetEndpoint = $"{GOOGLE_AUTH_URL}:sendOobCode?key={WEB_API_KEY}";
+                var payload = new { requestType = "PASSWORD_RESET", email = email };
+                var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+                HttpResponseMessage res = await client.PostAsync(resetEndpoint, content);
+                return res.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public async Task SendMessageAsync(FirebaseChatMessage message)
         {
             await firebaseClient
                 .Child("Chats")
                 .PostAsync(message);
         }
+
         public IDisposable ListenForMessages(Action<FirebaseChatMessage> onMessageReceived)
         {
             return firebaseClient
@@ -40,12 +83,10 @@ namespace AppManagermentRestaurant.Services
                 });
         }
 
-        // Trả về tuple chứa toàn bộ thông tin user
         public async Task<(string Token, string Uid, string HoTen, string Quyen, string TrangThai, bool IsEmailVerified)> LoginAndGetProfileAsync(string email, string password)
         {
             try
             {
-                // 1. Gửi request Đăng nhập
                 string authEndpoint = $"{GOOGLE_AUTH_URL}:signInWithPassword?key={WEB_API_KEY}";
                 var payload = new { email, password, returnSecureToken = true };
                 var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
@@ -58,7 +99,6 @@ namespace AppManagermentRestaurant.Services
                 string uid = doc.RootElement.GetProperty("localId").GetString();
                 string token = doc.RootElement.GetProperty("idToken").GetString();
 
-                // 2. Tra cứu trạng thái Xác minh Email (emailVerified)
                 bool isEmailVerified = false;
                 string lookupEndpoint = $"{GOOGLE_AUTH_URL}:lookup?key={WEB_API_KEY}";
                 var lookupPayload = new { idToken = token };
@@ -76,7 +116,6 @@ namespace AppManagermentRestaurant.Services
                     }
                 }
 
-                // 3. Chui vào Realtime Database lấy Quyền hạn
                 string dbUrl = $"{FIREBASE_URL}/Users/{uid}.json?auth={token}";
                 HttpResponseMessage dbRes = await client.GetAsync(dbUrl);
                 string dbResult = await dbRes.Content.ReadAsStringAsync();
@@ -96,30 +135,10 @@ namespace AppManagermentRestaurant.Services
             }
         }
 
-
-        public async Task<bool> SendPasswordResetEmailAsync(string email)
-        {
-            try
-            {
-                string resetEndpoint = $"{GOOGLE_AUTH_URL}:sendOobCode?key={WEB_API_KEY}";
-                var payload = new { requestType = "PASSWORD_RESET", email = email };
-                var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-
-                HttpResponseMessage res = await client.PostAsync(resetEndpoint, content);
-                return res.IsSuccessStatusCode; // Trả về true nếu Firebase gửi mail thành công
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        // Thêm vào bên trong class FirebaseService
         public async Task<(bool IsSuccess, string ErrorMessage)> RegisterNewUserAsync(string email, string password, string name, string role)
         {
             try
             {
-                // 1. Gọi API tạo tài khoản (Auth)
                 string signUpEndpoint = $"{GOOGLE_AUTH_URL}:signUp?key={WEB_API_KEY}";
                 var payload = new { email, password, returnSecureToken = true };
                 var authContent = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
@@ -136,22 +155,15 @@ namespace AppManagermentRestaurant.Services
                     return (false, "Lỗi tạo tài khoản: " + errorMsg);
                 }
 
-                // 2. Lấy UID và Token của user vừa tạo
                 using JsonDocument doc = JsonDocument.Parse(authResult);
                 string newUid = doc.RootElement.GetProperty("localId").GetString();
                 string token = doc.RootElement.GetProperty("idToken").GetString();
 
-                // =========================================================
-                // BƯỚC 2.5: GỬI NGAY EMAIL XÁC MINH CHO TÀI KHOẢN VỪA TẠO
-                // =========================================================
                 string verifyEndpoint = $"{GOOGLE_AUTH_URL}:sendOobCode?key={WEB_API_KEY}";
                 var verifyPayload = new { requestType = "VERIFY_EMAIL", idToken = token };
                 var verifyContent = new StringContent(JsonSerializer.Serialize(verifyPayload), Encoding.UTF8, "application/json");
                 await client.PostAsync(verifyEndpoint, verifyContent);
-                // =========================================================
 
-                // 3. Lưu hồ sơ vào Realtime Database
-                // ... (Giữ nguyên đoạn code lưu Database của bạn ở đây) ...
                 var newUserProfile = new { hoTen = name, email = email, quyen = role, trangThai = "HoatDong" };
                 var dbContent = new StringContent(JsonSerializer.Serialize(newUserProfile), Encoding.UTF8, "application/json");
                 HttpResponseMessage dbRes = await client.PutAsync($"{FIREBASE_URL}/Users/{newUid}.json?auth={token}", dbContent);
@@ -182,9 +194,8 @@ namespace AppManagermentRestaurant.Services
                 return false;
             }
         }
-        public async Task SetUserOnlineAsync(
-                                            string uid,
-                                            string hoTen)
+
+        public async Task SetUserOnlineAsync(string uid, string hoTen)
         {
             var data = new PresenceModel
             {
@@ -199,9 +210,8 @@ namespace AppManagermentRestaurant.Services
                 .Child(uid)
                 .PutAsync(data);
         }
-        public async Task SetUserOfflineAsync(
-                                                string uid,
-                                                string hoTen)
+
+        public async Task SetUserOfflineAsync(string uid, string hoTen)
         {
             var data = new PresenceModel
             {
@@ -216,6 +226,7 @@ namespace AppManagermentRestaurant.Services
                 .Child(uid)
                 .PutAsync(data);
         }
+
         public async Task<PresenceModel?> GetPresenceAsync(string uid)
         {
             return await firebaseClient
@@ -223,6 +234,7 @@ namespace AppManagermentRestaurant.Services
                 .Child(uid)
                 .OnceSingleAsync<PresenceModel>();
         }
+
         public void StartPresenceListener()
         {
             firebaseClient
@@ -241,7 +253,6 @@ namespace AppManagermentRestaurant.Services
                 });
         }
 
-        // ── Write-back: Cập nhật trạng thái bàn lên Firebase ───────
         public async Task UpdateTableAsync(Table table)
         {
             var key = $"table_{table.Id}";
@@ -259,7 +270,6 @@ namespace AppManagermentRestaurant.Services
             await firebaseClient.Child("Tables").Child(key).PatchAsync(data);
         }
 
-        // ── Write-back: Cập nhật trạng thái order lên Firebase ─────
         public async Task UpdateOrderStatusAsync(Order order)
         {
             var key = $"order_{order.Id}";
@@ -272,7 +282,6 @@ namespace AppManagermentRestaurant.Services
             await firebaseClient.Child("Orders").Child(key).PatchAsync(data);
         }
 
-        // ── Write-back: Tạo order mới trên Firebase ────────────────
         public async Task CreateOrderAsync(Order order)
         {
             var key = $"order_{order.Id}";
@@ -291,7 +300,6 @@ namespace AppManagermentRestaurant.Services
             await firebaseClient.Child("Orders").Child(key).PutAsync(data);
         }
 
-        // ── Write-back: Tạo/cập nhật OrderItem trên Firebase ──────
         public async Task SaveOrderItemAsync(Order order, OrderItem item)
         {
             var key = $"oi_{item.Id}";
@@ -328,6 +336,5 @@ namespace AppManagermentRestaurant.Services
                 .Child($"ready_{id}")
                 .DeleteAsync();
         }
-
     }
 }

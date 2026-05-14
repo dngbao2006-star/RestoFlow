@@ -1,5 +1,3 @@
-// client-24520222
-// server-DuongDangChinh
 using System.Text.RegularExpressions;
 using AppManagermentRestaurant.Services;
 
@@ -31,17 +29,29 @@ public partial class ForgotPasswordPage : ContentPage
             return;
         }
 
-        // Gọi API Firebase gửi mail
+        LoadingOverlay.IsVisible = true;
+
+        bool isEmailExist = await _firebaseService.CheckEmailExistsAsync(email);
+
+        if (!isEmailExist)
+        {
+            LoadingOverlay.IsVisible = false;
+            await DisplayAlert("Lỗi", "Email này chưa được đăng ký trong hệ thống.", "Đóng");
+            return;
+        }
+
         bool isSuccess = await _firebaseService.SendPasswordResetEmailAsync(email);
+
+        LoadingOverlay.IsVisible = false;
 
         if (isSuccess)
         {
             await DisplayAlert("Thành công", "Link khôi phục mật khẩu đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư (và mục Spam).", "OK");
-            await Navigation.PopAsync(); // Quay lại trang đăng nhập
+            await Navigation.PopAsync();
         }
         else
         {
-            await DisplayAlert("Lỗi", "Email này chưa được đăng ký hoặc có lỗi kết nối.", "Đóng");
+            await DisplayAlert("Lỗi", "Có lỗi kết nối khi gửi email khôi phục.", "Đóng");
         }
     }
 
