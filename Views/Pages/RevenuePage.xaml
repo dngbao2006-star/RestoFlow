@@ -12,57 +12,77 @@
 
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Padding="24" Spacing="20">
+
+                <!-- ── Tiêu đề + Nút xuất ─────────────────────── -->
                 <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
-                    <Label Text="Revenue and Reports" Style="{StaticResource PageTitle}" />
-                    <Button Text="Export PDF" Style="{StaticResource SecondaryButton}" />
-                    <Button Text="Export Excel" Style="{StaticResource PrimaryButton}" />
+                    <Label Text="Doanh thu &amp; Báo cáo" Style="{StaticResource PageTitle}" />
+                    <Button Text="📄 Xuất báo cáo" Style="{StaticResource SecondaryButton}"
+                            Command="{Binding ExportTextCommand}" />
+                    <Button Text="📊 Xuất CSV" Style="{StaticResource PrimaryButton}"
+                            Command="{Binding ExportCsvCommand}" />
                 </HorizontalStackLayout>
 
+                <!-- ── Bộ lọc thời gian ────────────────────────── -->
                 <ScrollView Orientation="Horizontal">
                     <HorizontalStackLayout Spacing="8">
-                        <Button Text="Today" Style="{StaticResource PillButton}" />
-                        <Button Text="This Week" Style="{StaticResource PillButton}" />
-                        <Button Text="This Year" Style="{StaticResource PillButton}" />
+                        <Button x:Name="BtnToday" Text="📅 Hôm nay" Style="{StaticResource PillButton}"
+                                Clicked="OnPeriodFilterClicked" CommandParameter="today" />
+                        <Button x:Name="BtnWeek" Text="📆 Tuần này" Style="{StaticResource PillButton}"
+                                BackgroundColor="#F5F0E8"
+                                Clicked="OnPeriodFilterClicked" CommandParameter="week" />
+                        <Button x:Name="BtnYear" Text="📅 Cả năm" Style="{StaticResource PillButton}"
+                                Clicked="OnPeriodFilterClicked" CommandParameter="year" />
                     </HorizontalStackLayout>
                 </ScrollView>
 
+                <!-- ── Thẻ KPI ──────────────────────────────────── -->
                 <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
                     <Border Style="{StaticResource CardBorder}">
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Total Revenue" FontAttributes="Bold" />
-                            <Label Text="{Binding TotalRevenueDisplay}" FontSize="22" FontAttributes="Bold" />
+                            <Label Text="Tổng doanh thu" FontAttributes="Bold" />
+                            <Label Text="{Binding TotalRevenueDisplay}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
                         </VerticalStackLayout>
                     </Border>
                     <Border Style="{StaticResource CardBorder}" Grid.Column="1">
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Avg / Day" FontAttributes="Bold" />
-                            <Label Text="{Binding AvgPerDayDisplay}" FontSize="22" FontAttributes="Bold" />
+                            <Label Text="TB / Ngày" FontAttributes="Bold" />
+                            <Label Text="{Binding AvgPerDayDisplay}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource PrimaryAccent}" />
                         </VerticalStackLayout>
                     </Border>
                     <Border Style="{StaticResource CardBorder}" Grid.Column="2">
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Total Orders" FontAttributes="Bold" />
-                            <Label Text="128" FontSize="22" FontAttributes="Bold" />
+                            <Label Text="Tổng hóa đơn" FontAttributes="Bold" />
+                            <Label Text="{Binding TotalOrdersCount}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Warning}" />
                         </VerticalStackLayout>
                     </Border>
                     <Border Style="{StaticResource CardBorder}" Grid.Column="3">
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Avg Order Value" FontAttributes="Bold" />
-                            <Label Text="{Binding AvgOrderValueDisplay}" FontSize="22" FontAttributes="Bold" />
+                            <Label Text="Giá trị TB / Đơn" FontAttributes="Bold" />
+                            <Label Text="{Binding AvgOrderValueDisplay}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Success}" />
                         </VerticalStackLayout>
                     </Border>
                 </Grid>
 
+                <!-- ── Biểu đồ doanh thu + Top món ──────────────── -->
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+
+                    <!-- Biểu đồ cột ngang -->
                     <Border Style="{StaticResource CardBorder}">
                         <VerticalStackLayout Spacing="12">
-                            <Label Text="Revenue Chart" Style="{StaticResource SectionTitle}" FontSize="20" />
-                            <CollectionView ItemsSource="{Binding RevenueWeekly}" SelectionMode="None">
+                            <Label Text="📊 Biểu đồ doanh thu" Style="{StaticResource SectionTitle}" FontSize="20" />
+                            <CollectionView ItemsSource="{Binding ChartItems}" SelectionMode="None">
                                 <CollectionView.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Padding="0,4">
-                                            <Label Text="{Binding Label}" Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
-                                            <Label Grid.Column="1" Text="{Binding ValueDisplay}" FontAttributes="Bold" HorizontalOptions="End" />
+                                        <Grid ColumnDefinitions="50,*,Auto" ColumnSpacing="8" Padding="0,3">
+                                            <Label Text="{Binding Label}" Style="{StaticResource SecondaryTextStyle}" FontSize="12" VerticalOptions="Center" />
+                                            <Grid Grid.Column="1">
+                                                <BoxView Color="{StaticResource PrimaryAccent}"
+                                                         HeightRequest="20" CornerRadius="4"
+                                                         HorizontalOptions="Start"
+                                                         WidthRequest="{Binding BarWidthFraction}"
+                                                         Opacity="0.75" />
+                                            </Grid>
+                                            <Label Grid.Column="2" Text="{Binding ValueDisplay}" FontAttributes="Bold" FontSize="11" VerticalOptions="Center" />
                                         </Grid>
                                     </DataTemplate>
                                 </CollectionView.ItemTemplate>
@@ -70,15 +90,19 @@
                         </VerticalStackLayout>
                     </Border>
 
-                    <Border Style="{StaticResource CardBorder}">
+                    <!-- Doanh thu theo món -->
+                    <Border Style="{StaticResource CardBorder}" Grid.Column="1">
                         <VerticalStackLayout Spacing="12">
-                            <Label Text="Revenue by Dish" Style="{StaticResource SectionTitle}" FontSize="20" />
+                            <Label Text="💰 Doanh thu theo món" Style="{StaticResource SectionTitle}" FontSize="20" />
                             <CollectionView ItemsSource="{Binding TopDishes}" SelectionMode="None">
                                 <CollectionView.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid ColumnDefinitions="*,Auto" Padding="0,4">
-                                            <Label Text="{Binding Name}" />
-                                            <Label Grid.Column="1" Text="{Binding RevenueDisplay}" FontAttributes="Bold" />
+                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" Padding="0,4">
+                                            <Label Text="{Binding Name}" VerticalOptions="Center" />
+                                            <Label Grid.Column="1" Text="{Binding RevenueDisplay}" FontAttributes="Bold" VerticalOptions="Center" />
+                                            <Border Grid.Column="2" Background="#EEF2FF" StrokeThickness="0" StrokeShape="RoundRectangle 8" Padding="6,2">
+                                                <Label Text="{Binding ShareDisplay}" FontSize="11" TextColor="{StaticResource Primary}" />
+                                            </Border>
                                         </Grid>
                                     </DataTemplate>
                                 </CollectionView.ItemTemplate>
@@ -87,9 +111,10 @@
                     </Border>
                 </Grid>
 
+                <!-- ── Top món bán chạy (xếp hạng) ──────────────── -->
                 <Border Style="{StaticResource CardBorder}">
                     <VerticalStackLayout Spacing="12">
-                        <Label Text="Best-Selling Dishes" Style="{StaticResource SectionTitle}" FontSize="20" />
+                        <Label Text="🏆 Top món bán chạy" Style="{StaticResource SectionTitle}" FontSize="20" />
                         <CollectionView ItemsSource="{Binding TopDishes}" SelectionMode="None">
                             <CollectionView.ItemTemplate>
                                 <DataTemplate>
@@ -97,8 +122,8 @@
                                         <Border Background="{StaticResource Primary}" Stroke="{StaticResource Primary}" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="6">
                                             <Label Text="#" TextColor="White" FontSize="12" />
                                         </Border>
-                                        <Label Grid.Column="1" Text="{Binding Name}" />
-                                        <Label Grid.Column="2" Text="{Binding ShareDisplay}" FontAttributes="Bold" />
+                                        <Label Grid.Column="1" Text="{Binding Name}" VerticalOptions="Center" Margin="8,0,0,0" />
+                                        <Label Grid.Column="2" Text="{Binding ShareDisplay}" FontAttributes="Bold" VerticalOptions="Center" />
                                     </Grid>
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
@@ -109,4 +134,3 @@
         </ScrollView>
     </Grid>
 </ContentPage>
-

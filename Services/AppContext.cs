@@ -105,7 +105,9 @@ public class AppContext : ObservableObject
     public string TodayRevenueDisplay => RevenueDaily.Count > 0 ? RevenueDaily[Math.Min(6, RevenueDaily.Count - 1)].ValueDisplay : Formatters.FormatCurrency(0);
     public string AvgPerDayDisplay => RevenueWeekly.Count > 0 ? Formatters.FormatCurrency(RevenueWeekly.Average(point => point.Value)) : Formatters.FormatCurrency(0);
     public string TotalRevenueDisplay => RevenueWeekly.Count > 0 ? Formatters.FormatCurrency(RevenueWeekly.Sum(point => point.Value)) : Formatters.FormatCurrency(0);
-    public string AvgOrderValueDisplay => Formatters.FormatCurrency(250000);
+    public int TotalOrdersCount => Invoices.Count;
+    public string AvgOrderValueDisplay => Invoices.Count > 0 ? Formatters.FormatCurrency(Invoices.Average(i => i.Total)) : Formatters.FormatCurrency(0);
+    public string TotalDiscountDisplay => Invoices.Count > 0 ? Formatters.FormatCurrency(Invoices.Sum(i => i.Discount)) : Formatters.FormatCurrency(0);
 
     public decimal FilteredOrdersTotal => FilteredOrders.Sum(o => o.Total);
     public string FilteredOrdersTotalDisplay => Formatters.FormatCurrency(FilteredOrdersTotal);
