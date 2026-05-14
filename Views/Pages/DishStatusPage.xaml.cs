@@ -142,18 +142,44 @@ public partial class DishStatusPage : ContentPage
         if (button.CommandParameter is not DishReady item)
             return;
 
-        await firebase.DeleteDishReadyAsync(item.Id);
-
-        await LoadDishReady();
-
-        MainThread.BeginInvokeOnMainThread(() =>
+        try
         {
+            // Update OrderItem status to Served based on OrderId and MenuItemId
+            await firebase.UpdateOrderItemStatusByOrderAndMenuItemAsync(item.OrderId, item.MenuItemId, DishStatus.Served);
+
+            // Update AppContext Orders collection
+            var order = AppContext.Instance.Orders.FirstOrDefault(o => o.Id == item.OrderId);
+            if (order != null)
+            {
+                var orderItem = order.Items.FirstOrDefault(oi => oi.MenuItemId == item.MenuItemId);
+                if (orderItem != null)
+                {
+                    orderItem.Status = DishStatus.Served;
+                }
+            }
+
+            // Delete DishReady
+            await firebase.DeleteDishReadyAsync(item.Id);
+
+            // Remove from UI immediately
+            ReadyDishList.Remove(item);
+
+            // Update UI properties immediately
             OnPropertyChanged(nameof(ReadyDishList));
             OnPropertyChanged(nameof(HasReadyItems));
             OnPropertyChanged(nameof(ReadyItemsCount));
             OnPropertyChanged(nameof(ReadyDishCount));
-
-            RefreshPage();
-        });
+            OnPropertyChanged(nameof(PendingDishCount));
+            OnPropertyChanged(nameof(PreparingDishCount));
+            OnPropertyChanged(nameof(ServedDishCount));
+            OnPropertyChanged(nameof(FilteredOrders));
+        }
+        catch (Exception ex)
+        {
+            MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                await DisplayAlert("Lỗi", $"Không thể cập nhật trạng thái: {ex.Message}", "OK");
+            });
+        }
     }
 }

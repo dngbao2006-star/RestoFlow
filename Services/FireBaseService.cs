@@ -336,5 +336,78 @@ namespace AppManagermentRestaurant.Services
                 .Child($"ready_{id}")
                 .DeleteAsync();
         }
+
+        public async Task UpdateOrderItemStatusAsync(int orderItemId, DishStatus status)
+        {
+            var key = $"oi_{orderItemId}";
+            var data = new Dictionary<string, object>
+            {
+                ["Status"] = (int)status
+            };
+            await firebaseClient.Child("OrderItems").Child(key).PatchAsync(data);
+        }
+
+        public async Task<OrderItem?> GetOrderItemByOrderAndMenuItemAsync(int orderId, int menuItemId)
+        {
+            var allOrderItems = await firebaseClient
+                .Child("OrderItems")
+                .OnceAsync<OrderItem>();
+
+            var matchingItem = allOrderItems
+                .FirstOrDefault(x => 
+                    x.Object != null && 
+                    x.Object.MenuItemId == menuItemId &&
+                    (x.Object.Id.ToString().Contains(orderId.ToString()) || 
+                     x.Key.Contains($"oi_{orderId}")));
+
+            return matchingItem?.Object;
+        }
+
+        public async Task UpdateOrderItemStatusByOrderAndMenuItemAsync(int orderId, int menuItemId, DishStatus status)
+        {
+            try
+            {
+                var allOrderItems = await firebaseClient
+                    .Child("OrderItems")
+                    .OnceAsync<dynamic>();
+
+                // Tìm OrderItem dựa trên OrderId từ DishReady so sánh với Id của OrderItem
+                // và MenuItemId phải khớp
+                var matchingItem = allOrderItems
+                    .FirstOrDefault(x => 
+                    {
+                        try
+                        {
+                            if (x.Object == null) return false;
+
+                            // Lấy giá trị từ OrderItem
+                            var orderItemId = x.Object["Id"];
+                            var orderItemMenuItemId = x.Object["MenuItemId"];
+
+                            // So sánh Id của OrderItem với OrderId của DishReady
+                            // và MenuItemId phải khớp
+                            return orderItemId == orderId && orderItemMenuItemId == menuItemId;
+                        }
+                        catch
+                        {
+                            return false;
+                        }
+                    });
+
+                if (matchingItem != null)
+                {
+                    var data = new Dictionary<string, object>
+                    {
+                        ["Status"] = (int)status
+                    };
+                    await firebaseClient.Child("OrderItems").Child(matchingItem.Key).PatchAsync(data);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error updating order item status: {ex.Message}");
+                throw;
+            }
+        }
     }
 }
