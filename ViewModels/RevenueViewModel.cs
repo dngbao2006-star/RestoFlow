@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
+using System.Text;
 using System.Windows.Input;
 using AppManagermentRestaurant.Helpers;
 using AppManagermentRestaurant.Models;
+using CommunityToolkit.Maui.Storage;
 
 namespace AppManagermentRestaurant.ViewModels;
 
@@ -14,6 +16,8 @@ public class RevenueViewModel : ObservableObject
         SelectPeriodCommand = new Command<string>(SelectPeriod);
         ExportCsvCommand = new Command(async () => await ExportCsvAsync());
         ExportTextCommand = new Command(async () => await ExportTextAsync());
+        SaveCsvCommand = new Command(async () => await SaveCsvAsync());
+        SaveTextCommand = new Command(async () => await SaveTextAsync());
 
         // Initialize with default period
         RefreshData();
@@ -57,6 +61,8 @@ public class RevenueViewModel : ObservableObject
     public ICommand SelectPeriodCommand { get; }
     public ICommand ExportCsvCommand { get; }
     public ICommand ExportTextCommand { get; }
+    public ICommand SaveCsvCommand { get; }
+    public ICommand SaveTextCommand { get; }
 
     // ── Filter logic ───────────────────────────────────────────────
 
