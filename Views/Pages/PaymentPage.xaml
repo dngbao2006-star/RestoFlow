@@ -231,7 +231,10 @@
 
                             <Label Grid.Row="1" Grid.Column="0" Text="💵 Tiền khách đưa:" FontAttributes="Bold" VerticalOptions="Center" />
                             <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource InputBorder}" Padding="8">
-                                <Entry x:Name="CashReceivedEntry" Placeholder="Nhập số tiền" Keyboard="Numeric" BackgroundColor="Transparent" FontSize="16" FontAttributes="Bold" TextChanged="OnCashReceivedChanged" />
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                                    <Entry x:Name="CashReceivedEntry" Placeholder="Nhập số tiền" Keyboard="Numeric" BackgroundColor="Transparent" FontSize="16" FontAttributes="Bold" TextChanged="OnCashReceivedChanged" />
+                                    <Label Grid.Column="1" Text="đ" FontSize="16" FontAttributes="Bold" TextColor="#9CA3AF" VerticalOptions="Center" />
+                                </Grid>
                             </Border>
 
                             <Label Grid.Row="2" Grid.Column="0" Text="🔄 Tiền thối lại:" FontAttributes="Bold" VerticalOptions="Center" />

@@ -240,11 +240,11 @@ public partial class PaymentPage : ContentPage
             CashErrorLabel.IsVisible = true;
         }
 
-        // Format with dots
+        // Format with dots (no suffix — "đ" is a separate Label)
         _isFormattingCash = true;
-        var formatted = $"{cashReceived:N0}".Replace(",", ".") + " đ";
+        var formatted = $"{cashReceived:N0}".Replace(",", ".");
         entry.Text = formatted;
-        entry.CursorPosition = formatted.Length - 2; // Before " đ"
+        entry.CursorPosition = formatted.Length;
         _isFormattingCash = false;
     }
 
