@@ -52,7 +52,7 @@ public class HeaderViewModel : ObservableObject
 
     public bool HasUnreadNotifications => AppContext.UnreadNotifications > 0;
     public bool HasUnreadMessages => AppContext.UnreadMessages > 0;
-    public int OnlineCount => AppContext.StaffMembers.Count(m => m.Status == StaffStatus.Active);
+    public int OnlineCount => AppContext.StaffMembers.Count(m => m.IsOnline);
 
     // ─── Chat input ───────────────────────────────────────────────────────
 

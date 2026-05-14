@@ -100,8 +100,7 @@ public partial class ChatPage : ContentPage
     }
 
     public int OnlineMembersCount =>
-        AppContext.Instance.StaffMembers.Count(m =>
-            m.Status == StaffStatus.Active);
+        AppContext.Instance.StaffMembers.Count(m => m.IsOnline);
 
     public ObservableCollection<ChatMessage> ChatMessages =>
         AppContext.Instance.ChatMessages;

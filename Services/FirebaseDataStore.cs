@@ -30,10 +30,11 @@ public class FirebaseDataStore : IDataStore
             var weeklyTask    = _client.Child("Revenue").Child("Weekly").OnceAsync<RevenuePoint>();
             var monthlyTask   = _client.Child("Revenue").Child("Monthly").OnceAsync<RevenuePoint>();
             var topDishTask   = _client.Child("TopDishes").OnceAsync<DishRevenue>();
+            var usersTask     = _client.Child("Users").OnceAsync<FirebaseUserDto>();
 
             await Task.WhenAll(menuTask, tablesTask, ordersTask, orderItemsTask,
                                notifTask, invoicesTask, dailyTask, weeklyTask,
-                               monthlyTask, topDishTask);
+                               monthlyTask, topDishTask, usersTask);
 
             // ── 2. Populate MenuItems (sorted by Id) ───────────────────
             foreach (var item in menuTask.Result.OrderBy(i => i.Object.Id))
@@ -105,7 +106,28 @@ public class FirebaseDataStore : IDataStore
             foreach (var item in topDishTask.Result)
                 context.TopDishes.Add(item.Object);
 
-            // ── 10. Start real-time listeners ──────────────────────────
+            // ── 10. Populate StaffMembers from Users ────────────────────
+            foreach (var item in usersTask.Result)
+            {
+                var dto = item.Object;
+                context.StaffMembers.Add(new Staff
+                {
+                    FirebaseUid = item.Key,
+                    Name   = dto.hoTen,
+                    Email  = dto.email,
+                    Role   = dto.quyen == "QuanLy" ? StaffRole.Manager : StaffRole.Staff,
+                    Status = dto.trangThai switch
+                    {
+                        "TamKhoa" => StaffStatus.Locked,
+                        "Khóa"    => StaffStatus.Locked,
+                        _         => StaffStatus.Active
+                    },
+                    JoinDate  = DateTime.Now,
+                    LastLogin = DateTime.Now
+                });
+            }
+
+            // ── 11. Start real-time listeners ──────────────────────────
             StartListeners(context);
         }
         catch (Exception ex)
