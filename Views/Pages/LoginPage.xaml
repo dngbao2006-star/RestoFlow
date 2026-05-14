@@ -75,7 +75,7 @@
                         <VerticalStackLayout>
                             <Label Text="Tài khoản demo" FontAttributes="Bold"/>
                             <Label Text="Nhân viên: 24520222@gm.uit.edu.vn"/>
-                            <Label Text="Quản lý: 24520147@gm.uit.edu.vn"/>
+                            <Label Text="Quản lý: 24520214@gm.uit.edu.vn"/>
                         </VerticalStackLayout>
                     </Border>
                 </VerticalStackLayout>

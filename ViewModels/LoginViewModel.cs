@@ -41,7 +41,7 @@ namespace AppManagermentRestaurant.ViewModels
         [RelayCommand]
         private void SelectManagerRole()
         {
-            Email = "24520147@gm.uit.edu.vn";
+            Email = "24520214@gm.uit.edu.vn";
             ClearMessages();
         }
 
