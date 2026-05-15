@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="AppManagermentRestaurant.Views.Pages.AddMenuItemPage"
+    x:Name="MenuItemPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:AppManagermentRestaurant.Controls"
+    BackgroundColor="White"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+        <controls:AppHeaderView />
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="24" Spacing="20">
+                <!-- Title -->
+                <VerticalStackLayout Spacing="6">
+                    <Label 
+                        Text="{Binding EditingItem, StringFormat='{0:Sửa Món Ăn|Thêm Món Ăn}'}" 
+                        Style="{StaticResource PageTitle}" />
+                    <Label 
+                        Text="{Binding Name}"
+                        FontSize="14"
+                        TextColor="{StaticResource TextMuted}"
+                        IsVisible="{Binding EditingItem, Converter={StaticResource HasValueConverter}}" />
+                </VerticalStackLayout>
+
+                <!-- Image Section -->
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Ảnh món ăn" FontAttributes="Bold" />
+
+                        <!-- Image URL Input -->
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Link ảnh (URL)" FontAttributes="Bold" FontSize="12" TextColor="{StaticResource TextMuted}" />
+                            <Border Style="{StaticResource InputBorder}">
+                                <Entry 
+                                    Text="{Binding ImageUrl}" 
+                                    Placeholder="https://example.com/image.jpg"
+                                    FontSize="12" />
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <!-- Image Preview -->
+                        <Frame BorderColor="{StaticResource BorderColor}" CornerRadius="10" Padding="0" HasShadow="False">
+                            <Grid HeightRequest="200" BackgroundColor="#F5F5F5">
+                                <Image 
+                                    Source="{Binding ImageUrl}" 
+                                    Aspect="AspectFill"
+                                    IsVisible="{Binding ImageUrl, Converter={StaticResource HasValueConverter}}" />
+                                <VerticalStackLayout 
+                                    Spacing="8" 
+                                    VerticalOptions="Center" 
+                                    HorizontalOptions="Center"
+                                    IsVisible="{Binding ImageUrl, Converter={StaticResource BooleanNegationConverter}, ConverterParameter={StaticResource HasValueConverter}}">
+                                    <Label Text="🖼️" FontSize="48" HorizontalOptions="Center" />
+                                    <Label Text="Xem trước ảnh" HorizontalOptions="Center" TextColor="{StaticResource TextMuted}" />
+                                    <Label Text="Nhập link ảnh để xem" HorizontalOptions="Center" FontSize="11" TextColor="{StaticResource TextMuted}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Frame>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Basic Information -->
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="16">
+                        <Label Text="Thông tin cơ bản" FontAttributes="Bold" />
+
+                        <!-- Name -->
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Tên món ăn" FontAttributes="Bold" />
+                            <Border Style="{StaticResource InputBorder}">
+                                <Entry 
+                                    Text="{Binding Name}" 
+                                    Placeholder="Nhập tên món ăn" />
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <!-- Category -->
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Danh mục" FontAttributes="Bold" />
+                            <CollectionView ItemsSource="{Binding Categories}" SelectionMode="Single" SelectedItem="{Binding Category}">
+                                <CollectionView.ItemsLayout>
+                                    <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="8" VerticalItemSpacing="8" />
+                                </CollectionView.ItemsLayout>
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border 
+                                            StrokeThickness="2"
+                                            StrokeShape="RoundRectangle 8"
+                                            Padding="12,8">
+                                            <Border.Stroke>
+                                                <MultiBinding Converter="{StaticResource CategorySelectedConverter}">
+                                                    <Binding Path="." />
+                                                    <Binding Path="BindingContext.Category" Source="{x:Reference MenuItemPage}" />
+                                                </MultiBinding>
+                                            </Border.Stroke>
+                                            <Border.Background>
+                                                <MultiBinding Converter="{StaticResource CategoryBackgroundConverter}">
+                                                    <Binding Path="." />
+                                                    <Binding Path="BindingContext.Category" Source="{x:Reference MenuItemPage}" />
+                                                </MultiBinding>
+                                            </Border.Background>
+                                            <Label 
+                                                Text="{Binding .}" 
+                                                FontAttributes="Bold"
+                                                HorizontalOptions="Center"
+                                                VerticalOptions="Center">
+                                                <Label.GestureRecognizers>
+                                                    <TapGestureRecognizer 
+                                                        Command="{Binding Source={x:Reference MenuItemPage}, Path=BindingContext.SelectCategoryCommand}"
+                                                        CommandParameter="{Binding .}" />
+                                                </Label.GestureRecognizers>
+                                            </Label>
+                                        </Border>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </VerticalStackLayout>
+
+                        <!-- Price -->
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Giá (VND)" FontAttributes="Bold" />
+                            <Border Style="{StaticResource InputBorder}">
+                                <Entry 
+                                    Text="{Binding Price, StringFormat='{0:F0}'}" 
+                                    Placeholder="0"
+                                    Keyboard="Numeric" />
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <!-- Description -->
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Mô tả" FontAttributes="Bold" />
+                            <Border Style="{StaticResource InputBorder}">
+                                <Editor 
+                                    Text="{Binding Description}" 
+                                    Placeholder="Nhập mô tả món ăn"
+                                    HeightRequest="100" />
+                            </Border>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Status Section -->
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Trạng thái" FontAttributes="Bold" />
+
+                        <HorizontalStackLayout Spacing="16" VerticalOptions="Center">
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="Đang phục vụ" />
+                                <Switch IsToggled="{Binding Available}" />
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="Hết món" />
+                                <Switch IsToggled="{Binding OutOfStock}" />
+                            </VerticalStackLayout>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Action Buttons -->
+                <HorizontalStackLayout Spacing="12">
+                    <Button 
+                        Text="Hủy" 
+                        Style="{StaticResource SecondaryButton}"
+                        Clicked="OnCancelClicked"
+                        HorizontalOptions="FillAndExpand" />
+                    <Button 
+                        Text="Lưu" 
+                        Style="{StaticResource PrimaryButton}"
+                        Clicked="OnSaveClicked"
+                        IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanNegationConverter}}"
+                        HorizontalOptions="FillAndExpand" />
+                </HorizontalStackLayout>
+
+                <!-- Loading Indicator -->
+                <controls:LoadingIndicator IsVisible="{Binding IsLoading}" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

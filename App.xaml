@@ -18,6 +18,9 @@
             <helpers:BooleanNegationConverter x:Key="BooleanNegationConverter" />
             <helpers:StatusFilterColorConverter x:Key="StatusFilterColorConverter" />
             <helpers:OpacityConverter x:Key="OpacityConverter" />
+            <helpers:CategorySelectedConverter x:Key="CategorySelectedConverter" />
+            <helpers:CategoryBackgroundConverter x:Key="CategoryBackgroundConverter" />
+            <helpers:HasValueConverter x:Key="HasValueConverter" />
 
             <!-- 🔥 TABLE CARD STYLE (THÊM Ở ĐÂY) -->
             <Style x:Key="TableCardStyle" TargetType="Border">

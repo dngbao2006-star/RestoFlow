@@ -29,6 +29,8 @@ public partial class AppShell : Shell
 
         Routing.RegisterRoute(AppRoutes.ForgotPassword, typeof(ForgotPasswordPage));
         Routing.RegisterRoute(AppRoutes.Profile, typeof(AccountManagementPage));
+        Routing.RegisterRoute("add-menu-item", typeof(AddMenuItemPage));
+        Routing.RegisterRoute("edit-menu-item", typeof(AddMenuItemPage));
     }
 
     private async Task HandleSignOutAsync()

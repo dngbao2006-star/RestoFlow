@@ -14,7 +14,10 @@
             <VerticalStackLayout Padding="24" Spacing="20">
                 <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
                     <Label Text="Quản lý thực đơn" Style="{StaticResource PageTitle}" />
-                    <Button Text="Thêm món" Style="{StaticResource PrimaryButton}" />
+                    <Button 
+                        Text="Thêm món" 
+                        Style="{StaticResource PrimaryButton}" 
+                        Clicked="OnAddMenuItemClicked" />
                 </HorizontalStackLayout>
 
                 <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
@@ -78,9 +81,21 @@
                                     <Label Text="{Binding Description}" Style="{StaticResource SecondaryTextStyle}" LineBreakMode="TailTruncation" />
                                     <Label Text="{Binding Price, StringFormat='{0:0,0} VND'}" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
                                     <HorizontalStackLayout Spacing="8">
-                                        <Button Text="Đổi trạng thái" Style="{StaticResource SecondaryButton}" />
-                                        <Button Text="Sửa" Style="{StaticResource SecondaryButton}" />
-                                        <Button Text="Xóa" Style="{StaticResource DangerButton}" />
+                                        <Button 
+                                            Text="Đổi trạng thái" 
+                                            Style="{StaticResource SecondaryButton}"
+                                            CommandParameter="{Binding .}"
+                                            Clicked="OnToggleStatusClicked" />
+                                        <Button 
+                                            Text="Sửa" 
+                                            Style="{StaticResource SecondaryButton}"
+                                            CommandParameter="{Binding .}"
+                                            Clicked="OnEditMenuItemClicked" />
+                                        <Button 
+                                            Text="Xóa" 
+                                            Style="{StaticResource DangerButton}"
+                                            CommandParameter="{Binding .}"
+                                            Clicked="OnDeleteMenuItemClicked" />
                                     </HorizontalStackLayout>
                                 </VerticalStackLayout>
                             </Border>

@@ -510,5 +510,44 @@ namespace AppManagermentRestaurant.Services
                 throw;
             }
         }
+
+        public async Task SaveMenuItemAsync(FoodItem menuItem)
+        {
+            try
+            {
+                var key = $"menu_{menuItem.Id}";
+                var data = new
+                {
+                    menuItem.Id,
+                    menuItem.Name,
+                    menuItem.Category,
+                    menuItem.Price,
+                    menuItem.Description,
+                    menuItem.Image,
+                    menuItem.Available,
+                    menuItem.OutOfStock
+                };
+                await firebaseClient.Child("MenuItems").Child(key).PutAsync(data);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error saving menu item: {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task DeleteMenuItemAsync(int menuItemId)
+        {
+            try
+            {
+                var key = $"menu_{menuItemId}";
+                await firebaseClient.Child("MenuItems").Child(key).DeleteAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error deleting menu item: {ex.Message}");
+                throw;
+            }
+        }
     }
 }
