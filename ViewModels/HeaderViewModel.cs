@@ -144,6 +144,11 @@ public class HeaderViewModel : ObservableObject
 
     private async Task LogoutAsync()
     {
+        // Hủy listener xung đột phiên trước khi logout
+        AppContext.SessionConflictSubscription?.Dispose();
+        AppContext.SessionConflictSubscription = null;
+        AppContext.CurrentSessionId = null;
+
         AppContext.CurrentUser = null;
         await MainThread.InvokeOnMainThreadAsync(App.ShowLogin);
     }

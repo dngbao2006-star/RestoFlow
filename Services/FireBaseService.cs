@@ -195,14 +195,15 @@ namespace AppManagermentRestaurant.Services
             }
         }
 
-        public async Task SetUserOnlineAsync(string uid, string hoTen)
+        public async Task SetUserOnlineAsync(string uid, string hoTen, string sessionId)
         {
             var data = new PresenceModel
             {
                 HoTen = hoTen,
                 IsOnline = true,
                 LastSeen = DateTime.UtcNow,
-                Device = DeviceInfo.Platform.ToString()
+                Device = DeviceInfo.Platform.ToString(),
+                SessionId = sessionId
             };
 
             await firebaseClient
@@ -250,6 +251,42 @@ namespace AppManagermentRestaurant.Services
                     PresenceChanged?.Invoke(
                         d.Key,
                         d.Object);
+                });
+        }
+
+        /// <summary>
+        /// Lắng nghe toàn bộ node Presence và lọc theo uid của user hiện tại.
+        /// Khi SessionId trên Firebase thay đổi (không khớp localSessionId),
+        /// gọi onConflictDetected để thực hiện force logout.
+        ///
+        /// LƯU Ý QUAN TRỌNG:
+        /// Phải subscribe ở cấp .Child("Presence") chứ KHÔNG PHẢI .Child("Presence").Child(uid).
+        /// Vì AsObservable luôn lắng nghe CHILDREN của node được chỉ định:
+        ///   - .Child("Presence").AsObservable() → children = {uid} → deserialize OK ✅
+        ///   - .Child("Presence").Child(uid).AsObservable() → children = HoTen, IsOnline...
+        ///     → cố deserialize string/bool thành PresenceModel → FAIL SILENT ❌
+        /// </summary>
+        public IDisposable ListenForSessionConflict(string uid, string localSessionId, Action onConflictDetected)
+        {
+            return firebaseClient
+                .Child("Presence")
+                .AsObservable<PresenceModel>()
+                .Subscribe(d =>
+                {
+                    if (d.Object == null || string.IsNullOrEmpty(d.Key)) return;
+
+                    // Chỉ xử lý event của chính user hiện tại, bỏ qua user khác
+                    if (d.Key != uid) return;
+
+                    var remoteSessionId = d.Object.SessionId;
+
+                    // Nếu SessionId trên Firebase khác với SessionId local
+                    // → có thiết bị khác vừa đăng nhập cùng tài khoản
+                    if (!string.IsNullOrEmpty(remoteSessionId)
+                        && remoteSessionId != localSessionId)
+                    {
+                        onConflictDetected?.Invoke();
+                    }
                 });
         }
 

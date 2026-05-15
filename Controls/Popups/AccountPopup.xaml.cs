@@ -33,6 +33,11 @@ public partial class AccountPopup : Popup
 
         var currentUser = AppContext.Instance.CurrentUser;
 
+        // Hủy listener xung đột phiên trước khi logout
+        AppContext.Instance.SessionConflictSubscription?.Dispose();
+        AppContext.Instance.SessionConflictSubscription = null;
+        AppContext.Instance.CurrentSessionId = null;
+
         // Cập nhật OFFLINE lên Firebase
         if (currentUser != null)
         {

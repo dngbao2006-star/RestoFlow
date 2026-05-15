@@ -118,11 +118,28 @@ namespace AppManagermentRestaurant.ViewModels
                 LastLogin = DateTime.Now
             };
 
-            // CẬP NHẬT ONLINE
+            // SINH SESSION ID MỚI CHO PHIÊN ĐĂNG NHẬP NÀY
+            var sessionId = Guid.NewGuid().ToString();
+            AppContext.Instance.CurrentSessionId = sessionId;
+
+            // CẬP NHẬT ONLINE + SESSION ID LÊN FIREBASE
             await _firebaseService.SetUserOnlineAsync(
                 result.Uid,
-                result.HoTen);
+                result.HoTen,
+                sessionId);
 
+            // BẮT ĐẦU LẮNG NGHE XUNG ĐỘT PHIÊN ĐĂNG NHẬP
+            // Nếu thiết bị khác đăng nhập cùng tài khoản → SessionId trên Firebase sẽ thay đổi
+            // → listener phát hiện và gọi ForceLogoutAsync để đá thiết bị này ra
+            AppContext.Instance.SessionConflictSubscription?.Dispose();
+            AppContext.Instance.SessionConflictSubscription = _firebaseService.ListenForSessionConflict(
+                result.Uid,
+                sessionId,
+                () =>
+                {
+                    // Chạy force logout trên main thread
+                    _ = AppContext.Instance.ForceLogoutAsync();
+                });
 
             // Chuyển hướng vào màn hình chính
             App.ShowAppShell();

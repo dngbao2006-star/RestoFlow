@@ -1,4 +1,4 @@
-﻿using AppManagermentRestaurant.Constants;
+using AppManagermentRestaurant.Constants;
 using AppManagermentRestaurant.Services;
 using AppManagermentRestaurant.Views.Pages;
 
@@ -43,6 +43,12 @@ public partial class AppShell : Shell
         }
 
         ActivityLogService.Instance.LogLogout();
+
+        // Hủy listener xung đột phiên trước khi logout
+        AppContext.Instance.SessionConflictSubscription?.Dispose();
+        AppContext.Instance.SessionConflictSubscription = null;
+        AppContext.Instance.CurrentSessionId = null;
+
         this.BindingContext = null;
         await MainThread.InvokeOnMainThreadAsync(App.ShowLogin);
         AppContext.Instance.CurrentUser = null;

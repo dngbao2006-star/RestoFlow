@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,5 +10,6 @@ namespace AppManagermentRestaurant.Models
         public bool IsOnline { get; set; }
         public DateTime LastSeen { get; set; }
         public string Device { get; set; } = "";
+        public string SessionId { get; set; } = "";
     }
 }

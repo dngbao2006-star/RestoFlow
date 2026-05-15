@@ -14,7 +14,20 @@ public class AppContext : ObservableObject
     private Staff? _currentUser;
     private Order? _selectedOrder;
     private Table? _selectedTable;
+    private bool _isForceLoggingOut;
     internal static string? BaseDirectory;
+
+    /// <summary>
+    /// SessionId duy nhất của phiên đăng nhập hiện tại trên thiết bị này.
+    /// Được sinh mới mỗi lần đăng nhập thành công.
+    /// </summary>
+    public string? CurrentSessionId { get; set; }
+
+    /// <summary>
+    /// Subscription lắng nghe thay đổi Presence node của chính user hiện tại.
+    /// Dùng để phát hiện khi thiết bị khác đăng nhập cùng tài khoản.
+    /// </summary>
+    public IDisposable? SessionConflictSubscription { get; set; }
 
     public AppContext(IDataStore dataStore)
     {
@@ -220,5 +233,53 @@ public class AppContext : ObservableObject
         RefreshBadges();
     }
 
+    /// <summary>
+    /// Force logout: hiển thị thông báo và đưa user về màn hình đăng nhập.
+    /// Được gọi khi phát hiện SessionId trên Firebase không còn khớp với thiết bị này.
+    /// </summary>
+    public async Task ForceLogoutAsync()
+    {
+        if (_isForceLoggingOut) return;
+        _isForceLoggingOut = true;
+
+        try
+        {
+            // Hủy listener tránh loop
+            SessionConflictSubscription?.Dispose();
+            SessionConflictSubscription = null;
+            CurrentSessionId = null;
+
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                // Hiển thị thông báo cho user
+                if (Application.Current?.MainPage != null)
+                {
+                    await Application.Current.MainPage.DisplayAlert(
+                        "Phiên đăng nhập hết hạn",
+                        "Tài khoản đã được đăng nhập trên thiết bị khác. Bạn sẽ được chuyển về màn hình đăng nhập.",
+                        "OK");
+                }
+
+                // QUAN TRỌNG: Phải ngắt BindingContext của AppShell TRƯỚC khi set CurrentUser = null.
+                // Nếu không, setter của CurrentUser sẽ fire OnPropertyChanged("IsStaff")
+                // → binding system cố update UI element đã bị dispose → NullReferenceException.
+                // Thứ tự này giống hệt pattern an toàn trong AppShell.HandleSignOutAsync().
+                if (Application.Current?.MainPage is AppShell shell)
+                {
+                    shell.BindingContext = null;
+                }
+
+                // Chuyển về login TRƯỚC
+                App.ShowLogin();
+
+                // Set null SAU khi binding đã ngắt
+                CurrentUser = null;
+            });
+        }
+        finally
+        {
+            _isForceLoggingOut = false;
+        }
+    }
 
 }
