@@ -1,12 +1,18 @@
 using AppManagermentRestaurant.Models;
 using AppManagermentRestaurant.ViewModels;
-using System.Diagnostics;
 
 namespace AppManagermentRestaurant.Views.Pages;
 
 public partial class AddMenuItemPage : ContentPage
 {
     private AddMenuItemViewModel _viewModel;
+
+    /// <summary>
+    /// Static property để truyền trực tiếp FoodItem object khi navigate.
+    /// Đặt giá trị TRƯỚC khi GoToAsync, page sẽ tự đọc trong OnNavigatedTo.
+    /// Cách này đảm bảo 100% data được truyền đúng, không phụ thuộc URL parsing.
+    /// </summary>
+    public static FoodItem? PendingEditItem { get; set; }
 
     public AddMenuItemPage()
     {
@@ -15,95 +21,31 @@ public partial class AddMenuItemPage : ContentPage
         BindingContext = _viewModel;
     }
 
-    public AddMenuItemPage(FoodItem editingItem) : this()
-    {
-        _viewModel.LoadMenuItem(editingItem);
-    }
-
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
 
-        try
+        // Nếu có item đang chờ chỉnh sửa → load dữ liệu vào form
+        if (PendingEditItem != null)
         {
-            // Lấy id từ query parameter
-            var location = Shell.Current.CurrentState.Location.ToString();
-            Debug.WriteLine($"[DEBUG] Location: {location}");
-
-            if (location.Contains("edit-menu-item") && location.Contains("id="))
-            {
-                var idParam = ExtractQueryParameter(location, "id");
-                Debug.WriteLine($"[DEBUG] Extracted ID Parameter: {idParam}");
-
-                if (!string.IsNullOrEmpty(idParam) && int.TryParse(idParam, out int id))
-                {
-                    Debug.WriteLine($"[DEBUG] Loading menu item with ID: {id}");
-                    Debug.WriteLine($"[DEBUG] AppContext MenuItems count: {AppContext.Instance.MenuItems.Count}");
-
-                    // Load dữ liệu trực tiếp
-                    LoadMenuItemById(id);
-
-                    Debug.WriteLine($"[DEBUG] Menu item loaded. Name: {_viewModel.Name}, Price: {_viewModel.Price}");
-                }
-                else
-                {
-                    Debug.WriteLine("[DEBUG] ID parameter is null or not valid integer");
-                }
-            }
-            else
-            {
-                Debug.WriteLine("[DEBUG] Not edit-menu-item route");
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"[DEBUG] Exception in OnNavigatedTo: {ex.Message}");
+            _viewModel.LoadMenuItem(PendingEditItem);
+            PendingEditItem = null; // Xóa sau khi đã load, tránh load lại khi quay lại trang
         }
     }
 
-    private string ExtractQueryParameter(string query, string paramName)
+    // === On-blur Validation Handlers ===
+
+    private void OnNameUnfocused(object sender, FocusEventArgs e)
     {
-        try
-        {
-            var startIndex = query.IndexOf($"{paramName}=", StringComparison.OrdinalIgnoreCase);
-            if (startIndex < 0) return string.Empty;
-
-            startIndex += paramName.Length + 1;
-            var endIndex = query.IndexOf("&", startIndex);
-            if (endIndex < 0) endIndex = query.Length;
-
-            var result = query.Substring(startIndex, endIndex - startIndex);
-            Debug.WriteLine($"[DEBUG] ExtractQueryParameter - {paramName}={result}");
-            return result;
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"[DEBUG] Error extracting parameter: {ex.Message}");
-            return string.Empty;
-        }
+        _viewModel.ValidateName();
     }
 
-    private void LoadMenuItemById(int id)
+    private void OnPriceUnfocused(object sender, FocusEventArgs e)
     {
-        var menuItem = AppContext.Instance.MenuItems.FirstOrDefault(m => m.Id == id);
-        if (menuItem != null)
-        {
-            Debug.WriteLine($"[DEBUG] Found menu item: Id={menuItem.Id}, Name={menuItem.Name}, Price={menuItem.Price}");
-            _viewModel.LoadMenuItem(menuItem);
-            Debug.WriteLine($"[DEBUG] ViewModel after LoadMenuItem - Name={_viewModel.Name}, Price={_viewModel.Price}, Category={_viewModel.Category}");
-        }
-        else
-        {
-            Debug.WriteLine($"[DEBUG] Menu item with ID {id} NOT FOUND in AppContext.MenuItems");
-            Debug.WriteLine($"[DEBUG] Available IDs in MenuItems: {string.Join(", ", AppContext.Instance.MenuItems.Select(m => m.Id))}");
-        }
+        _viewModel.ValidatePrice();
     }
 
-    private async Task AnimateLoadComplete()
-    {
-        // Optional: Thêm animation khi load xong
-        await this.FadeTo(1, 300, Easing.CubicOut);
-    }
+    // === Action Handlers ===
 
     private async void OnSaveClicked(object sender, EventArgs e)
     {

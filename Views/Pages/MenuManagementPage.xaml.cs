@@ -15,6 +15,7 @@ public partial class MenuManagementPage : ContentPage
 
     private async void OnAddMenuItemClicked(object sender, EventArgs e)
     {
+        AddMenuItemPage.PendingEditItem = null;
         await Shell.Current.GoToAsync("add-menu-item");
     }
 
@@ -22,7 +23,9 @@ public partial class MenuManagementPage : ContentPage
     {
         if (sender is Button button && button.CommandParameter is FoodItem item)
         {
-            await Shell.Current.GoToAsync($"edit-menu-item?id={item.Id}");
+            // Truyền trực tiếp object FoodItem, không dùng URL query parameter
+            AddMenuItemPage.PendingEditItem = item;
+            await Shell.Current.GoToAsync("edit-menu-item");
         }
     }
 

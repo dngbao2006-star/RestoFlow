@@ -14,10 +14,19 @@ public class AddMenuItemViewModel : BaseViewModel
     private decimal _price;
     private string _description = string.Empty;
     private string _imageUrl = string.Empty;
-    private bool _available = true;
-    private bool _outOfStock;
+    private bool _isServing = true;
     private bool _isLoading;
     private FoodItem? _editingItem;
+
+    // Validation error fields
+    private string _nameError = string.Empty;
+    private string _categoryError = string.Empty;
+    private string _priceError = string.Empty;
+    private bool _hasNameError;
+    private bool _hasCategoryError;
+    private bool _hasPriceError;
+    private string _formError = string.Empty;
+    private bool _hasFormError;
 
     public int Id
     {
@@ -28,19 +37,55 @@ public class AddMenuItemViewModel : BaseViewModel
     public string Name
     {
         get => _name;
-        set => SetProperty(ref _name, value);
+        set
+        {
+            if (SetProperty(ref _name, value))
+            {
+                // Xóa lỗi khi user bắt đầu nhập
+                if (!string.IsNullOrWhiteSpace(value) && HasNameError)
+                {
+                    HasNameError = false;
+                    NameError = string.Empty;
+                }
+                OnPropertyChanged(nameof(CanSave));
+            }
+        }
     }
 
     public string Category
     {
         get => _category;
-        set => SetProperty(ref _category, value);
+        set
+        {
+            if (SetProperty(ref _category, value))
+            {
+                // Xóa lỗi khi user chọn danh mục
+                if (!string.IsNullOrWhiteSpace(value) && HasCategoryError)
+                {
+                    HasCategoryError = false;
+                    CategoryError = string.Empty;
+                }
+                OnPropertyChanged(nameof(CanSave));
+            }
+        }
     }
 
     public decimal Price
     {
         get => _price;
-        set => SetProperty(ref _price, value);
+        set
+        {
+            if (SetProperty(ref _price, value))
+            {
+                // Xóa lỗi khi user nhập giá hợp lệ
+                if (value >= 1000 && HasPriceError)
+                {
+                    HasPriceError = false;
+                    PriceError = string.Empty;
+                }
+                OnPropertyChanged(nameof(CanSave));
+            }
+        }
     }
 
     public string Description
@@ -55,22 +100,31 @@ public class AddMenuItemViewModel : BaseViewModel
         set => SetProperty(ref _imageUrl, value);
     }
 
-    public bool Available
+    /// <summary>
+    /// Toggle đơn: true = "Đang phục vụ", false = "Hết món".
+    /// </summary>
+    public bool IsServing
     {
-        get => _available;
-        set => SetProperty(ref _available, value);
+        get => _isServing;
+        set
+        {
+            if (SetProperty(ref _isServing, value))
+            {
+                OnPropertyChanged(nameof(StatusLabel));
+            }
+        }
     }
 
-    public bool OutOfStock
-    {
-        get => _outOfStock;
-        set => SetProperty(ref _outOfStock, value);
-    }
+    public string StatusLabel => IsServing ? "Đang phục vụ" : "Hết món";
 
     public bool IsLoading
     {
         get => _isLoading;
-        set => SetProperty(ref _isLoading, value);
+        set
+        {
+            if (SetProperty(ref _isLoading, value))
+                OnPropertyChanged(nameof(CanSave));
+        }
     }
 
     public FoodItem? EditingItem
@@ -78,6 +132,75 @@ public class AddMenuItemViewModel : BaseViewModel
         get => _editingItem;
         set => SetProperty(ref _editingItem, value);
     }
+
+    public bool IsEditing => EditingItem != null;
+
+    // === Validation Properties ===
+
+    public string NameError
+    {
+        get => _nameError;
+        set => SetProperty(ref _nameError, value);
+    }
+
+    public bool HasNameError
+    {
+        get => _hasNameError;
+        set
+        {
+            if (SetProperty(ref _hasNameError, value))
+                OnPropertyChanged(nameof(CanSave));
+        }
+    }
+
+    public string CategoryError
+    {
+        get => _categoryError;
+        set => SetProperty(ref _categoryError, value);
+    }
+
+    public bool HasCategoryError
+    {
+        get => _hasCategoryError;
+        set
+        {
+            if (SetProperty(ref _hasCategoryError, value))
+                OnPropertyChanged(nameof(CanSave));
+        }
+    }
+
+    public string PriceError
+    {
+        get => _priceError;
+        set => SetProperty(ref _priceError, value);
+    }
+
+    public bool HasPriceError
+    {
+        get => _hasPriceError;
+        set
+        {
+            if (SetProperty(ref _hasPriceError, value))
+                OnPropertyChanged(nameof(CanSave));
+        }
+    }
+
+    public string FormError
+    {
+        get => _formError;
+        set => SetProperty(ref _formError, value);
+    }
+
+    public bool HasFormError
+    {
+        get => _hasFormError;
+        set => SetProperty(ref _hasFormError, value);
+    }
+
+    /// <summary>
+    /// Nút Lưu chỉ được bật khi không có lỗi validation và không đang loading.
+    /// </summary>
+    public bool CanSave => !HasNameError && !HasCategoryError && !HasPriceError && !IsLoading;
 
     public List<string> Categories { get; } = new()
     {
@@ -96,11 +219,81 @@ public class AddMenuItemViewModel : BaseViewModel
         SelectCategoryCommand = new Command<string>(category => Category = category);
     }
 
+    // === On-blur Validation Methods ===
+
+    public void ValidateName()
+    {
+        if (string.IsNullOrWhiteSpace(Name))
+        {
+            HasNameError = true;
+            NameError = "Tên món ăn không được để trống.";
+        }
+        else
+        {
+            HasNameError = false;
+            NameError = string.Empty;
+        }
+    }
+
+    public void ValidatePrice()
+    {
+        if (Price < 1000)
+        {
+            HasPriceError = true;
+            PriceError = "Giá tiền phải từ 1,000 VNĐ trở lên.";
+        }
+        else
+        {
+            HasPriceError = false;
+            PriceError = string.Empty;
+        }
+    }
+
+    public void ValidateCategory()
+    {
+        if (string.IsNullOrWhiteSpace(Category))
+        {
+            HasCategoryError = true;
+            CategoryError = "Vui lòng chọn ít nhất 1 danh mục.";
+        }
+        else
+        {
+            HasCategoryError = false;
+            CategoryError = string.Empty;
+        }
+    }
+
+    /// <summary>
+    /// Validate toàn bộ form khi nhấn Lưu.
+    /// Trả về true nếu hợp lệ, false nếu có lỗi.
+    /// </summary>
+    public bool ValidateAll()
+    {
+        ValidateName();
+        ValidatePrice();
+        ValidateCategory();
+
+        bool hasAnyError = HasNameError || HasCategoryError || HasPriceError;
+
+        if (hasAnyError)
+        {
+            HasFormError = true;
+            FormError = "Vui lòng nhập đầy đủ thông tin cho món ăn.";
+        }
+        else
+        {
+            HasFormError = false;
+            FormError = string.Empty;
+        }
+
+        return !hasAnyError;
+    }
+
     public async Task SaveMenuItemAsync()
     {
-        if (string.IsNullOrWhiteSpace(Name) || Price <= 0 || string.IsNullOrWhiteSpace(Category))
+        // On-submit validation
+        if (!ValidateAll())
         {
-            await Application.Current?.MainPage?.DisplayAlert("Lỗi", "Vui lòng điền đầy đủ thông tin", "OK")!;
             return;
         }
 
@@ -116,8 +309,8 @@ public class AddMenuItemViewModel : BaseViewModel
                 Price = Price,
                 Description = Description,
                 Image = ImageUrl,
-                Available = Available,
-                OutOfStock = OutOfStock
+                Available = IsServing,
+                OutOfStock = !IsServing
             };
 
             // Save to Firebase
@@ -168,19 +361,20 @@ public class AddMenuItemViewModel : BaseViewModel
         Price = item.Price;
         Description = item.Description;
         ImageUrl = item.Image;
-        Available = item.Available;
-        OutOfStock = item.OutOfStock;
+        IsServing = item.Available && !item.OutOfStock;
 
         // Force refresh UI bindings
         OnPropertyChanged(nameof(EditingItem));
+        OnPropertyChanged(nameof(IsEditing));
         OnPropertyChanged(nameof(Id));
         OnPropertyChanged(nameof(Name));
         OnPropertyChanged(nameof(Category));
         OnPropertyChanged(nameof(Price));
         OnPropertyChanged(nameof(Description));
         OnPropertyChanged(nameof(ImageUrl));
-        OnPropertyChanged(nameof(Available));
-        OnPropertyChanged(nameof(OutOfStock));
+        OnPropertyChanged(nameof(IsServing));
+        OnPropertyChanged(nameof(StatusLabel));
+        OnPropertyChanged(nameof(CanSave));
     }
 
     private int GenerateNewId()

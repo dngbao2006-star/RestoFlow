@@ -5,43 +5,57 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:AppManagermentRestaurant.Controls"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     BackgroundColor="White"
     Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+    </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto,*">
         <controls:AppHeaderView />
 
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Padding="24" Spacing="20">
+
                 <!-- Title -->
                 <VerticalStackLayout Spacing="6">
-                    <Label 
-                        Text="{Binding EditingItem, StringFormat='{0:Sửa Món Ăn|Thêm Món Ăn}'}" 
-                        Style="{StaticResource PageTitle}" />
+                    <Label Text="Thêm Món Ăn" Style="{StaticResource PageTitle}" IsVisible="{Binding IsEditing, Converter={StaticResource InvertedBoolConverter}}" />
+                    <Label Text="Sửa Món Ăn" Style="{StaticResource PageTitle}" IsVisible="{Binding IsEditing}" />
                     <Label 
                         Text="{Binding Name}"
                         FontSize="14"
                         TextColor="{StaticResource TextMuted}"
-                        IsVisible="{Binding EditingItem, Converter={StaticResource HasValueConverter}}" />
+                        IsVisible="{Binding IsEditing}" />
                 </VerticalStackLayout>
 
-                <!-- Image Section -->
+                <!-- Form Error Banner (On-submit) -->
+                <Border 
+                    Background="#FFF3E0" Stroke="#FF9800" StrokeThickness="1" 
+                    StrokeShape="RoundRectangle 8" Padding="12"
+                    IsVisible="{Binding HasFormError}">
+                    <Label Text="{Binding FormError}" TextColor="#E65100" FontAttributes="Bold" FontSize="13" />
+                </Border>
+
+                <!-- Image Section (Optional) -->
                 <Border Style="{StaticResource CardBorder}">
                     <VerticalStackLayout Spacing="12">
                         <Label Text="Ảnh món ăn" FontAttributes="Bold" />
+                        <Label Text="Không bắt buộc — nếu trống sẽ hiển thị ảnh mặc định" 
+                               FontSize="11" TextColor="{StaticResource TextMuted}" />
 
-                        <!-- Image URL Input -->
                         <VerticalStackLayout Spacing="6">
                             <Label Text="Link ảnh (URL)" FontAttributes="Bold" FontSize="12" TextColor="{StaticResource TextMuted}" />
                             <Border Style="{StaticResource InputBorder}">
                                 <Entry 
+                                    x:Name="ImageUrlEntry"
                                     Text="{Binding ImageUrl}" 
                                     Placeholder="https://example.com/image.jpg"
                                     FontSize="12" />
                             </Border>
                         </VerticalStackLayout>
 
-                        <!-- Image Preview -->
                         <Frame BorderColor="{StaticResource BorderColor}" CornerRadius="10" Padding="0" HasShadow="False">
                             <Grid HeightRequest="200" BackgroundColor="#F5F5F5">
                                 <Image 
@@ -67,19 +81,29 @@
                     <VerticalStackLayout Spacing="16">
                         <Label Text="Thông tin cơ bản" FontAttributes="Bold" />
 
-                        <!-- Name -->
+                        <!-- Name (Bắt buộc) -->
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Tên món ăn" FontAttributes="Bold" />
-                            <Border Style="{StaticResource InputBorder}">
+                            <HorizontalStackLayout Spacing="4">
+                                <Label Text="Tên món ăn" FontAttributes="Bold" />
+                                <Label Text="*" TextColor="#F44336" FontAttributes="Bold" />
+                            </HorizontalStackLayout>
+                            <Border Style="{StaticResource InputBorder}" 
+                                    Stroke="{Binding HasNameError, Converter={StaticResource BoolToColorConverter}, ConverterParameter=Error}">
                                 <Entry 
+                                    x:Name="NameEntry"
                                     Text="{Binding Name}" 
-                                    Placeholder="Nhập tên món ăn" />
+                                    Placeholder="Nhập tên món ăn"
+                                    Unfocused="OnNameUnfocused" />
                             </Border>
+                            <Label Text="{Binding NameError}" TextColor="#F44336" FontSize="11" IsVisible="{Binding HasNameError}" />
                         </VerticalStackLayout>
 
-                        <!-- Category -->
+                        <!-- Category (Bắt buộc) -->
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Danh mục" FontAttributes="Bold" />
+                            <HorizontalStackLayout Spacing="4">
+                                <Label Text="Danh mục" FontAttributes="Bold" />
+                                <Label Text="*" TextColor="#F44336" FontAttributes="Bold" />
+                            </HorizontalStackLayout>
                             <CollectionView ItemsSource="{Binding Categories}" SelectionMode="Single" SelectedItem="{Binding Category}">
                                 <CollectionView.ItemsLayout>
                                     <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="8" VerticalItemSpacing="8" />
@@ -117,22 +141,31 @@
                                     </DataTemplate>
                                 </CollectionView.ItemTemplate>
                             </CollectionView>
+                            <Label Text="{Binding CategoryError}" TextColor="#F44336" FontSize="11" IsVisible="{Binding HasCategoryError}" />
                         </VerticalStackLayout>
 
-                        <!-- Price -->
+                        <!-- Price (Bắt buộc) -->
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Giá (VND)" FontAttributes="Bold" />
-                            <Border Style="{StaticResource InputBorder}">
+                            <HorizontalStackLayout Spacing="4">
+                                <Label Text="Giá (VND)" FontAttributes="Bold" />
+                                <Label Text="*" TextColor="#F44336" FontAttributes="Bold" />
+                            </HorizontalStackLayout>
+                            <Border Style="{StaticResource InputBorder}"
+                                    Stroke="{Binding HasPriceError, Converter={StaticResource BoolToColorConverter}, ConverterParameter=Error}">
                                 <Entry 
+                                    x:Name="PriceEntry"
                                     Text="{Binding Price, StringFormat='{0:F0}'}" 
                                     Placeholder="0"
-                                    Keyboard="Numeric" />
+                                    Keyboard="Numeric"
+                                    Unfocused="OnPriceUnfocused" />
                             </Border>
+                            <Label Text="{Binding PriceError}" TextColor="#F44336" FontSize="11" IsVisible="{Binding HasPriceError}" />
                         </VerticalStackLayout>
 
-                        <!-- Description -->
+                        <!-- Description (Không bắt buộc) -->
                         <VerticalStackLayout Spacing="6">
                             <Label Text="Mô tả" FontAttributes="Bold" />
+                            <Label Text="Không bắt buộc" FontSize="11" TextColor="{StaticResource TextMuted}" />
                             <Border Style="{StaticResource InputBorder}">
                                 <Editor 
                                     Text="{Binding Description}" 
@@ -143,21 +176,16 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <!-- Status Section -->
+                <!-- Status Section — Single Toggle -->
                 <Border Style="{StaticResource CardBorder}">
                     <VerticalStackLayout Spacing="12">
                         <Label Text="Trạng thái" FontAttributes="Bold" />
 
-                        <HorizontalStackLayout Spacing="16" VerticalOptions="Center">
-                            <VerticalStackLayout Spacing="6">
-                                <Label Text="Đang phục vụ" />
-                                <Switch IsToggled="{Binding Available}" />
-                            </VerticalStackLayout>
-
-                            <VerticalStackLayout Spacing="6">
-                                <Label Text="Hết món" />
-                                <Switch IsToggled="{Binding OutOfStock}" />
-                            </VerticalStackLayout>
+                        <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                            <Switch IsToggled="{Binding IsServing}" />
+                            <Label Text="{Binding StatusLabel}" 
+                                   FontAttributes="Bold" FontSize="14"
+                                   VerticalOptions="Center" />
                         </HorizontalStackLayout>
                     </VerticalStackLayout>
                 </Border>
@@ -170,10 +198,11 @@
                         Clicked="OnCancelClicked"
                         HorizontalOptions="FillAndExpand" />
                     <Button 
+                        x:Name="SaveButton"
                         Text="Lưu" 
                         Style="{StaticResource PrimaryButton}"
                         Clicked="OnSaveClicked"
-                        IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanNegationConverter}}"
+                        IsEnabled="{Binding CanSave}"
                         HorizontalOptions="FillAndExpand" />
                 </HorizontalStackLayout>
 

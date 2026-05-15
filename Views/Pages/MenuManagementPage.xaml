@@ -30,13 +30,13 @@
                     <Border Style="{StaticResource CardBorder}" Grid.Column="1">
                         <VerticalStackLayout Spacing="6">
                             <Label Text="Đang phục vụ" FontAttributes="Bold" />
-                            <Label Text="11" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Success}" />
+                            <Label Text="{Binding AvailableMenuItemCount}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Success}" />
                         </VerticalStackLayout>
                     </Border>
                     <Border Style="{StaticResource CardBorder}" Grid.Column="2">
                         <VerticalStackLayout Spacing="6">
                             <Label Text="Hết món" FontAttributes="Bold" />
-                            <Label Text="1" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Danger}" />
+                            <Label Text="{Binding OutOfStockMenuItemCount}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Danger}" />
                         </VerticalStackLayout>
                     </Border>
                 </Grid>
