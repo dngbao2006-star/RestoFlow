@@ -236,6 +236,70 @@ namespace AppManagermentRestaurant.Services
                 .OnceSingleAsync<PresenceModel>();
         }
 
+        /// <summary>
+        /// Đổi mật khẩu người dùng thông qua Firebase Auth REST API.
+        /// Bước 1: Xác thực mật khẩu hiện tại bằng signInWithPassword → lấy idToken mới.
+        /// Bước 2: Gọi accounts:update với idToken + password mới.
+        /// </summary>
+        public async Task<(bool IsSuccess, string ErrorMessage)> ChangePasswordAsync(string email, string currentPassword, string newPassword)
+        {
+            try
+            {
+                // BƯỚC 1: Xác thực mật khẩu hiện tại
+                string signInEndpoint = $"{GOOGLE_AUTH_URL}:signInWithPassword?key={WEB_API_KEY}";
+                var signInPayload = new { email, password = currentPassword, returnSecureToken = true };
+                var signInContent = new StringContent(JsonSerializer.Serialize(signInPayload), Encoding.UTF8, "application/json");
+
+                HttpResponseMessage signInRes = await client.PostAsync(signInEndpoint, signInContent);
+
+                if (!signInRes.IsSuccessStatusCode)
+                {
+                    string signInError = await signInRes.Content.ReadAsStringAsync();
+                    using JsonDocument errorDoc = JsonDocument.Parse(signInError);
+                    string errorMsg = errorDoc.RootElement.GetProperty("error").GetProperty("message").GetString() ?? "";
+
+                    return errorMsg switch
+                    {
+                        "INVALID_PASSWORD" => (false, "Mật khẩu hiện tại không đúng."),
+                        "INVALID_LOGIN_CREDENTIALS" => (false, "Mật khẩu hiện tại không đúng."),
+                        "USER_DISABLED" => (false, "Tài khoản đã bị vô hiệu hóa."),
+                        "TOO_MANY_ATTEMPTS_TRY_LATER" => (false, "Quá nhiều lần thử. Vui lòng thử lại sau."),
+                        _ => (false, "Xác thực thất bại: " + errorMsg)
+                    };
+                }
+
+                // Lấy idToken từ phiên xác thực
+                string signInResult = await signInRes.Content.ReadAsStringAsync();
+                using JsonDocument signInDoc = JsonDocument.Parse(signInResult);
+                string idToken = signInDoc.RootElement.GetProperty("idToken").GetString() ?? "";
+
+                // BƯỚC 2: Đổi mật khẩu bằng idToken
+                string updateEndpoint = $"{GOOGLE_AUTH_URL}:update?key={WEB_API_KEY}";
+                var updatePayload = new { idToken, password = newPassword, returnSecureToken = true };
+                var updateContent = new StringContent(JsonSerializer.Serialize(updatePayload), Encoding.UTF8, "application/json");
+
+                HttpResponseMessage updateRes = await client.PostAsync(updateEndpoint, updateContent);
+
+                if (!updateRes.IsSuccessStatusCode)
+                {
+                    string updateError = await updateRes.Content.ReadAsStringAsync();
+                    using JsonDocument updateErrorDoc = JsonDocument.Parse(updateError);
+                    string updateErrorMsg = updateErrorDoc.RootElement.GetProperty("error").GetProperty("message").GetString() ?? "";
+
+                    if (updateErrorMsg.Contains("WEAK_PASSWORD"))
+                        return (false, "Mật khẩu mới quá yếu. Vui lòng chọn mật khẩu mạnh hơn (ít nhất 6 ký tự).");
+
+                    return (false, "Đổi mật khẩu thất bại: " + updateErrorMsg);
+                }
+
+                return (true, "Mật khẩu đã được cập nhật thành công!");
+            }
+            catch (Exception ex)
+            {
+                return (false, "Lỗi kết nối: " + ex.Message);
+            }
+        }
+
         public void StartPresenceListener()
         {
             firebaseClient

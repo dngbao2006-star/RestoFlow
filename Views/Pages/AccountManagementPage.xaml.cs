@@ -8,6 +8,7 @@ namespace AppManagermentRestaurant.Views.Pages;
 public partial class AccountManagementPage : ContentPage
 {
     private Button? _selectedTabButton;
+    private readonly FirebaseService _firebaseService = new FirebaseService();
 
     public AccountManagementPage()
     {
@@ -77,7 +78,7 @@ public partial class AccountManagementPage : ContentPage
 
     private async void OnUpdatePasswordClicked(object sender, EventArgs e)
     {
-        var updated = ViewModel.UpdatePassword(
+        var updated = await ViewModel.UpdatePasswordAsync(
             CurrentPasswordEntry?.Text ?? string.Empty,
             NewPasswordEntry?.Text ?? string.Empty,
             ConfirmPasswordEntry?.Text ?? string.Empty);
@@ -87,11 +88,39 @@ public partial class AccountManagementPage : ContentPage
             return;
         }
 
-        if (CurrentPasswordEntry != null) CurrentPasswordEntry.Text = string.Empty;
-        if (NewPasswordEntry != null) NewPasswordEntry.Text = string.Empty;
-        if (ConfirmPasswordEntry != null) ConfirmPasswordEntry.Text = string.Empty;
+        // Hiển thị thông báo thành công
+        await DisplayAlert(
+            "Đổi mật khẩu thành công",
+            "Mật khẩu đã được cập nhật. Vui lòng đăng nhập lại với mật khẩu mới.",
+            "OK");
 
-        await Task.Delay(3000);
-        ViewModel.ClearPasswordSuccess();
+        // === LOGOUT AN TOÀN (thứ tự chống crash đã kiểm chứng) ===
+
+        var currentUser = AppContext.Instance.CurrentUser;
+
+        // 1. Hủy listener xung đột phiên
+        AppContext.Instance.SessionConflictSubscription?.Dispose();
+        AppContext.Instance.SessionConflictSubscription = null;
+        AppContext.Instance.CurrentSessionId = null;
+
+        // 2. Cập nhật trạng thái offline lên Firebase
+        if (currentUser != null)
+        {
+            await _firebaseService.SetUserOfflineAsync(
+                currentUser.FirebaseUid,
+                currentUser.Name);
+        }
+
+        // 3. Ngắt BindingContext của AppShell TRƯỚC (tránh NullReferenceException)
+        if (Application.Current?.MainPage is AppShell shell)
+        {
+            shell.BindingContext = null;
+        }
+
+        // 4. Chuyển về màn hình đăng nhập TRƯỚC
+        App.ShowLogin();
+
+        // 5. Xóa user SAU khi binding đã ngắt
+        AppContext.Instance.CurrentUser = null;
     }
 }

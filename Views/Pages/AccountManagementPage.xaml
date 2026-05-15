@@ -4,8 +4,13 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:controls="clr-namespace:AppManagermentRestaurant.Controls"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     BackgroundColor="White"
     Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+    </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto,*">
         <controls:AppHeaderView />
@@ -101,7 +106,11 @@
                             </Border>
 
                             <Label x:Name="PasswordSuccessLabel" Text="✅ Mật khẩu đã được cập nhật thành công!" TextColor="#4CAF50" FontSize="12" IsVisible="{Binding HasPasswordSuccess}" FontAttributes="Bold" />
-                            <Button Text="Cập nhật mật khẩu" Style="{StaticResource PrimaryButton}" Clicked="OnUpdatePasswordClicked" IsEnabled="{Binding CanUpdatePassword}" />
+
+                            <Grid>
+                                <Button Text="Cập nhật mật khẩu" Style="{StaticResource PrimaryButton}" Clicked="OnUpdatePasswordClicked" IsEnabled="{Binding CanUpdatePassword}" IsVisible="{Binding IsUpdatingPassword, Converter={StaticResource InvertedBoolConverter}}" />
+                                <Button Text="⏳ Đang cập nhật..." Style="{StaticResource PrimaryButton}" IsEnabled="False" IsVisible="{Binding IsUpdatingPassword}" />
+                            </Grid>
                         </VerticalStackLayout>
                     </Border>
                 </VerticalStackLayout>

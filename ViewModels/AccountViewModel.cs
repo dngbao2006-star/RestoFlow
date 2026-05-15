@@ -8,6 +8,7 @@ namespace AppManagermentRestaurant.ViewModels;
 public class AccountViewModel : ObservableObject
 {
     private readonly AppContext _appContext;
+    private readonly FirebaseService _firebaseService = new FirebaseService();
     private string _selectedTab = "Profile";
     private string _passwordError = string.Empty;
     private bool _hasPasswordError;
@@ -19,6 +20,7 @@ public class AccountViewModel : ObservableObject
     private bool _isCurrentPasswordHidden = true;
     private bool _isNewPasswordHidden = true;
     private bool _isConfirmPasswordHidden = true;
+    private bool _isUpdatingPassword;
 
     public AccountViewModel(AppContext appContext)
     {
@@ -85,6 +87,15 @@ public class AccountViewModel : ObservableObject
     {
         get => _hasPasswordSuccess;
         set => SetProperty(ref _hasPasswordSuccess, value);
+    }
+
+    /// <summary>
+    /// Trạng thái loading khi đang gọi API đổi mật khẩu.
+    /// </summary>
+    public bool IsUpdatingPassword
+    {
+        get => _isUpdatingPassword;
+        set => SetProperty(ref _isUpdatingPassword, value);
     }
 
     public string VerificationError
@@ -163,7 +174,7 @@ public class AccountViewModel : ObservableObject
     public string NewPasswordShowText => IsNewPasswordHidden ? "👁" : "🙈";
     public string ConfirmPasswordShowText => IsConfirmPasswordHidden ? "👁" : "🙈";
 
-    public bool CanUpdatePassword => !HasPasswordError;
+    public bool CanUpdatePassword => !HasPasswordError && !IsUpdatingPassword;
     public bool CanVerifyEmail => VerificationCode.Length == 6;
 
     public void ValidatePasswordFields(string current, string newPass, string confirm)
@@ -192,7 +203,12 @@ public class AccountViewModel : ObservableObject
         OnPropertyChanged(nameof(CanUpdatePassword));
     }
 
-    public bool UpdatePassword(string current, string newPass, string confirm)
+    /// <summary>
+    /// Đổi mật khẩu thông qua Firebase Auth REST API.
+    /// Bước 1: Validate input local.
+    /// Bước 2: Gọi ChangePasswordAsync → xác thực mật khẩu cũ + đổi mật khẩu mới.
+    /// </summary>
+    public async Task<bool> UpdatePasswordAsync(string current, string newPass, string confirm)
     {
         ValidatePasswordFields(current, newPass, confirm);
 
@@ -208,13 +224,42 @@ public class AccountViewModel : ObservableObject
             return false;
         }
 
-        // TODO: [BACKEND] - Chỗ này gọi API đổi mật khẩu (kèm xác thực mật khẩu hiện tại và chính sách bảo mật).
-        HasPasswordSuccess = true;
-        HasPasswordError = false;
-        PasswordError = string.Empty;
+        // Lấy email của user hiện tại
+        var email = _appContext.CurrentUser?.Email;
+        if (string.IsNullOrEmpty(email))
+        {
+            HasPasswordError = true;
+            PasswordError = "Không tìm thấy thông tin tài khoản.";
+            return false;
+        }
 
-        ActivityLogService.Instance.LogPasswordChange();
-        return true;
+        // Gọi Firebase Auth API
+        IsUpdatingPassword = true;
+        OnPropertyChanged(nameof(CanUpdatePassword));
+
+        try
+        {
+            var result = await _firebaseService.ChangePasswordAsync(email, current, newPass);
+
+            if (!result.IsSuccess)
+            {
+                HasPasswordError = true;
+                PasswordError = result.ErrorMessage;
+                return false;
+            }
+
+            // Thành công
+            HasPasswordSuccess = true;
+            HasPasswordError = false;
+            PasswordError = string.Empty;
+            ActivityLogService.Instance.LogPasswordChange();
+            return true;
+        }
+        finally
+        {
+            IsUpdatingPassword = false;
+            OnPropertyChanged(nameof(CanUpdatePassword));
+        }
     }
 
     public void ClearPasswordSuccess()
