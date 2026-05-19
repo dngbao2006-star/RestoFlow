@@ -90,7 +90,12 @@ public partial class DishStatusPage : ContentPage
     {
         get
         {
-            var orders = AppContext.Instance.Orders.AsEnumerable();
+            // CHỈ hiển thị order đã có items (đã submit lên bếp)
+            // Order draft (chưa gửi) không nằm trong AppContext.Orders
+            // nhưng thêm bộ lọc an toàn: bỏ qua order rỗng
+            var orders = AppContext.Instance.Orders
+                .Where(o => o.Items.Count > 0)
+                .AsEnumerable();
 
             if (_selectedStatusFilter != null)
             {

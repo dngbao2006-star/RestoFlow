@@ -18,6 +18,12 @@ public partial class OrderCreationPage : ContentPage
     private Table _selectedActiveTable;
     private HashSet<int> _itemsSubmittedPreviously = new();
 
+    /// <summary>
+    /// Order nháp chỉ tồn tại local, CHƯA được thêm vào AppContext.Orders.
+    /// Chỉ được đẩy vào AppContext.Orders + Firebase khi nhấn "Gửi lên bếp".
+    /// </summary>
+    private Order? _draftOrder;
+
     public OrderCreationPage()
     {
         InitializeComponent();
@@ -68,7 +74,7 @@ public partial class OrderCreationPage : ContentPage
         // 3. TỰ ĐỘNG CHỌN BÀN SỐ NHỎ NHẤT (Nếu không có bàn nào đang chọn)
         if (targetTable == null && _activeTables.Any())
         {
-            targetTable = _activeTables.First(); // Ưu tiên T1, T2...
+            targetTable = _activeTables.First();
         }
 
         // 4. Ép SelectedActiveTable cập nhật
@@ -82,6 +88,7 @@ public partial class OrderCreationPage : ContentPage
         else
         {
             AppContext.Instance.SelectedOrder = null;
+            _draftOrder = null;
             UpdatePageState();
         }
 
@@ -90,16 +97,29 @@ public partial class OrderCreationPage : ContentPage
 
     private void SwitchTableData(Table table)
     {
+        // Reset draft khi chuyển bàn
+        _draftOrder = null;
+
+        // Tìm order đã tồn tại trên Firebase (đã submit trước đó)
         var existingOrder = AppContext.Instance.Orders.FirstOrDefault(o => o.TableId == table.Id && o.Status == OrderStatus.Active);
 
         if (existingOrder != null)
         {
+            // Order đã submit rồi → dùng order đó (có dữ liệu từ Firebase)
             AppContext.Instance.SelectedOrder = existingOrder;
+
+            // Đánh dấu tất cả items hiện có là đã submit
+            _itemsSubmittedPreviously.Clear();
+            foreach (var item in existingOrder.Items)
+            {
+                _itemsSubmittedPreviously.Add(item.Id);
+            }
         }
         else
         {
+            // Bàn có khách nhưng CHƯA có order → tạo order nháp LOCAL
             var allOrders = AppContext.Instance.Orders.Concat(AppContext.Instance.OrderHistory).ToList();
-            var newOrder = new Order
+            _draftOrder = new Order
             {
                 Id = allOrders.Any() ? allOrders.Max(o => o.Id) + 1 : 1,
                 TableId = table.Id,
@@ -111,8 +131,10 @@ public partial class OrderCreationPage : ContentPage
                 Items = new()
             };
 
-            AppContext.Instance.Orders.Add(newOrder);
-            AppContext.Instance.SelectedOrder = newOrder;
+            // KHÔNG thêm vào AppContext.Instance.Orders
+            // Chỉ set SelectedOrder để UI binding hoạt động
+            AppContext.Instance.SelectedOrder = _draftOrder;
+            _itemsSubmittedPreviously.Clear();
         }
 
         MainThread.BeginInvokeOnMainThread(() =>
@@ -457,11 +479,16 @@ public partial class OrderCreationPage : ContentPage
         if (AppContext.Instance.SelectedOrder?.Items.Count == 0)
         {
             await DisplayAlert("Thông báo", "Vui lòng thêm ít nhất một món trước khi gửi", "OK");
+            _isSubmitting = false;
             return;
         }
 
         var order = AppContext.Instance.SelectedOrder;
-        if (order == null) return;
+        if (order == null)
+        {
+            _isSubmitting = false;
+            return;
+        }
 
         var confirm = await DisplayAlert(
             "Xác nhận đơn hàng",
@@ -469,7 +496,11 @@ public partial class OrderCreationPage : ContentPage
             "Có",
             "Không");
 
-        if (!confirm) return;
+        if (!confirm)
+        {
+            _isSubmitting = false;
+            return;
+        }
 
         // Gộp các món trùng MenuItemId lại thành 1 entry duy nhất
         MergeOrderItems(order);
@@ -484,6 +515,13 @@ public partial class OrderCreationPage : ContentPage
             table.OrderTotal = order.TotalDisplay;
             AppContext.Instance.SelectedTable = table;
             _ = _firebase.UpdateTableAsync(table);
+        }
+
+        // === CHÍNH THỨC thêm order vào AppContext.Orders nếu là draft ===
+        if (_draftOrder != null && _draftOrder.Id == order.Id)
+        {
+            AppContext.Instance.Orders.Add(order);
+            _draftOrder = null; // Không còn là draft nữa
         }
 
         // Sync order + items to Firebase
