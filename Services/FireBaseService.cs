@@ -366,9 +366,38 @@ namespace AppManagermentRestaurant.Services
                 ["OrderTotal"] = table.OrderTotal ?? string.Empty,
                 ["ArrivalTime"] = table.ArrivalTime?.ToString("yyyy-MM-ddTHH:mm:ss") ?? string.Empty,
                 ["ReservedFor"] = table.ReservedFor ?? string.Empty,
+                ["ReservedPhone"] = table.ReservedPhone ?? string.Empty,
                 ["ReservedAt"] = table.ReservedAt?.ToString("yyyy-MM-ddTHH:mm:ss") ?? string.Empty
             };
             await firebaseClient.Child("Tables").Child(key).PatchAsync(data);
+        }
+
+        public async Task CreateTableAsync(Table table)
+        {
+            var key = $"table_{table.Id}";
+            var data = new
+            {
+                table.Id,
+                table.Number,
+                table.Floor,
+                Status = (int)table.Status,
+                table.Capacity,
+                CurrentOrderId = table.CurrentOrderId ?? (object)string.Empty,
+                HasOrdered = table.HasOrdered,
+                OrderItemCount = table.OrderItemCount,
+                OrderTotal = table.OrderTotal ?? string.Empty,
+                ArrivalTime = table.ArrivalTime?.ToString("yyyy-MM-ddTHH:mm:ss") ?? string.Empty,
+                ReservedFor = table.ReservedFor ?? string.Empty,
+                ReservedPhone = table.ReservedPhone ?? string.Empty,
+                ReservedAt = table.ReservedAt?.ToString("yyyy-MM-ddTHH:mm:ss") ?? string.Empty
+            };
+            await firebaseClient.Child("Tables").Child(key).PutAsync(data);
+        }
+
+        public async Task DeleteTableAsync(int tableId)
+        {
+            var key = $"table_{tableId}";
+            await firebaseClient.Child("Tables").Child(key).DeleteAsync();
         }
 
         public async Task UpdateOrderStatusAsync(Order order)

@@ -12,6 +12,7 @@ public class Table
     public int? CurrentOrderId { get; set; }
 
     public string? ReservedFor { get; set; }
+    public string? ReservedPhone { get; set; }
     public DateTime? ReservedAt { get; set; }
 
     public DateTime? ArrivalTime { get; set; }

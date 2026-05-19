@@ -52,7 +52,7 @@
                             </Border>
 
                             <HorizontalStackLayout Spacing="4">
-                                <Label Text="Seats" FontSize="11"/>
+                                <Label Text="Chỗ ngồi" FontSize="11"/>
                                 <Label Text="{Binding Capacity}" FontAttributes="Bold" FontSize="11"/>
                             </HorizontalStackLayout>
 
