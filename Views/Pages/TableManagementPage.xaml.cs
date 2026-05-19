@@ -135,7 +135,8 @@ public partial class TableManagementPage : ContentPage
         if (sender is Button btn && btn.CommandParameter is Table table)
         {
             AppContext.Instance.SelectedTable = table;
-            AppContext.Instance.SelectedOrder = AppContext.Instance.Orders.FirstOrDefault(o => o.TableId == table.Id && o.Status == OrderStatus.Active);
+            AppContext.Instance.SelectedOrder = AppContext.Instance.Orders.FirstOrDefault(o => o.TableId == table.Id && o.Status == OrderStatus.Active)
+                                                ?? AppContext.Instance.Orders.FirstOrDefault(o => o.TableNumber == table.Number && o.Status == OrderStatus.Active);
             await Shell.Current.GoToAsync(AppRoutes.Absolute(AppRoutes.Payment));
         }
     }
@@ -162,7 +163,8 @@ public partial class TableManagementPage : ContentPage
                 table.HasOrdered = false;
                 _ = _firebase.UpdateTableAsync(table);
 
-                var draftOrder = AppContext.Instance.Orders.FirstOrDefault(o => o.TableId == table.Id && o.Status == OrderStatus.Active);
+                var draftOrder = AppContext.Instance.Orders.FirstOrDefault(o => o.TableId == table.Id && o.Status == OrderStatus.Active)
+                              ?? AppContext.Instance.Orders.FirstOrDefault(o => o.TableNumber == table.Number && o.Status == OrderStatus.Active);
                 if (draftOrder != null)
                 {
                     AppContext.Instance.Orders.Remove(draftOrder);

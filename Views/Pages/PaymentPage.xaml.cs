@@ -52,7 +52,9 @@ public partial class PaymentPage : ContentPage
         // 2. Xét xem có bàn nào đang được truyền từ trang sơ đồ qua không
         if (AppContext.Instance.SelectedTable != null)
         {
-            targetOrder = _activeOrders.FirstOrDefault(o => o.TableId == AppContext.Instance.SelectedTable.Id);
+            var selTable = AppContext.Instance.SelectedTable;
+            targetOrder = _activeOrders.FirstOrDefault(o => o.TableId == selTable.Id)
+                       ?? _activeOrders.FirstOrDefault(o => o.TableNumber == selTable.Number);
         }
 
         // 3. TỰ ĐỘNG CHỌN BÀN SỐ NHỎ NHẤT (Nếu không có bàn nào đang chọn)
@@ -83,7 +85,8 @@ public partial class PaymentPage : ContentPage
                 if (value != null)
                 {
                     AppContext.Instance.SelectedOrder = value;
-                    AppContext.Instance.SelectedTable = AppContext.Instance.Tables.FirstOrDefault(t => t.Id == value.TableId);
+                    AppContext.Instance.SelectedTable = AppContext.Instance.Tables.FirstOrDefault(t => t.Id == value.TableId)
+                                                     ?? AppContext.Instance.Tables.FirstOrDefault(t => t.Number == value.TableNumber);
                 }
 
                 OnPropertyChanged(nameof(SelectedTableOrder));
@@ -328,7 +331,8 @@ public partial class PaymentPage : ContentPage
         order.Status = OrderStatus.Paid;
         order.PaymentMethod = _selectedPaymentMethod.Value;
 
-        var table = AppContext.Instance.Tables.FirstOrDefault(t => t.Number == order.TableNumber);
+        var table = AppContext.Instance.Tables.FirstOrDefault(t => t.Id == order.TableId)
+                 ?? AppContext.Instance.Tables.FirstOrDefault(t => t.Number == order.TableNumber);
         if (table != null)
         {
             table.Status = TableStatus.NeedsClearing;

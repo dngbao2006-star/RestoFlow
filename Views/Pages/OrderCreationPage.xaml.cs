@@ -83,7 +83,7 @@ public partial class OrderCreationPage : ContentPage
             AppContext.Instance.SelectedTable = targetTable;
             _selectedActiveTable = targetTable;
             OnPropertyChanged(nameof(SelectedActiveTable));
-            SwitchTableData(targetTable);
+            await SwitchTableDataAsync(targetTable);
         }
         else
         {
@@ -95,13 +95,15 @@ public partial class OrderCreationPage : ContentPage
         _isLoadingData = false;
     }
 
-    private void SwitchTableData(Table table)
+    private async Task SwitchTableDataAsync(Table table)
     {
         // Reset draft khi chuyển bàn
         _draftOrder = null;
 
         // Tìm order đã tồn tại trên Firebase (đã submit trước đó)
-        var existingOrder = AppContext.Instance.Orders.FirstOrDefault(o => o.TableId == table.Id && o.Status == OrderStatus.Active);
+        // Ưu tiên match theo TableId, fallback theo TableNumber
+        var existingOrder = AppContext.Instance.Orders.FirstOrDefault(o => o.TableId == table.Id && o.Status == OrderStatus.Active)
+                         ?? AppContext.Instance.Orders.FirstOrDefault(o => o.TableNumber == table.Number && o.Status == OrderStatus.Active);
 
         if (existingOrder != null)
         {
@@ -117,19 +119,30 @@ public partial class OrderCreationPage : ContentPage
         }
         else
         {
-            // Bàn có khách nhưng CHƯA có order → tạo order nháp LOCAL
-            var allOrders = AppContext.Instance.Orders.Concat(AppContext.Instance.OrderHistory).ToList();
-            _draftOrder = new Order
+            // Bàn có khách nhưng CHƯA có order → thử khôi phục draft
+            var restoredDraft = await DraftOrderService.Instance.GetDraftAsync(table.Id);
+
+            if (restoredDraft != null)
             {
-                Id = allOrders.Any() ? allOrders.Max(o => o.Id) + 1 : 1,
-                TableId = table.Id,
-                TableNumber = table.Number,
-                Status = OrderStatus.Active,
-                CreatedAt = DateTime.Now,
-                ServerName = AppContext.Instance.CurrentUser?.Name ?? "Nhân viên",
-                ServerId = AppContext.Instance.CurrentUser?.FirebaseUid ?? "",
-                Items = new()
-            };
+                // Tầng 2: Khôi phục từ RAM/disk
+                _draftOrder = restoredDraft;
+            }
+            else
+            {
+                // Tạo order nháp mới
+                var allOrders = AppContext.Instance.Orders.Concat(AppContext.Instance.OrderHistory).ToList();
+                _draftOrder = new Order
+                {
+                    Id = allOrders.Any() ? allOrders.Max(o => o.Id) + 1 : 1,
+                    TableId = table.Id,
+                    TableNumber = table.Number,
+                    Status = OrderStatus.Active,
+                    CreatedAt = DateTime.Now,
+                    ServerName = AppContext.Instance.CurrentUser?.Name ?? "Nhân viên",
+                    ServerId = AppContext.Instance.CurrentUser?.FirebaseUid ?? "",
+                    Items = new()
+                };
+            }
 
             // KHÔNG thêm vào AppContext.Instance.Orders
             // Chỉ set SelectedOrder để UI binding hoạt động
@@ -150,14 +163,18 @@ public partial class OrderCreationPage : ContentPage
         if (AppContext.Instance.SelectedOrder == null)
         {
             _isOrderReadOnly = false;
+            RefreshVisibility();
             return;
         }
 
-        var table = AppContext.Instance.Tables.FirstOrDefault(t => t.Number == AppContext.Instance.SelectedOrder.TableNumber);
+        var order = AppContext.Instance.SelectedOrder;
+        var table = AppContext.Instance.Tables.FirstOrDefault(t => t.Id == order.TableId)
+                 ?? AppContext.Instance.Tables.FirstOrDefault(t => t.Number == order.TableNumber);
 
         if (table == null)
         {
             _isOrderReadOnly = false;
+            RefreshVisibility();
             return;
         }
 
@@ -184,7 +201,7 @@ public partial class OrderCreationPage : ContentPage
                 if (value != null && !_isLoadingData)
                 {
                     AppContext.Instance.SelectedTable = value;
-                    SwitchTableData(value);
+                    _ = SwitchTableDataAsync(value);
                 }
             }
         }
@@ -194,6 +211,32 @@ public partial class OrderCreationPage : ContentPage
     public bool HasNewItems => _newItems.Count > 0;
     public bool HasNoItems => (AppContext.Instance.SelectedOrder?.Items.Count ?? 0) == 0;
 
+    /// <summary>
+    /// Nút "Gửi lên bếp" chỉ hiện khi có ít nhất 1 món mới (chưa submit).
+    /// </summary>
+    public bool ShowSubmitButton => _newItems.Count > 0;
+
+    /// <summary>
+    /// Khung tổng tiền hiện khi: có bất kỳ item nào (mới hoặc cũ),
+    /// HOẶC bàn đã từng có đơn hàng trước đó.
+    /// </summary>
+    public bool ShowTotalBox
+    {
+        get
+        {
+            var order = AppContext.Instance.SelectedOrder;
+            if (order == null) return false;
+
+            // Có item bất kỳ → hiện
+            if (order.Items.Count > 0) return true;
+
+            // Bàn đã từng có đơn (HasOrdered) → hiện để xem tổng tiền cũ
+            var table = AppContext.Instance.Tables.FirstOrDefault(t => t.Id == order.TableId)
+                     ?? AppContext.Instance.Tables.FirstOrDefault(t => t.Number == order.TableNumber);
+            return table?.HasOrdered == true;
+        }
+    }
+
     public string ExistingOrderInfo
     {
         get
@@ -202,6 +245,12 @@ public partial class OrderCreationPage : ContentPage
             if (order == null) return "Đơn mới";
             return order.Items.Count > 0 ? $"Cập nhật ({order.Items.Count} món)" : "Đơn mới";
         }
+    }
+
+    private void RefreshVisibility()
+    {
+        OnPropertyChanged(nameof(ShowSubmitButton));
+        OnPropertyChanged(nameof(ShowTotalBox));
     }
 
     private void RefreshItemCollections()
@@ -231,6 +280,7 @@ public partial class OrderCreationPage : ContentPage
         OnPropertyChanged(nameof(HasNewItems));
         OnPropertyChanged(nameof(HasNoItems));
         OnPropertyChanged(nameof(ExistingOrderInfo));
+        RefreshVisibility();
     }
 
     private void InitializeFilteredMenuItems()
@@ -342,6 +392,7 @@ public partial class OrderCreationPage : ContentPage
         order.NotifyItemsChanged();
         AppContext.Instance.RefreshBadges();
         RefreshItemCollections();
+        AutoSaveDraft();
     }
 
     private void OnIncreaseQuantityClicked(object sender, EventArgs e)
@@ -352,6 +403,7 @@ public partial class OrderCreationPage : ContentPage
         AppContext.Instance.SelectedOrder?.NotifyItemsChanged();
         AppContext.Instance.RefreshBadges();
         RefreshItemCollections();
+        AutoSaveDraft();
     }
 
     private void OnDecreaseQuantityClicked(object sender, EventArgs e)
@@ -371,6 +423,7 @@ public partial class OrderCreationPage : ContentPage
         AppContext.Instance.SelectedOrder?.NotifyItemsChanged();
         AppContext.Instance.RefreshBadges();
         RefreshItemCollections();
+        AutoSaveDraft();
     }
 
     private async void OnNoteItemClicked(object sender, EventArgs e)
@@ -390,12 +443,14 @@ public partial class OrderCreationPage : ContentPage
         {
             orderItem.Notes = newNote.Trim() == "" ? null : newNote.Trim();
             RefreshItemCollections();
+            AutoSaveDraft();
         }
     }
 
     private void OnNoteEntryCompleted(object sender, EventArgs e)
     {
         AppContext.Instance.RefreshBadges();
+        AutoSaveDraft();
     }
 
     private void AddItemToOrder(Models.FoodItem menuItem)
@@ -430,6 +485,18 @@ public partial class OrderCreationPage : ContentPage
         order.NotifyItemsChanged();
         AppContext.Instance.RefreshBadges();
         RefreshItemCollections();
+        AutoSaveDraft();
+    }
+
+    /// <summary>
+    /// Auto-save draft mỗi khi có thay đổi (thêm/bớt/sửa món).
+    /// Chỉ save khi đang ở chế độ draft (chưa submit).
+    /// </summary>
+    private void AutoSaveDraft()
+    {
+        if (_draftOrder == null) return;
+        var tableId = _draftOrder.TableId;
+        DraftOrderService.Instance.UpdateDraft(tableId, _draftOrder);
     }
 
     private void MergeOrderItems(Order order)
@@ -505,7 +572,8 @@ public partial class OrderCreationPage : ContentPage
         // Gộp các món trùng MenuItemId lại thành 1 entry duy nhất
         MergeOrderItems(order);
 
-        var table = AppContext.Instance.Tables.FirstOrDefault(t => t.Number == order.TableNumber);
+        var table = AppContext.Instance.Tables.FirstOrDefault(t => t.Id == order.TableId)
+                 ?? AppContext.Instance.Tables.FirstOrDefault(t => t.Number == order.TableNumber);
         if (table != null)
         {
             table.Status = TableStatus.Occupied;
@@ -521,7 +589,10 @@ public partial class OrderCreationPage : ContentPage
         if (_draftOrder != null && _draftOrder.Id == order.Id)
         {
             AppContext.Instance.Orders.Add(order);
-            _draftOrder = null; // Không còn là draft nữa
+
+            // Dọn dẹp draft (RAM + disk)
+            DraftOrderService.Instance.ClearDraft(order.TableId);
+            _draftOrder = null;
         }
 
         // Sync order + items to Firebase

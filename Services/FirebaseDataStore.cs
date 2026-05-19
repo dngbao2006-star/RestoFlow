@@ -164,7 +164,7 @@ public class FirebaseDataStore : IDataStore
         _subscriptions.Add(
             _client.Child("Orders")
                 .AsObservable<Order>()
-                .Subscribe(evt => MainThread.BeginInvokeOnMainThread(() =>
+                .Subscribe(evt => MainThread.BeginInvokeOnMainThread(async () =>
                 {
                     if (evt.Object == null || string.IsNullOrEmpty(evt.Key)) return;
                     var order = evt.Object;
@@ -190,14 +190,62 @@ public class FirebaseDataStore : IDataStore
                         var existing = context.Orders.FirstOrDefault(o => o.Id == order.Id);
                         if (existing != null)
                         {
-                            var idx = context.Orders.IndexOf(existing);
-                            // Preserve items from existing order since Firebase Orders node doesn't have items
-                            order.Items = existing.Items;
-                            context.Orders[idx] = order;
+                            // CẬP NHẬT thuộc tính thay vì GHI ĐÈ object
+                            // → giữ nguyên reference Items và UI bindings
+                            existing.TableId = order.TableId;
+                            existing.TableNumber = order.TableNumber;
+                            existing.Status = order.Status;
+                            existing.ServerName = order.ServerName;
+                            existing.ServerId = order.ServerId;
+                            existing.Discount = order.Discount;
+                            existing.PaymentMethod = order.PaymentMethod;
+                            // KHÔNG ghi đè existing.Items
                         }
                         else
                         {
+                            // Order mới từ Firebase → thêm vào collection
                             context.Orders.Add(order);
+
+                            // Chủ động fetch items cho order mới vì Orders node
+                            // không chứa items (chúng nằm ở node OrderItems riêng)
+                            try
+                            {
+                                var orderKey = evt.Key; // vd: "order_7"
+                                var allItems = await _client.Child("OrderItems").OnceAsync<FirebaseOrderItemDto>();
+                                var matchingItems = allItems
+                                    .Where(oi => oi.Object.OrderId == orderKey)
+                                    .Select(oi =>
+                                    {
+                                        var dto = oi.Object;
+                                        return new OrderItem
+                                        {
+                                            Id         = dto.Id,
+                                            MenuItemId = dto.MenuItemId,
+                                            Name       = dto.Name,
+                                            Price      = dto.Price,
+                                            Quantity   = dto.Quantity,
+                                            Status     = dto.Status,
+                                            Image      = dto.Image,
+                                            Notes      = dto.Notes
+                                        };
+                                    })
+                                    .ToList();
+
+                                MainThread.BeginInvokeOnMainThread(() =>
+                                {
+                                    foreach (var item in matchingItems)
+                                    {
+                                        if (!order.Items.Any(i => i.Id == item.Id))
+                                            order.Items.Add(item);
+                                    }
+                                    order.NotifyItemsChanged();
+                                    context.RefreshBadges();
+                                });
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"[FirebaseDataStore] Fetch items for new order error: {ex.Message}");
+                            }
                         }
                     }
                     context.RefreshBadges();

@@ -103,12 +103,7 @@
 
         <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource CardBorder}" Margin="0,24,24,24">
             <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="16">
-                <HorizontalStackLayout Grid.Row="0" Spacing="8" VerticalOptions="Center">
-                    <Label Text="📋 Tóm tắt đơn" Style="{StaticResource SectionTitle}" FontSize="18" />
-                    <Border Style="{StaticResource BadgeBorder}">
-                        <Label Text="{Binding SelectedOrder.ItemsCount}" Style="{StaticResource BadgeText}" />
-                    </Border>
-                </HorizontalStackLayout>
+                <Label Grid.Row="0" Text="📋 Tóm tắt đơn" Style="{StaticResource SectionTitle}" FontSize="18" HorizontalOptions="Center" HorizontalTextAlignment="Center" />
 
                 <ScrollView Grid.Row="1">
                     <VerticalStackLayout Spacing="12">
@@ -178,25 +173,14 @@
                     </VerticalStackLayout>
                 </ScrollView>
 
-                <Border Grid.Row="2" Style="{StaticResource InputBorder}">
-                    <VerticalStackLayout Spacing="6">
-                        <HorizontalStackLayout>
-                            <Label Text="Cộng tiền hàng" Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
-                            <Label Text="{Binding SelectedOrder.Subtotal, StringFormat='{0:0,0} VND'}" FontAttributes="Bold" HorizontalOptions="EndAndExpand" FontSize="12" />
-                        </HorizontalStackLayout>
-                        <HorizontalStackLayout IsVisible="{Binding SelectedOrder.HasDiscount}">
-                            <Label Text="Giảm giá" Style="{StaticResource SecondaryTextStyle}" FontSize="12" TextColor="{StaticResource Success}" />
-                            <Label Text="{Binding SelectedOrder.Discount, StringFormat='- {0:0,0} VND'}" TextColor="{StaticResource Success}" HorizontalOptions="EndAndExpand" FontSize="12" FontAttributes="Bold" />
-                        </HorizontalStackLayout>
-                        <BoxView HeightRequest="1" Color="{StaticResource BorderLight}" Margin="0,4" />
-                        <HorizontalStackLayout>
-                            <Label Text="Tổng cộng" FontAttributes="Bold" FontSize="16" />
-                            <Label Text="{Binding SelectedOrder.TotalDisplay}" FontAttributes="Bold" FontSize="16" TextColor="{StaticResource Primary}" HorizontalOptions="EndAndExpand" />
-                        </HorizontalStackLayout>
-                    </VerticalStackLayout>
+                <Border Grid.Row="2" Style="{StaticResource InputBorder}" Padding="16" IsVisible="{Binding ShowTotalBox}">
+                    <HorizontalStackLayout>
+                        <Label Text="Tổng cộng:" FontAttributes="Bold" FontSize="16" VerticalOptions="Center" />
+                        <Label Text="{Binding SelectedOrder.TotalDisplay}" FontAttributes="Bold" FontSize="18" TextColor="{StaticResource Primary}" HorizontalOptions="EndAndExpand" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
                 </Border>
 
-                <Button Grid.Row="3" Text="✓ Gửi lên bếp" Style="{StaticResource PrimaryButton}" Clicked="OnSubmitOrderClicked" Padding="16,12" FontSize="14" FontAttributes="Bold" />
+                <Button Grid.Row="3" Text="✓ Gửi lên bếp" Style="{StaticResource PrimaryButton}" Clicked="OnSubmitOrderClicked" Padding="16,12" FontSize="14" FontAttributes="Bold" IsVisible="{Binding ShowSubmitButton}" />
             </Grid>
         </Border>
     </Grid>
