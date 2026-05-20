@@ -20,6 +20,7 @@ public static class AppRoutes
     public const string Notifications = "thong-bao";
     public const string SystemConfig = "cau-hinh";
     public const string StaffChat = "staff-chat";
+    public const string OrderManagement = "quan-ly-don-hang";
     public const string ManagementChat = "management-chat";
 
     public static string Absolute(string route) => $"//{route}";

@@ -578,5 +578,22 @@ namespace AppManagermentRestaurant.Services
                 throw;
             }
         }
+
+        public async Task UpdateOrderItemFieldsAsync(int orderItemId, int quantity, string? notes)
+        {
+            var key = $"oi_{orderItemId}";
+            var data = new Dictionary<string, object>
+            {
+                ["Quantity"] = quantity,
+                ["Notes"] = notes ?? string.Empty
+            };
+            await firebaseClient.Child("OrderItems").Child(key).PatchAsync(data);
+        }
+
+        public async Task DeleteOrderItemAsync(int orderItemId)
+        {
+            var key = $"oi_{orderItemId}";
+            await firebaseClient.Child("OrderItems").Child(key).DeleteAsync();
+        }
     }
 }

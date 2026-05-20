@@ -1,0 +1,588 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="AppManagermentRestaurant.Views.Pages.OrderManagementPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:AppManagermentRestaurant.Controls"
+    xmlns:helpers="clr-namespace:AppManagermentRestaurant.Helpers"
+    BackgroundColor="#F5F6FA"
+    Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <helpers:BoolToOpacityConverter x:Key="BoolToOpacityConverter" />
+        <helpers:BooleanNegationConverter x:Key="InvertedBoolConverter" />
+        <helpers:HasValueConverter x:Key="HasValueConverter" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Header -->
+        <controls:AppHeaderView />
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
+
+            <!-- ORDER CARDS GRID -->
+            <ScrollView>
+                <VerticalStackLayout Padding="24" Spacing="20">
+
+                    <!-- Page Title + Summary -->
+                    <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Quản lý đơn hàng"
+                                   Style="{StaticResource PageTitle}" />
+                            <Label Text="{Binding OrderSummaryText}"
+                                   Style="{StaticResource SecondaryTextStyle}"
+                                   FontSize="13" />
+                        </VerticalStackLayout>
+
+                        <!-- Refresh Button -->
+                        <Button Grid.Column="1"
+                                Text="🔄 Làm mới"
+                                Style="{StaticResource PillButton}"
+                                Clicked="OnRefreshClicked"
+                                Padding="16,8"
+                                VerticalOptions="Center" />
+                    </Grid>
+
+                    <!-- Status Filter Pills -->
+                    <HorizontalStackLayout Spacing="8">
+                        <Button x:Name="BtnFilterAll"
+                                Text="📋 Tất cả"
+                                Style="{StaticResource PillButton}"
+                                Clicked="OnOrderStatusFilterClicked"
+                                CommandParameter="All" />
+                        <Button x:Name="BtnFilterPending"
+                                Text="⏳ Có món chờ"
+                                Style="{StaticResource PillButton}"
+                                Clicked="OnOrderStatusFilterClicked"
+                                CommandParameter="Pending" />
+                        <Button x:Name="BtnFilterPreparing"
+                                Text="🔥 Đang làm"
+                                Style="{StaticResource PillButton}"
+                                Clicked="OnOrderStatusFilterClicked"
+                                CommandParameter="Preparing" />
+                        <Button x:Name="BtnFilterReady"
+                                Text="✅ Sẵn sàng"
+                                Style="{StaticResource PillButton}"
+                                Clicked="OnOrderStatusFilterClicked"
+                                CommandParameter="Ready" />
+                        <Button x:Name="BtnFilterServed"
+                                Text="🍽️ Đã phục vụ"
+                                Style="{StaticResource PillButton}"
+                                Clicked="OnOrderStatusFilterClicked"
+                                CommandParameter="Served" />
+                    </HorizontalStackLayout>
+
+                    <!-- Order Cards Collection -->
+                    <CollectionView ItemsSource="{Binding FilteredOrders}"
+                                    SelectionMode="None">
+
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout Orientation="Vertical"
+                                             Span="3"
+                                             HorizontalItemSpacing="16"
+                                             VerticalItemSpacing="16"/>
+                        </CollectionView.ItemsLayout>
+
+                        <CollectionView.EmptyView>
+                            <VerticalStackLayout HorizontalOptions="Center"
+                                                 VerticalOptions="Center"
+                                                 Spacing="12"
+                                                 Padding="40">
+                                <Label Text="📋"
+                                       FontSize="48"
+                                       HorizontalOptions="Center" />
+                                <Label Text="Không có đơn hàng nào"
+                                       FontSize="16"
+                                       FontAttributes="Bold"
+                                       HorizontalOptions="Center"
+                                       TextColor="#9CA3AF" />
+                                <Label Text="Các đơn hàng đang hoạt động sẽ hiển thị tại đây"
+                                       FontSize="13"
+                                       HorizontalOptions="Center"
+                                       TextColor="#9CA3AF" />
+                            </VerticalStackLayout>
+                        </CollectionView.EmptyView>
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <!-- ORDER CARD -->
+                                <Border Background="White"
+                                        StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 16"
+                                        Padding="0">
+
+                                    <Grid RowDefinitions="Auto,*">
+
+                                        <!-- CARD HEADER -->
+                                        <Border Background="#1E3A5F"
+                                                StrokeThickness="0"
+                                                StrokeShape="RoundRectangle 16,16,0,0"
+                                                Padding="16,12">
+
+                                            <Grid ColumnDefinitions="Auto,*,Auto"
+                                                  RowDefinitions="Auto,Auto"
+                                                  ColumnSpacing="10"
+                                                  RowSpacing="4">
+
+                                                <!-- Table Number Badge -->
+                                                <Border Grid.RowSpan="2"
+                                                        Background="#2563EB"
+                                                        StrokeThickness="0"
+                                                        StrokeShape="RoundRectangle 12"
+                                                        WidthRequest="52"
+                                                        HeightRequest="52"
+                                                        VerticalOptions="Center">
+                                                    <VerticalStackLayout HorizontalOptions="Center"
+                                                                         VerticalOptions="Center"
+                                                                         Spacing="0">
+                                                        <Label Text="BÀN"
+                                                               TextColor="#93C5FD"
+                                                               FontSize="9"
+                                                               FontAttributes="Bold"
+                                                               HorizontalOptions="Center" />
+                                                        <Label Text="{Binding TableNumber}"
+                                                               TextColor="White"
+                                                               FontSize="20"
+                                                               FontAttributes="Bold"
+                                                               HorizontalOptions="Center" />
+                                                    </VerticalStackLayout>
+                                                </Border>
+
+                                                <!-- Server Name -->
+                                                <Label Grid.Column="1"
+                                                       Text="{Binding ServerName}"
+                                                       TextColor="White"
+                                                       FontSize="14"
+                                                       FontAttributes="Bold"
+                                                       LineBreakMode="TailTruncation" />
+
+                                                <!-- Order ID -->
+                                                <Label Grid.Row="1" Grid.Column="1"
+                                                       Text="{Binding Id, StringFormat='Đơn #{0}'}"
+                                                       TextColor="#93C5FD"
+                                                       FontSize="11" />
+
+                                                <!-- Item Count Badge -->
+                                                <Border Grid.Column="2" Grid.RowSpan="2"
+                                                        Background="#F59E0B"
+                                                        StrokeThickness="0"
+                                                        StrokeShape="RoundRectangle 10"
+                                                        Padding="8,4"
+                                                        VerticalOptions="Center">
+                                                    <Label Text="{Binding ItemsCount, StringFormat='{0} món'}"
+                                                           TextColor="White"
+                                                           FontSize="11"
+                                                           FontAttributes="Bold" />
+                                                </Border>
+
+                                            </Grid>
+                                        </Border>
+
+                                        <!-- CARD BODY — Order Items List -->
+                                        <Border Grid.Row="1"
+                                                Background="White"
+                                                StrokeThickness="0"
+                                                StrokeShape="RoundRectangle 0,0,16,16"
+                                                Padding="12"
+                                                HeightRequest="380">
+
+                                            <ScrollView>
+                                                <VerticalStackLayout
+                                                    BindableLayout.ItemsSource="{Binding Items}"
+                                                    Spacing="8">
+
+                                                    <BindableLayout.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <!-- INDIVIDUAL ORDER ITEM ROW -->
+                                                            <Border Background="#F9FAFB"
+                                                                    StrokeThickness="1"
+                                                                    Stroke="#E5E7EB"
+                                                                    StrokeShape="RoundRectangle 10"
+                                                                    Padding="10">
+
+                                                                <VerticalStackLayout Spacing="6">
+
+                                                                    <!-- Row 1: Name + Status Button -->
+                                                                    <Grid ColumnDefinitions="*,Auto"
+                                                                          ColumnSpacing="8">
+
+                                                                        <!-- Dish Name (tappable to change) -->
+                                                                        <Label Text="{Binding Name}"
+                                                                               FontSize="13"
+                                                                               FontAttributes="Bold"
+                                                                               TextColor="#1E3A5F"
+                                                                               LineBreakMode="TailTruncation"
+                                                                               VerticalOptions="Center">
+                                                                            <Label.GestureRecognizers>
+                                                                                <TapGestureRecognizer
+                                                                                    Tapped="OnDishNameTapped"
+                                                                                    CommandParameter="{Binding .}" />
+                                                                            </Label.GestureRecognizers>
+                                                                        </Label>
+
+                                                                        <!-- Status Button (dropdown trigger) -->
+                                                                        <Border Grid.Column="1"
+                                                                                Background="{Binding StatusColor}"
+                                                                                StrokeThickness="0"
+                                                                                StrokeShape="RoundRectangle 8"
+                                                                                Padding="8,4"
+                                                                                VerticalOptions="Center">
+
+                                                                            <Border.GestureRecognizers>
+                                                                                <TapGestureRecognizer
+                                                                                    Tapped="OnStatusButtonTapped"
+                                                                                    CommandParameter="{Binding .}" />
+                                                                            </Border.GestureRecognizers>
+
+                                                                            <HorizontalStackLayout Spacing="4">
+                                                                                <Label Text="{Binding StatusLabel}"
+                                                                                       TextColor="White"
+                                                                                       FontSize="10"
+                                                                                       FontAttributes="Bold" />
+                                                                                <Label Text="▼"
+                                                                                       TextColor="White"
+                                                                                       FontSize="8"
+                                                                                       VerticalOptions="Center" />
+                                                                            </HorizontalStackLayout>
+                                                                        </Border>
+                                                                    </Grid>
+
+                                                                    <!-- Row 2: Notes (if any) -->
+                                                                    <Grid ColumnDefinitions="Auto,*"
+                                                                          ColumnSpacing="4"
+                                                                          IsVisible="{Binding Notes, Converter={StaticResource HasValueConverter}}">
+                                                                        <Label Text="📝"
+                                                                               FontSize="10"
+                                                                               VerticalOptions="Center" />
+                                                                        <Label Grid.Column="1"
+                                                                               Text="{Binding Notes}"
+                                                                               FontSize="10"
+                                                                               TextColor="#F59E0B"
+                                                                               FontAttributes="Italic"
+                                                                               LineBreakMode="TailTruncation"
+                                                                               VerticalOptions="Center">
+                                                                            <Label.GestureRecognizers>
+                                                                                <TapGestureRecognizer
+                                                                                    Tapped="OnNoteTapped"
+                                                                                    CommandParameter="{Binding .}" />
+                                                                            </Label.GestureRecognizers>
+                                                                        </Label>
+                                                                    </Grid>
+
+                                                                    <!-- Row 3: Quantity Controls + Price -->
+                                                                    <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto"
+                                                                          ColumnSpacing="6">
+
+                                                                        <!-- Decrease Button -->
+                                                                        <Border Background="#FEE2E2"
+                                                                                StrokeThickness="0"
+                                                                                StrokeShape="RoundRectangle 6"
+                                                                                WidthRequest="28"
+                                                                                HeightRequest="28">
+                                                                            <Border.GestureRecognizers>
+                                                                                <TapGestureRecognizer
+                                                                                    Tapped="OnDecreaseQtyTapped"
+                                                                                    CommandParameter="{Binding .}" />
+                                                                            </Border.GestureRecognizers>
+                                                                            <Label Text="−"
+                                                                                   TextColor="#EF4444"
+                                                                                   FontSize="16"
+                                                                                   FontAttributes="Bold"
+                                                                                   HorizontalOptions="Center"
+                                                                                   VerticalOptions="Center" />
+                                                                        </Border>
+
+                                                                        <!-- Quantity -->
+                                                                        <Border Grid.Column="1"
+                                                                                Background="#1E3A5F"
+                                                                                StrokeThickness="0"
+                                                                                StrokeShape="RoundRectangle 6"
+                                                                                WidthRequest="32"
+                                                                                HeightRequest="28">
+                                                                            <Label Text="{Binding Quantity}"
+                                                                                   TextColor="White"
+                                                                                   FontSize="13"
+                                                                                   FontAttributes="Bold"
+                                                                                   HorizontalOptions="Center"
+                                                                                   VerticalOptions="Center" />
+                                                                        </Border>
+
+                                                                        <!-- Increase Button -->
+                                                                        <Border Grid.Column="2"
+                                                                                Background="#DCFCE7"
+                                                                                StrokeThickness="0"
+                                                                                StrokeShape="RoundRectangle 6"
+                                                                                WidthRequest="28"
+                                                                                HeightRequest="28">
+                                                                            <Border.GestureRecognizers>
+                                                                                <TapGestureRecognizer
+                                                                                    Tapped="OnIncreaseQtyTapped"
+                                                                                    CommandParameter="{Binding .}" />
+                                                                            </Border.GestureRecognizers>
+                                                                            <Label Text="+"
+                                                                                   TextColor="#22C55E"
+                                                                                   FontSize="16"
+                                                                                   FontAttributes="Bold"
+                                                                                   HorizontalOptions="Center"
+                                                                                   VerticalOptions="Center" />
+                                                                        </Border>
+
+                                                                        <!-- Notes edit button -->
+                                                                        <Border Grid.Column="3"
+                                                                                Background="#F0F0F0"
+                                                                                StrokeThickness="0"
+                                                                                StrokeShape="RoundRectangle 6"
+                                                                                HeightRequest="28"
+                                                                                Padding="6,0"
+                                                                                HorizontalOptions="Start">
+                                                                            <Border.GestureRecognizers>
+                                                                                <TapGestureRecognizer
+                                                                                    Tapped="OnNoteTapped"
+                                                                                    CommandParameter="{Binding .}" />
+                                                                            </Border.GestureRecognizers>
+                                                                            <Label Text="✏️ Ghi chú"
+                                                                                   FontSize="10"
+                                                                                   TextColor="#6B7280"
+                                                                                   VerticalOptions="Center" />
+                                                                        </Border>
+
+                                                                        <!-- Line Total -->
+                                                                        <Label Grid.Column="4"
+                                                                               Text="{Binding LineTotalDisplay}"
+                                                                               FontSize="12"
+                                                                               FontAttributes="Bold"
+                                                                               TextColor="#1E3A5F"
+                                                                               HorizontalOptions="End"
+                                                                               VerticalOptions="Center" />
+                                                                    </Grid>
+
+                                                                </VerticalStackLayout>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </BindableLayout.ItemTemplate>
+
+                                                </VerticalStackLayout>
+                                            </ScrollView>
+                                        </Border>
+
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+
+                    </CollectionView>
+
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <!-- ══════════════════════════════════════════════════════════ -->
+            <!--  MENU SELECTION MODAL (overlay)                          -->
+            <!-- ══════════════════════════════════════════════════════════ -->
+            <Grid x:Name="MenuModal"
+                  IsVisible="False"
+                  Background="#80000000"
+                  InputTransparent="False">
+
+                <!-- Modal Content -->
+                <Border Background="White"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 20"
+                        Margin="40"
+                        Padding="0"
+                        VerticalOptions="Fill"
+                        HorizontalOptions="Fill">
+
+                    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
+
+                        <!-- Modal Header -->
+                        <Grid Padding="24,20,24,12"
+                              ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="🍽️ Chọn món thay thế"
+                                       FontSize="20"
+                                       FontAttributes="Bold"
+                                       TextColor="#1E3A5F" />
+                                <Label x:Name="ModalSubtitle"
+                                       Text="Chọn món mới để thay thế"
+                                       FontSize="12"
+                                       TextColor="#6B7280" />
+                            </VerticalStackLayout>
+
+                            <!-- Close Button -->
+                            <Border Grid.Column="1"
+                                    Background="#FEE2E2"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 20"
+                                    WidthRequest="40"
+                                    HeightRequest="40"
+                                    VerticalOptions="Center">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnCloseModalTapped" />
+                                </Border.GestureRecognizers>
+                                <Label Text="✕"
+                                       TextColor="#EF4444"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center" />
+                            </Border>
+                        </Grid>
+
+                        <!-- Search Bar -->
+                        <Border Grid.Row="1"
+                                Margin="24,0"
+                                Background="#F3F4F6"
+                                StrokeThickness="1"
+                                Stroke="#E5E7EB"
+                                StrokeShape="RoundRectangle 12"
+                                Padding="12,0">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                <Label Text="🔍"
+                                       VerticalOptions="Center"
+                                       FontSize="16" />
+                                <Entry Grid.Column="1"
+                                       x:Name="ModalSearchEntry"
+                                       Placeholder="Tìm kiếm món ăn..."
+                                       TextChanged="OnModalSearchTextChanged"
+                                       FontSize="14"
+                                       BackgroundColor="Transparent" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Category Filter Pills -->
+                        <ScrollView Grid.Row="2"
+                                    Orientation="Horizontal"
+                                    Margin="24,12,24,8">
+                            <HorizontalStackLayout Spacing="8">
+                                <Button Text="📋 Tất cả"
+                                        Style="{StaticResource PillButton}"
+                                        Clicked="OnModalFilterClicked"
+                                        CommandParameter="All" />
+                                <Button Text="🥗 Khai vị"
+                                        Style="{StaticResource PillButton}"
+                                        Clicked="OnModalFilterClicked"
+                                        CommandParameter="Appetizers" />
+                                <Button Text="🍖 Món chính"
+                                        Style="{StaticResource PillButton}"
+                                        Clicked="OnModalFilterClicked"
+                                        CommandParameter="Main Course" />
+                                <Button Text="🍲 Canh"
+                                        Style="{StaticResource PillButton}"
+                                        Clicked="OnModalFilterClicked"
+                                        CommandParameter="Soups" />
+                                <Button Text="🦐 Hải sản"
+                                        Style="{StaticResource PillButton}"
+                                        Clicked="OnModalFilterClicked"
+                                        CommandParameter="Seafood" />
+                                <Button Text="🍰 Tráng miệng"
+                                        Style="{StaticResource PillButton}"
+                                        Clicked="OnModalFilterClicked"
+                                        CommandParameter="Desserts" />
+                                <Button Text="🥤 Nước uống"
+                                        Style="{StaticResource PillButton}"
+                                        Clicked="OnModalFilterClicked"
+                                        CommandParameter="Drinks" />
+                            </HorizontalStackLayout>
+                        </ScrollView>
+
+                        <!-- Menu Items Grid -->
+                        <CollectionView Grid.Row="3"
+                                        x:Name="ModalMenuItems"
+                                        SelectionMode="None"
+                                        Margin="24,0">
+
+                            <CollectionView.ItemsLayout>
+                                <GridItemsLayout Orientation="Vertical"
+                                                 Span="4"
+                                                 HorizontalItemSpacing="12"
+                                                 VerticalItemSpacing="12" />
+                            </CollectionView.ItemsLayout>
+
+                            <CollectionView.EmptyView>
+                                <VerticalStackLayout HorizontalOptions="Center"
+                                                     VerticalOptions="Center"
+                                                     Padding="40">
+                                    <Label Text="😕 Không tìm thấy món ăn"
+                                           FontSize="14"
+                                           TextColor="#9CA3AF"
+                                           HorizontalOptions="Center" />
+                                </VerticalStackLayout>
+                            </CollectionView.EmptyView>
+
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="White"
+                                            StrokeThickness="1"
+                                            Stroke="#E5E7EB"
+                                            StrokeShape="RoundRectangle 12"
+                                            Padding="0"
+                                            Opacity="{Binding OutOfStock, Converter={StaticResource BoolToOpacityConverter}}">
+
+                                        <VerticalStackLayout Spacing="6">
+                                            <!-- Food Image -->
+                                            <Grid HeightRequest="100">
+                                                <Image Source="{Binding Image}"
+                                                       Aspect="AspectFill" />
+                                                <!-- Out of Stock Overlay -->
+                                                <Border Background="#CC000000"
+                                                        Stroke="#00000000"
+                                                        StrokeThickness="0"
+                                                        IsVisible="{Binding OutOfStock}"
+                                                        Padding="4">
+                                                    <Label Text="HẾT MÓN"
+                                                           TextColor="#FFFF0000"
+                                                           FontAttributes="Bold"
+                                                           FontSize="12"
+                                                           HorizontalOptions="Center"
+                                                           VerticalOptions="Center" />
+                                                </Border>
+                                            </Grid>
+
+                                            <VerticalStackLayout Padding="8,0,8,8" Spacing="4">
+                                                <Label Text="{Binding Name}"
+                                                       FontAttributes="Bold"
+                                                       FontSize="12"
+                                                       LineBreakMode="TailTruncation"
+                                                       MaxLines="1" />
+                                                <Label Text="{Binding Price, StringFormat='{0:0,0} VND'}"
+                                                       TextColor="{StaticResource Primary}"
+                                                       FontAttributes="Bold"
+                                                       FontSize="11" />
+                                                <Button Text="+ Chọn"
+                                                        Style="{StaticResource PrimaryButton}"
+                                                        Clicked="OnModalMenuItemSelected"
+                                                        CommandParameter="{Binding .}"
+                                                        IsEnabled="{Binding OutOfStock, Converter={StaticResource InvertedBoolConverter}}"
+                                                        Padding="8,4"
+                                                        FontSize="11"
+                                                        HeightRequest="30" />
+                                            </VerticalStackLayout>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+
+                        </CollectionView>
+
+                        <!-- Modal Footer -->
+                        <Border Grid.Row="4"
+                                Background="#F9FAFB"
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 0,0,20,20"
+                                Padding="24,12">
+                            <Label Text="💡 Chọn một món từ thực đơn để thay thế món hiện tại"
+                                   FontSize="12"
+                                   TextColor="#9CA3AF"
+                                   HorizontalOptions="Center" />
+                        </Border>
+
+                    </Grid>
+                </Border>
+            </Grid>
+
+        </Grid>
+    </Grid>
+
+</ContentPage>

@@ -24,6 +24,7 @@ public class TitleToIconConverter : IValueConverter
                 "Tài khoản" => "tai_khoan.png",
 
                 //Manager tabs icon
+                "Quản lý đơn hàng" => "dat_mon.png",
                 "Tổng quan" => "tong_quan.png",
                 "Nhân sự" => "nhan_su.png",
                 "Thực đơn" => "thuc_don.png",

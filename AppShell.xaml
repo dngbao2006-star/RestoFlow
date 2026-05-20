@@ -138,6 +138,12 @@
         ContentTemplate="{DataTemplate pages:DashboardPage}" />
 
     <ShellContent
+        Title="Quản lý đơn hàng"
+        Route="{x:Static constants:AppRoutes.OrderManagement}"
+        IsVisible="{Binding IsManager}"
+        ContentTemplate="{DataTemplate pages:OrderManagementPage}" />
+
+    <ShellContent
         Title="Nhân sự"
         Route="{x:Static constants:AppRoutes.HR}"
         IsVisible="{Binding IsManager}"
