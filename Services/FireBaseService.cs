@@ -595,5 +595,17 @@ namespace AppManagermentRestaurant.Services
             var key = $"oi_{orderItemId}";
             await firebaseClient.Child("OrderItems").Child(key).DeleteAsync();
         }
+
+        public async Task UpdateStaffProfileAsync(string firebaseUid, string email, string phone, string joinDate, string status)
+        {
+            var data = new Dictionary<string, object>
+            {
+                ["email"] = email,
+                ["sdt"] = phone,
+                ["ngayVaoLam"] = joinDate,
+                ["trangThai"] = status
+            };
+            await firebaseClient.Child("Users").Child(firebaseUid).PatchAsync(data);
+        }
     }
 }

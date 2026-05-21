@@ -17,6 +17,7 @@ public class Order : ObservableObject
     private PaymentMethod _paymentMethod;
     private bool _isExpanded;
     private string _discountCode = "";
+    private bool _hasPendingEdits;
 
     public int Id
     {
@@ -97,6 +98,12 @@ public class Order : ObservableObject
     {
         get => _discountCode;
         set => SetProperty(ref _discountCode, value);
+    }
+
+    public bool HasPendingEdits
+    {
+        get => _hasPendingEdits;
+        set => SetProperty(ref _hasPendingEdits, value);
     }
 
     public int ItemsCount

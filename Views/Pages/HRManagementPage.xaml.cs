@@ -1,4 +1,5 @@
 using AppManagermentRestaurant.Models;
+using AppManagermentRestaurant.Services;
 using AppManagermentRestaurant.ViewModels;
 
 namespace AppManagermentRestaurant.Views.Pages;
@@ -6,6 +7,7 @@ namespace AppManagermentRestaurant.Views.Pages;
 public partial class HRManagementPage : ContentPage
 {
     private readonly HRManagementViewModel _viewModel;
+    private readonly FirebaseService _firebase = new();
 
     public HRManagementPage()
     {
@@ -16,7 +18,6 @@ public partial class HRManagementPage : ContentPage
 
     private async void OnAddEmployeeClicked(object sender, EventArgs e)
     {
-        // Thay đổi: Mở trang đăng ký nhân viên thay vì hiện thông báo
         await Navigation.PushAsync(new RegisterStaffPage());
     }
 
@@ -25,35 +26,10 @@ public partial class HRManagementPage : ContentPage
         if (sender is Button { CommandParameter: Staff staff })
         {
             _viewModel.ViewStaffDetails(staff);
+
+            // Show/hide edit button based on role
+            BtnEditStaff.IsVisible = staff.Role == StaffRole.Staff;
         }
-    }
-
-    private async void OnToggleLockClicked(object sender, EventArgs e)
-    {
-        if (sender is not Button { CommandParameter: Staff staff })
-        {
-            return;
-        }
-
-        if (staff.Status == StaffStatus.Locked)
-        {
-            var confirmUnlock = await DisplayAlert("Mở khóa tài khoản", $"Bạn có muốn mở khóa cho {staff.Name}?", "Mở khóa", "Hủy");
-            if (!confirmUnlock)
-            {
-                return;
-            }
-
-            _viewModel.UnlockStaff(staff);
-            return;
-        }
-
-        var confirmLock = await DisplayAlert("Khóa tài khoản", $"Khóa tài khoản {staff.Name}? Nhân viên sẽ không thể đăng nhập hệ thống.", "Khóa", "Hủy");
-        if (!confirmLock)
-        {
-            return;
-        }
-
-        _viewModel.LockStaff(staff);
     }
 
     private void OnCloseDetailsClicked(object sender, EventArgs e)
@@ -61,91 +37,110 @@ public partial class HRManagementPage : ContentPage
         _viewModel.CloseStaffDetails();
     }
 
-    private async void OnEditStaffClicked(object sender, EventArgs e)
-    {
-        if (_viewModel.SelectedStaff != null)
-        {
-            await DisplayAlert("Nhân sự", $"Chức năng chỉnh sửa {_viewModel.SelectedStaff.Name} sẽ được bổ sung sau.", "Đã hiểu");
-        }
-    }
-
-    private async void OnDeleteStaffClicked(object sender, EventArgs e)
-    {
-        if (_viewModel.SelectedStaff == null)
-        {
-            return;
-        }
-
-        var staff = _viewModel.SelectedStaff;
-        var confirm = await DisplayAlert("Xóa nhân viên", $"Bạn chắc chắn muốn xóa {staff.Name}? Hành động này không thể hoàn tác.", "Xóa", "Hủy");
-
-        if (!confirm)
-        {
-            return;
-        }
-
-        _viewModel.RemoveStaff(staff);
-        _viewModel.CloseStaffDetails();
-        await DisplayAlert("Thành công", $"Đã xóa {staff.Name} khỏi danh sách nhân sự.", "Đã hiểu");
-    }
-
     private void OnClearSearchClicked(object sender, EventArgs e)
     {
         _viewModel.SearchText = string.Empty;
     }
 
-    private void OnClearFiltersClicked(object sender, EventArgs e)
-    {
-        _viewModel.ClearFilters();
-    }
+    // ═══════════════════════════════════════════════════════════════
+    //  EDIT STAFF MODAL
+    // ═══════════════════════════════════════════════════════════════
 
-    private void OnRoleFilterClicked(object sender, EventArgs e)
+    private void OnEditStaffClicked(object sender, EventArgs e)
     {
-        if (sender is not Button { CommandParameter: string roleFilter })
+        if (_viewModel.SelectedStaff == null) return;
+
+        // Only staff role can be edited
+        if (_viewModel.SelectedStaff.Role != StaffRole.Staff)
         {
+            DisplayAlert("Thông báo", "Không thể chỉnh sửa tài khoản quản lý.", "Đã hiểu");
             return;
         }
 
-        switch (roleFilter)
+        var staff = _viewModel.SelectedStaff;
+
+        // Pre-fill modal fields
+        EditEmail.Text = staff.Email;
+        EditPhone.Text = staff.Phone;
+        EditJoinDate.Date = staff.JoinDate == DateTime.MinValue ? DateTime.Now : staff.JoinDate;
+
+        var isActive = staff.Status == StaffStatus.Active;
+        EditStatusSwitch.IsToggled = isActive;
+        EditStatusLabel.Text = isActive ? "Hoạt động" : "Đã khóa";
+        EditStatusLabel.TextColor = isActive ? Color.FromArgb("#22C55E") : Color.FromArgb("#EF4444");
+
+        EditStaffModal.IsVisible = true;
+    }
+
+    private void OnCloseEditModalTapped(object? sender, EventArgs e)
+    {
+        EditStaffModal.IsVisible = false;
+    }
+
+    private void OnStatusToggled(object? sender, ToggledEventArgs e)
+    {
+        EditStatusLabel.Text = e.Value ? "Hoạt động" : "Đã khóa";
+        EditStatusLabel.TextColor = e.Value ? Color.FromArgb("#22C55E") : Color.FromArgb("#EF4444");
+    }
+
+    private async void OnSaveEditClicked(object? sender, EventArgs e)
+    {
+        if (_viewModel.SelectedStaff == null) return;
+
+        var staff = _viewModel.SelectedStaff;
+        var newEmail = EditEmail.Text?.Trim() ?? "";
+        var newPhone = EditPhone.Text?.Trim() ?? "";
+        var newJoinDate = EditJoinDate.Date ?? DateTime.Now;
+        var newStatus = EditStatusSwitch.IsToggled ? StaffStatus.Active : StaffStatus.Locked;
+        var statusString = newStatus == StaffStatus.Active ? "HoatDong" : "TamKhoa";
+
+        try
         {
-            case "All":
-                _viewModel.FilterByRole = false;
-                break;
-            case "Staff":
-                _viewModel.SelectedRole = StaffRole.Staff;
-                _viewModel.FilterByRole = true;
-                break;
-            case "Manager":
-                _viewModel.SelectedRole = StaffRole.Manager;
-                _viewModel.FilterByRole = true;
-                break;
+            await _firebase.UpdateStaffProfileAsync(
+                staff.FirebaseUid,
+                newEmail,
+                newPhone,
+                newJoinDate.ToString("yyyy-MM-dd"),
+                statusString);
+
+            // Update local
+            staff.Email = newEmail;
+            staff.Phone = newPhone;
+            staff.JoinDate = newJoinDate;
+            staff.Status = newStatus;
+
+            _viewModel.RefreshFilteredList();
+
+            // Reassign to refresh bindings
+            _viewModel.SelectedStaff = null;
+            _viewModel.SelectedStaff = staff;
+
+            // Re-evaluate edit button visibility
+            BtnEditStaff.IsVisible = staff.Role == StaffRole.Staff;
+
+            EditStaffModal.IsVisible = false;
+            await DisplayAlert("Thành công", "Đã cập nhật thông tin nhân viên.", "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Lỗi", $"Không thể cập nhật: {ex.Message}", "OK");
         }
     }
 
-    private void OnStatusFilterClicked(object sender, EventArgs e)
+    private async void OnDeleteStaffClicked(object sender, EventArgs e)
     {
-        if (sender is not Button { CommandParameter: string statusFilter })
-        {
-            return;
-        }
+        if (_viewModel.SelectedStaff == null) return;
 
-        switch (statusFilter)
-        {
-            case "All":
-                _viewModel.FilterByStatus = false;
-                break;
-            case "Active":
-                _viewModel.SelectedStatus = StaffStatus.Active;
-                _viewModel.FilterByStatus = true;
-                break;
-            case "Inactive":
-                _viewModel.SelectedStatus = StaffStatus.Inactive;
-                _viewModel.FilterByStatus = true;
-                break;
-            case "Locked":
-                _viewModel.SelectedStatus = StaffStatus.Locked;
-                _viewModel.FilterByStatus = true;
-                break;
-        }
+        var staff = _viewModel.SelectedStaff;
+        var confirm = await DisplayAlert(
+            "Xóa nhân viên",
+            $"Bạn chắc chắn muốn xóa {staff.Name}? Hành động này không thể hoàn tác.",
+            "Xóa", "Hủy");
+
+        if (!confirm) return;
+
+        _viewModel.RemoveStaff(staff);
+        _viewModel.CloseStaffDetails();
+        await DisplayAlert("Thành công", $"Đã xóa {staff.Name} khỏi danh sách nhân sự.", "Đã hiểu");
     }
 }

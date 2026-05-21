@@ -115,6 +115,7 @@ public class FirebaseDataStore : IDataStore
                     FirebaseUid = item.Key,
                     Name   = dto.hoTen,
                     Email  = dto.email,
+                    Phone  = dto.sdt,
                     Role   = dto.quyen == "QuanLy" ? StaffRole.Manager : StaffRole.Staff,
                     Status = dto.trangThai switch
                     {
@@ -122,7 +123,7 @@ public class FirebaseDataStore : IDataStore
                         "Khóa"    => StaffStatus.Locked,
                         _         => StaffStatus.Active
                     },
-                    JoinDate  = DateTime.Now,
+                    JoinDate  = DateTime.TryParse(dto.ngayVaoLam, out var jd) ? jd : DateTime.MinValue,
                     LastLogin = DateTime.Now
                 });
             }
