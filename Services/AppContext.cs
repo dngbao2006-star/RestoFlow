@@ -326,6 +326,27 @@ public class AppContext : ObservableObject
         OnPropertyChanged(nameof(OnlineStaffCount));
     }
 
+    /// <summary>
+    /// Resolve tên nhân viên thực từ Firebase UID (ServerId).
+    /// Tra cứu trong danh sách StaffMembers đã tải từ Firebase.
+    /// Nếu không tìm thấy, trả về fallbackName.
+    /// </summary>
+    public string ResolveServerName(string? serverId, string? fallbackName = null)
+    {
+        if (!string.IsNullOrWhiteSpace(serverId))
+        {
+            var staff = StaffMembers.FirstOrDefault(s => s.FirebaseUid == serverId);
+            if (staff != null)
+                return staff.Name;
+        }
+
+        // Nếu không có ServerId hoặc không tìm thấy, dùng CurrentUser
+        if (string.IsNullOrWhiteSpace(fallbackName) || fallbackName == "Nhân viên")
+            return CurrentUser?.Name ?? fallbackName ?? "Nhân viên";
+
+        return fallbackName;
+    }
+
     public void TransferOrder(int targetTableId)
     {
         if (SelectedOrder == null)

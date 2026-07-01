@@ -147,6 +147,30 @@ public class FirebaseDataStore : IDataStore
 
             context.SystemConfiguration = configTask.Result ?? new SystemConfiguration();
 
+            // ── 11b. Resolve ServerName cho tất cả orders từ ServerId ────
+            // Đảm bảo tên nhân viên hiển thị luôn khớp với dữ liệu thật
+            // trong Firebase Users, không dùng tên cũ/mock có sẵn trên order
+            foreach (var order in context.Orders.Concat(context.OrderHistory))
+            {
+                var resolvedName = context.ResolveServerName(order.ServerId, order.ServerName);
+                if (!string.IsNullOrEmpty(resolvedName) && resolvedName != order.ServerName)
+                    order.ServerName = resolvedName;
+            }
+
+            // Resolve ServerName cho invoices đã load
+            foreach (var invoice in context.Invoices)
+            {
+                // Tìm order tương ứng để lấy ServerId
+                var matchingOrder = context.OrderHistory.FirstOrDefault(o => o.Id == invoice.OrderId)
+                                 ?? context.Orders.FirstOrDefault(o => o.Id == invoice.OrderId);
+                if (matchingOrder != null)
+                {
+                    var resolvedName = context.ResolveServerName(matchingOrder.ServerId, invoice.ServerName);
+                    if (!string.IsNullOrEmpty(resolvedName))
+                        invoice.ServerName = resolvedName;
+                }
+            }
+
             // ── 12. Start real-time listeners ──────────────────────────
             StartListeners(context);
         }

@@ -23,12 +23,17 @@ public static class InvoiceDocumentService
     public static Invoice FromOrder(Order order)
     {
         var existing = AppContext.Instance.Invoices.FirstOrDefault(invoice => invoice.OrderId == order.Id);
-        return existing ?? new Invoice
+        if (existing != null) return existing;
+
+        // Resolve tên nhân viên thực từ ServerId
+        var resolvedName = AppContext.Instance.ResolveServerName(order.ServerId, order.ServerName);
+
+        return new Invoice
         {
             Id = order.Id,
             OrderId = order.Id,
             TableNumber = order.TableNumber,
-            ServerName = order.ServerName,
+            ServerName = resolvedName,
             CreatedAt = order.CreatedAt,
             PaymentMethod = order.PaymentMethod,
             Discount = order.Discount,

@@ -163,6 +163,13 @@ public class MockDataStore : IDataStore
     private static void SeedOrders(AppContext context)
     {
         var menuItems = context.MenuItems.ToList();
+        // Sử dụng tên nhân viên thật từ CurrentUser hoặc StaffMembers
+        var currentUserName = context.CurrentUser?.Name
+            ?? context.StaffMembers.FirstOrDefault()?.Name
+            ?? "Nhân viên";
+        var currentUserId = context.CurrentUser?.FirebaseUid
+            ?? context.StaffMembers.FirstOrDefault()?.FirebaseUid
+            ?? "";
 
         context.Orders.Add(new Order
         {
@@ -171,8 +178,8 @@ public class MockDataStore : IDataStore
             TableNumber = 1,
             Status = OrderStatus.Active,
             CreatedAt = DateTime.Now.AddMinutes(-45),
-            ServerName = "Tran Minh Tuan",
-            ServerId = "2",
+            ServerName = currentUserName,
+            ServerId = currentUserId,
             Discount = 0,
             PaymentMethod = PaymentMethod.Cash,
             Items =
@@ -189,8 +196,8 @@ public class MockDataStore : IDataStore
             TableNumber = 4,
             Status = OrderStatus.Active,
             CreatedAt = DateTime.Now.AddMinutes(-30),
-            ServerName = "Le Thi Lan Anh",
-            ServerId = "3",
+            ServerName = currentUserName,
+            ServerId = currentUserId,
             Discount = 15000,
             PaymentMethod = PaymentMethod.Qr,
             Items =
@@ -207,8 +214,8 @@ public class MockDataStore : IDataStore
             TableNumber = 8,
             Status = OrderStatus.Active,
             CreatedAt = DateTime.Now.AddMinutes(-20),
-            ServerName = "Tran Minh Tuan",
-            ServerId = "2",
+            ServerName = currentUserName,
+            ServerId = currentUserId,
             Discount = 0,
             PaymentMethod = PaymentMethod.Cash,
             Items =
@@ -225,8 +232,8 @@ public class MockDataStore : IDataStore
             TableNumber = 10,
             Status = OrderStatus.Active,
             CreatedAt = DateTime.Now.AddMinutes(-10),
-            ServerName = "Le Thi Lan Anh",
-            ServerId = "3",
+            ServerName = currentUserName,
+            ServerId = currentUserId,
             Discount = 0,
             PaymentMethod = PaymentMethod.Qr,
             Items =
@@ -243,8 +250,8 @@ public class MockDataStore : IDataStore
             TableNumber = 16,
             Status = OrderStatus.Active,
             CreatedAt = DateTime.Now.AddMinutes(-55),
-            ServerName = "Tran Minh Tuan",
-            ServerId = "2",
+            ServerName = currentUserName,
+            ServerId = currentUserId,
             Discount = 50000,
             PaymentMethod = PaymentMethod.Cash,
             Items =
@@ -261,8 +268,8 @@ public class MockDataStore : IDataStore
             TableNumber = 2,
             Status = OrderStatus.Active,
             CreatedAt = DateTime.Now.AddMinutes(-70),
-            ServerName = "Tran Minh Tuan",
-            ServerId = "2",
+            ServerName = currentUserName,
+            ServerId = currentUserId,
             Discount = 0,
             PaymentMethod = PaymentMethod.Cash,
             Items =
@@ -279,8 +286,8 @@ public class MockDataStore : IDataStore
             TableNumber = 6,
             Status = OrderStatus.Active,
             CreatedAt = DateTime.Now.AddMinutes(-85),
-            ServerName = "Le Thi Lan Anh",
-            ServerId = "3",
+            ServerName = currentUserName,
+            ServerId = currentUserId,
             Discount = 25000,
             PaymentMethod = PaymentMethod.Qr,
             Items =
@@ -297,8 +304,8 @@ public class MockDataStore : IDataStore
             TableNumber = 9,
             Status = OrderStatus.Active,
             CreatedAt = DateTime.Now.AddMinutes(-60),
-            ServerName = "Tran Minh Tuan",
-            ServerId = "2",
+            ServerName = currentUserName,
+            ServerId = currentUserId,
             Discount = 0,
             PaymentMethod = PaymentMethod.Cash,
             Items =
@@ -316,8 +323,8 @@ public class MockDataStore : IDataStore
             TableNumber = 14,
             Status = OrderStatus.Active,
             CreatedAt = DateTime.Now.AddMinutes(-50),
-            ServerName = "Le Thi Lan Anh",
-            ServerId = "3",
+            ServerName = currentUserName,
+            ServerId = currentUserId,
             Discount = 0,
             PaymentMethod = PaymentMethod.Qr,
             Items =
@@ -334,8 +341,8 @@ public class MockDataStore : IDataStore
             TableNumber = 6,
             Status = OrderStatus.Paid,
             CreatedAt = DateTime.Now.AddDays(-1),
-            ServerName = "Tran Minh Tuan",
-            ServerId = "2",
+            ServerName = currentUserName,
+            ServerId = currentUserId,
             Discount = 20000,
             PaymentMethod = PaymentMethod.Cash,
             Items =
@@ -352,8 +359,8 @@ public class MockDataStore : IDataStore
             TableNumber = 12,
             Status = OrderStatus.Paid,
             CreatedAt = DateTime.Now.AddDays(-3),
-            ServerName = "Le Thi Lan Anh",
-            ServerId = "3",
+            ServerName = currentUserName,
+            ServerId = currentUserId,
             Discount = 0,
             PaymentMethod = PaymentMethod.Qr,
             Items =
@@ -370,8 +377,8 @@ public class MockDataStore : IDataStore
             TableNumber = 15,
             Status = OrderStatus.Paid,
             CreatedAt = DateTime.Now.AddDays(-4),
-            ServerName = "Tran Minh Tuan",
-            ServerId = "2",
+            ServerName = currentUserName,
+            ServerId = currentUserId,
             Discount = 30000,
             PaymentMethod = PaymentMethod.Cash,
             Items =
@@ -502,7 +509,7 @@ public class MockDataStore : IDataStore
             Id = 8001,
             OrderId = 201,
             TableNumber = 6,
-            ServerName = "Tran Minh Tuan",
+            ServerName = context.OrderHistory[0].ServerName,
             CreatedAt = DateTime.Now.AddDays(-1),
             PaymentMethod = PaymentMethod.Cash,
             Discount = 20000,
@@ -515,7 +522,7 @@ public class MockDataStore : IDataStore
             Id = 8002,
             OrderId = 202,
             TableNumber = 12,
-            ServerName = "Le Thi Lan Anh",
+            ServerName = context.OrderHistory[1].ServerName,
             CreatedAt = DateTime.Now.AddDays(-3),
             PaymentMethod = PaymentMethod.Qr,
             Discount = 0,
@@ -528,7 +535,7 @@ public class MockDataStore : IDataStore
             Id = 8003,
             OrderId = 203,
             TableNumber = 15,
-            ServerName = "Tran Minh Tuan",
+            ServerName = context.OrderHistory[2].ServerName,
             CreatedAt = DateTime.Now.AddDays(-4),
             PaymentMethod = PaymentMethod.Cash,
             Discount = 30000,
@@ -541,7 +548,7 @@ public class MockDataStore : IDataStore
             Id = 8004,
             OrderId = 104,
             TableNumber = 10,
-            ServerName = "Le Thi Lan Anh",
+            ServerName = context.Orders[3].ServerName,
             CreatedAt = DateTime.Now.AddDays(-5),
             PaymentMethod = PaymentMethod.Qr,
             Discount = 0,

@@ -412,12 +412,15 @@ public partial class PaymentPage : ContentPage
             var invoiceId = AppContext.Instance.Invoices.Count == 0
                 ? 1
                 : AppContext.Instance.Invoices.Max(invoice => invoice.Id) + 1;
+            // Resolve tên nhân viên thực từ Firebase thông qua ServerId
+            var resolvedServerName = AppContext.Instance.ResolveServerName(order.ServerId, order.ServerName);
+
             var invoice = new Invoice
             {
                 Id = invoiceId,
                 OrderId = order.Id,
                 TableNumber = order.TableNumber,
-                ServerName = order.ServerName,
+                ServerName = resolvedServerName,
                 CreatedAt = paidAt,
                 PaymentMethod = _selectedPaymentMethod.Value,
                 Discount = order.Discount,
