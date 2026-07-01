@@ -56,13 +56,26 @@ public partial class TableManagementPage : ContentPage
             var confirmSeat = await DisplayAlert("Nhận khách", $"Bạn muốn nhận khách vào bàn {table.Number}?", "Xác nhận", "Hủy");
             if (!confirmSeat) return;
 
+            var previousStatus = table.Status;
+            var previousArrivalTime = table.ArrivalTime;
+            var previousHasOrdered = table.HasOrdered;
             table.Status = TableStatus.Occupied;
             table.ArrivalTime = DateTime.Now;
             table.HasOrdered = false;
-            AppContext.Instance.SelectedTable = table;
-            _ = _firebase.UpdateTableAsync(table);
 
-            await Shell.Current.GoToAsync(AppRoutes.Absolute(AppRoutes.CreateOrder));
+            try
+            {
+                await _firebase.UpdateTableAsync(table);
+                AppContext.Instance.SelectedTable = table;
+                await Shell.Current.GoToAsync(AppRoutes.Absolute(AppRoutes.CreateOrder));
+            }
+            catch (Exception ex)
+            {
+                table.Status = previousStatus;
+                table.ArrivalTime = previousArrivalTime;
+                table.HasOrdered = previousHasOrdered;
+                await DisplayAlert("Lỗi", $"Không thể nhận khách: {ex.Message}", "Đóng");
+            }
         }
     }
 
@@ -73,11 +86,35 @@ public partial class TableManagementPage : ContentPage
             bool confirm = await DisplayAlert("Nhận bàn đặt", $"Khách {table.ReservedFor} đã đến nhận bàn {table.DisplayNumber}?", "Xác nhận", "Hủy");
             if (confirm)
             {
+                var previousStatus = table.Status;
+                var previousArrivalTime = table.ArrivalTime;
+                var previousHasOrdered = table.HasOrdered;
+                var previousReservedFor = table.ReservedFor;
+                var previousReservedPhone = table.ReservedPhone;
+                var previousReservedAt = table.ReservedAt;
+
                 table.Status = TableStatus.Occupied;
                 table.ArrivalTime = DateTime.Now;
                 table.HasOrdered = false;
-                _ = _firebase.UpdateTableAsync(table);
-                await _filterViewModel.RefreshTablesAsync();
+                table.ReservedFor = null;
+                table.ReservedPhone = null;
+                table.ReservedAt = null;
+
+                try
+                {
+                    await _firebase.UpdateTableAsync(table);
+                    await _filterViewModel.RefreshTablesAsync();
+                }
+                catch (Exception ex)
+                {
+                    table.Status = previousStatus;
+                    table.ArrivalTime = previousArrivalTime;
+                    table.HasOrdered = previousHasOrdered;
+                    table.ReservedFor = previousReservedFor;
+                    table.ReservedPhone = previousReservedPhone;
+                    table.ReservedAt = previousReservedAt;
+                    await DisplayAlert("Lỗi", $"Không thể nhận bàn: {ex.Message}", "Đóng");
+                }
             }
         }
     }
@@ -99,6 +136,27 @@ public partial class TableManagementPage : ContentPage
             if (selectedTableName != "Hủy" && !string.IsNullOrEmpty(selectedTableName))
             {
                 var targetTable = availableTables.First(t => t.DisplayNumber == selectedTableName);
+                var orderToTransfer = AppContext.Instance.Orders.FirstOrDefault(o => o.Id == currentTable.CurrentOrderId)
+                                   ?? AppContext.Instance.Orders.FirstOrDefault(o => o.TableId == currentTable.Id && o.Status == OrderStatus.Active);
+                var draftToTransfer = orderToTransfer == null
+                    ? await DraftOrderService.Instance.GetDraftAsync(currentTable.Id)
+                    : null;
+
+                if (currentTable.HasOrdered && orderToTransfer == null)
+                {
+                    await DisplayAlert(
+                        "Không thể chuyển bàn",
+                        "Không tìm thấy đơn đang hoạt động của bàn này. Hãy tải lại dữ liệu trước khi thử lại.",
+                        "Đóng");
+                    return;
+                }
+
+                var currentStatus = currentTable.Status;
+                var currentOrderId = currentTable.CurrentOrderId;
+                var currentArrivalTime = currentTable.ArrivalTime;
+                var currentHasOrdered = currentTable.HasOrdered;
+                var currentItemCount = currentTable.OrderItemCount;
+                var currentOrderTotal = currentTable.OrderTotal;
 
                 targetTable.Status = currentTable.Status;
                 targetTable.CurrentOrderId = currentTable.CurrentOrderId;
@@ -107,7 +165,8 @@ public partial class TableManagementPage : ContentPage
                 targetTable.OrderItemCount = currentTable.OrderItemCount;
                 targetTable.OrderTotal = currentTable.OrderTotal;
 
-                var orderToTransfer = AppContext.Instance.Orders.FirstOrDefault(o => o.Id == currentTable.CurrentOrderId);
+                int? previousOrderTableId = orderToTransfer?.TableId;
+                int? previousOrderTableNumber = orderToTransfer?.TableNumber;
                 if (orderToTransfer != null)
                 {
                     orderToTransfer.TableId = targetTable.Id;
@@ -121,11 +180,57 @@ public partial class TableManagementPage : ContentPage
                 currentTable.OrderItemCount = 0;
                 currentTable.OrderTotal = string.Empty;
 
-                _ = _firebase.UpdateTableAsync(targetTable);
-                _ = _firebase.UpdateTableAsync(currentTable);
+                var draftTransferred = false;
 
-                await _filterViewModel.RefreshTablesAsync();
-                await DisplayAlert("Thành công", $"Đã chuyển khách sang {targetTable.DisplayNumber}.", "OK");
+                try
+                {
+                    if (draftToTransfer != null)
+                    {
+                        draftTransferred = await DraftOrderService.Instance.TransferDraftAsync(currentTable.Id, targetTable);
+                    }
+
+                    // One multi-location PATCH keeps both tables and the order consistent.
+                    await _firebase.TransferTableAsync(currentTable, targetTable, orderToTransfer);
+                    await _filterViewModel.RefreshTablesAsync();
+                    await DisplayAlert("Thành công", $"Đã chuyển khách sang {targetTable.DisplayNumber}.", "OK");
+                }
+                catch (Exception ex)
+                {
+                    currentTable.Status = currentStatus;
+                    currentTable.CurrentOrderId = currentOrderId;
+                    currentTable.ArrivalTime = currentArrivalTime;
+                    currentTable.HasOrdered = currentHasOrdered;
+                    currentTable.OrderItemCount = currentItemCount;
+                    currentTable.OrderTotal = currentOrderTotal;
+
+                    targetTable.Status = TableStatus.Available;
+                    targetTable.CurrentOrderId = null;
+                    targetTable.ArrivalTime = null;
+                    targetTable.HasOrdered = false;
+                    targetTable.OrderItemCount = 0;
+                    targetTable.OrderTotal = string.Empty;
+
+                    if (orderToTransfer != null && previousOrderTableId.HasValue && previousOrderTableNumber.HasValue)
+                    {
+                        orderToTransfer.TableId = previousOrderTableId.Value;
+                        orderToTransfer.TableNumber = previousOrderTableNumber.Value;
+                    }
+
+                    if (draftTransferred)
+                    {
+                        try
+                        {
+                            await DraftOrderService.Instance.TransferDraftAsync(targetTable.Id, currentTable);
+                        }
+                        catch (Exception rollbackEx)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[TableTransfer] Draft rollback failed: {rollbackEx.Message}");
+                        }
+                    }
+
+                    await _filterViewModel.RefreshTablesAsync();
+                    await DisplayAlert("Lỗi", $"Không thể chuyển bàn: {ex.Message}", "Đóng");
+                }
             }
         }
     }
@@ -157,20 +262,40 @@ public partial class TableManagementPage : ContentPage
             bool confirm = await DisplayAlert("Làm trống bàn", $"Bàn {table.Number} chưa gọi món. Bạn muốn làm trống bàn?", "Đồng ý", "Hủy");
             if (confirm)
             {
+                var submittedOrder = AppContext.Instance.Orders.FirstOrDefault(o =>
+                    o.Status == OrderStatus.Active && (o.TableId == table.Id || o.TableNumber == table.Number));
+                if (submittedOrder != null)
+                {
+                    await DisplayAlert(
+                        "Không thể làm trống bàn",
+                        "Bàn này đã có đơn được gửi lên Firebase. Hãy xử lý hoặc thanh toán đơn trước.",
+                        "Đóng");
+                    return;
+                }
+
+                var previousStatus = table.Status;
+                var previousOrderId = table.CurrentOrderId;
+                var previousArrivalTime = table.ArrivalTime;
+                var previousHasOrdered = table.HasOrdered;
                 table.Status = TableStatus.Available;
                 table.CurrentOrderId = null;
                 table.ArrivalTime = null;
                 table.HasOrdered = false;
-                _ = _firebase.UpdateTableAsync(table);
 
-                var draftOrder = AppContext.Instance.Orders.FirstOrDefault(o => o.TableId == table.Id && o.Status == OrderStatus.Active)
-                              ?? AppContext.Instance.Orders.FirstOrDefault(o => o.TableNumber == table.Number && o.Status == OrderStatus.Active);
-                if (draftOrder != null)
+                try
                 {
-                    AppContext.Instance.Orders.Remove(draftOrder);
+                    await _firebase.UpdateTableAsync(table);
+                    DraftOrderService.Instance.ClearDraft(table.Id);
+                    await _filterViewModel.RefreshTablesAsync();
                 }
-
-                await _filterViewModel.RefreshTablesAsync();
+                catch (Exception ex)
+                {
+                    table.Status = previousStatus;
+                    table.CurrentOrderId = previousOrderId;
+                    table.ArrivalTime = previousArrivalTime;
+                    table.HasOrdered = previousHasOrdered;
+                    await DisplayAlert("Lỗi", $"Không thể làm trống bàn: {ex.Message}", "Đóng");
+                }
             }
         }
     }
@@ -182,9 +307,18 @@ public partial class TableManagementPage : ContentPage
             var confirmClean = await DisplayAlert("Đánh dấu dọn xong", $"Xác nhận bàn {table.Number} đã dọn dẹp xong?", "Xác nhận", "Hủy");
             if (!confirmClean) return;
 
+            var previousStatus = table.Status;
             table.Status = TableStatus.Available;
-            _ = _firebase.UpdateTableAsync(table);
-            await _filterViewModel.RefreshTablesAsync();
+            try
+            {
+                await _firebase.UpdateTableAsync(table);
+                await _filterViewModel.RefreshTablesAsync();
+            }
+            catch (Exception ex)
+            {
+                table.Status = previousStatus;
+                await DisplayAlert("Lỗi", $"Không thể cập nhật bàn: {ex.Message}", "Đóng");
+            }
         }
     }
 }

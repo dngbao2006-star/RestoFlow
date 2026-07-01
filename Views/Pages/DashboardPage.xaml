@@ -12,86 +12,79 @@
 
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Padding="24" Spacing="20">
-                <Label Text="Chào buổi sáng!" Style="{StaticResource PageTitle}" />
+                <Label Text="{Binding GreetingText}" Style="{StaticResource PageTitle}" />
 
                 <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
                     <Border Style="{StaticResource CardBorder}">
-                        <VerticalStackLayout Spacing="6">
+                        <VerticalStackLayout Spacing="5">
                             <Label Text="Doanh thu hôm nay" FontAttributes="Bold" />
                             <Label Text="{Binding TodayRevenueDisplay}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
+                            <Label Text="{Binding RevenueComparisonDisplay}" FontSize="11" TextColor="{Binding RevenueComparisonColor}" />
                         </VerticalStackLayout>
                     </Border>
-                    <Border Style="{StaticResource CardBorder}" Grid.Column="1">
-                        <VerticalStackLayout Spacing="6">
+                    <Border Grid.Column="1" Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Hóa đơn hôm nay" FontAttributes="Bold" />
+                            <Label Text="{Binding TodayPaidOrderCount}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Success}" />
+                            <Label Text="Đã thanh toán" Style="{StaticResource MutedTextStyle}" FontSize="11" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Column="2" Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="5">
                             <Label Text="Đơn đang phục vụ" FontAttributes="Bold" />
-                            <Label Text="{Binding Orders.Count}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource PrimaryAccent}" />
+                            <Label Text="{Binding ActiveOrderCount}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource PrimaryAccent}" />
+                            <Label Text="Cần theo dõi" Style="{StaticResource MutedTextStyle}" FontSize="11" />
                         </VerticalStackLayout>
                     </Border>
-                    <Border Style="{StaticResource CardBorder}" Grid.Column="2">
-                        <VerticalStackLayout Spacing="6">
-                            <Label Text="Bàn có khách" FontAttributes="Bold" />
-                            <Label Text="{Binding OccupiedCount}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Warning}" />
-                        </VerticalStackLayout>
-                    </Border>
-                    <Border Style="{StaticResource CardBorder}" Grid.Column="3">
-                        <VerticalStackLayout Spacing="6">
-                            <Label Text="Nhân sự trực ca" FontAttributes="Bold" />
-                            <Label Text="3 / 5" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Success}" />
+                    <Border Grid.Column="3" Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Nhân sự đang online" FontAttributes="Bold" />
+                            <Label Text="{Binding OnlineStaffCount}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Warning}" />
+                            <Label Text="Theo trạng thái đăng nhập" Style="{StaticResource MutedTextStyle}" FontSize="11" />
                         </VerticalStackLayout>
                     </Border>
                 </Grid>
 
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Grid ColumnDefinitions="1.25*,0.75*" ColumnSpacing="12">
                     <Border Style="{StaticResource CardBorder}">
                         <VerticalStackLayout Spacing="12">
-                            <Label Text="Biểu đồ doanh thu" Style="{StaticResource SectionTitle}" FontSize="20" />
-                            <CollectionView ItemsSource="{Binding RevenueDaily}" SelectionMode="None">
-                                <CollectionView.ItemTemplate>
+                            <Label Text="Doanh thu hôm nay theo khung giờ" Style="{StaticResource SectionTitle}" FontSize="20" />
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding HourlyRevenue}" Spacing="7">
+                                <BindableLayout.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8" Padding="0,4">
-                                            <Label Text="{Binding Label}" Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
-                                            <Label Grid.Column="1" Text="{Binding ValueDisplay}" FontAttributes="Bold" HorizontalOptions="End" />
+                                        <Grid ColumnDefinitions="55,*,Auto" ColumnSpacing="8">
+                                            <Label Text="{Binding Label}" Style="{StaticResource SecondaryTextStyle}" FontSize="11" VerticalOptions="Center" />
+                                            <Grid Grid.Column="1">
+                                                <BoxView Color="{StaticResource PrimaryAccent}" HeightRequest="18" CornerRadius="4"
+                                                         HorizontalOptions="Start" WidthRequest="{Binding BarWidthFraction}" Opacity="0.8" />
+                                            </Grid>
+                                            <Label Grid.Column="2" Text="{Binding ValueDisplay}" FontAttributes="Bold" FontSize="11" VerticalOptions="Center" />
                                         </Grid>
                                     </DataTemplate>
-                                </CollectionView.ItemTemplate>
-                            </CollectionView>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
                         </VerticalStackLayout>
                     </Border>
 
-                    <VerticalStackLayout Spacing="12">
+                    <VerticalStackLayout Grid.Column="1" Spacing="12">
                         <Border Style="{StaticResource CardBorder}">
                             <VerticalStackLayout Spacing="8">
-                                <Label Text="Cảnh báo gần đây" Style="{StaticResource SectionTitle}" FontSize="20" />
-                                <Label Text="Cảnh báo - Có bàn cần dọn" Style="{StaticResource SecondaryTextStyle}" />
-                                <Label Text="Thông tin - Beef Pho Soup đã hết hàng" Style="{StaticResource SecondaryTextStyle}" />
-                                <Label Text="Thành công - Món cho bàn 8 đã sẵn sàng" Style="{StaticResource SecondaryTextStyle}" />
-                                <Label Text="Cảnh báo - Có đặt chỗ VIP lúc 19:00" Style="{StaticResource SecondaryTextStyle}" />
+                                <Label Text="Cảnh báo vận hành" Style="{StaticResource SectionTitle}" FontSize="20" />
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecentAlerts}" Spacing="6">
+                                    <BindableLayout.ItemTemplate><DataTemplate><Label Text="{Binding .}" Style="{StaticResource SecondaryTextStyle}" /></DataTemplate></BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
                             </VerticalStackLayout>
                         </Border>
 
                         <Border Style="{StaticResource CardBorder}">
                             <VerticalStackLayout Spacing="8">
-                                <Label Text="Tổng quan trạng thái bàn" Style="{StaticResource SectionTitle}" FontSize="20" />
-                                <HorizontalStackLayout Spacing="6">
-                                    <Ellipse Fill="{StaticResource TableAvailable}" WidthRequest="10" HeightRequest="10" />
-                                    <Label Text="Còn trống" Style="{StaticResource SecondaryTextStyle}" />
-                                    <Label Text="{Binding AvailableCount}" FontAttributes="Bold" HorizontalOptions="EndAndExpand" />
-                                </HorizontalStackLayout>
-                                <HorizontalStackLayout Spacing="6">
-                                    <Ellipse Fill="{StaticResource TableOccupied}" WidthRequest="10" HeightRequest="10" />
-                                    <Label Text="Có khách" Style="{StaticResource SecondaryTextStyle}" />
-                                    <Label Text="{Binding OccupiedCount}" FontAttributes="Bold" HorizontalOptions="EndAndExpand" />
-                                </HorizontalStackLayout>
-                                <HorizontalStackLayout Spacing="6">
-                                    <Ellipse Fill="{StaticResource TableReserved}" WidthRequest="10" HeightRequest="10" />
-                                    <Label Text="Đặt trước" Style="{StaticResource SecondaryTextStyle}" />
-                                    <Label Text="{Binding ReservedCount}" FontAttributes="Bold" HorizontalOptions="EndAndExpand" />
-                                </HorizontalStackLayout>
-                                <HorizontalStackLayout Spacing="6">
-                                    <Ellipse Fill="{StaticResource TableNeedsClearing}" WidthRequest="10" HeightRequest="10" />
-                                    <Label Text="Cần dọn" Style="{StaticResource SecondaryTextStyle}" />
-                                    <Label Text="{Binding NeedsClearingCount}" FontAttributes="Bold" HorizontalOptions="EndAndExpand" />
-                                </HorizontalStackLayout>
+                                <Label Text="Trạng thái bàn" Style="{StaticResource SectionTitle}" FontSize="20" />
+                                <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="7">
+                                    <Ellipse Fill="{StaticResource TableAvailable}" WidthRequest="10" HeightRequest="10" /><Label Grid.Column="1" Text="Còn trống" /><Label Grid.Column="2" Text="{Binding AvailableCount}" FontAttributes="Bold" />
+                                    <Ellipse Grid.Row="1" Fill="{StaticResource TableOccupied}" WidthRequest="10" HeightRequest="10" /><Label Grid.Row="1" Grid.Column="1" Text="Có khách" /><Label Grid.Row="1" Grid.Column="2" Text="{Binding OccupiedCount}" FontAttributes="Bold" />
+                                    <Ellipse Grid.Row="2" Fill="{StaticResource TableReserved}" WidthRequest="10" HeightRequest="10" /><Label Grid.Row="2" Grid.Column="1" Text="Đặt trước" /><Label Grid.Row="2" Grid.Column="2" Text="{Binding ReservedCount}" FontAttributes="Bold" />
+                                    <Ellipse Grid.Row="3" Fill="{StaticResource TableNeedsClearing}" WidthRequest="10" HeightRequest="10" /><Label Grid.Row="3" Grid.Column="1" Text="Cần dọn" /><Label Grid.Row="3" Grid.Column="2" Text="{Binding NeedsClearingCount}" FontAttributes="Bold" />
+                                </Grid>
                             </VerticalStackLayout>
                         </Border>
                     </VerticalStackLayout>
@@ -100,20 +93,20 @@
                 <Border Style="{StaticResource CardBorder}">
                     <VerticalStackLayout Spacing="8">
                         <Label Text="Đơn đang hoạt động" Style="{StaticResource SectionTitle}" FontSize="20" />
-                        <CollectionView ItemsSource="{Binding Orders}" SelectionMode="None">
-                            <CollectionView.ItemTemplate>
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding ActiveOrders}">
+                            <BindableLayout.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid ColumnDefinitions="*,Auto" Padding="4">
-                                        <Label Text="{Binding TableNumber, StringFormat='Bàn {0}'}" />
-                                        <Label Grid.Column="1" Text="{Binding TotalDisplay}" FontAttributes="Bold" />
+                                    <Grid ColumnDefinitions="Auto,*,Auto" Padding="4" ColumnSpacing="12">
+                                        <Label Text="{Binding TableNumber, StringFormat='Bàn {0}'}" FontAttributes="Bold" />
+                                        <Label Grid.Column="1" Text="{Binding CreatedAtDisplay}" Style="{StaticResource SecondaryTextStyle}" />
+                                        <Label Grid.Column="2" Text="{Binding TotalDisplay}" FontAttributes="Bold" />
                                     </Grid>
                                 </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Border>
             </VerticalStackLayout>
         </ScrollView>
     </Grid>
 </ContentPage>
-

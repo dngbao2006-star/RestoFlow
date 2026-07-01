@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="AppManagermentRestaurant.Controls.SearchableDropdownView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Name="Root">
+
+    <!-- The outer Grid uses a single row so the dropdown doesn't push siblings.
+         The dropdown is rendered via code-behind as a popup on the Page overlay. -->
+    <Grid RowDefinitions="Auto">
+        <Border Style="{StaticResource InputBorder}" Padding="10,0" HeightRequest="48">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                <Entry x:Name="InputEntry"
+                       Placeholder="{Binding Placeholder, Source={x:Reference Root}}"
+                       TextChanged="OnEntryTextChanged"
+                       Focused="OnEntryFocused"
+                       Completed="OnEntryCompleted"
+                       FontSize="13" />
+                <Button Grid.Column="1"
+                        Text="⌄"
+                        BackgroundColor="Transparent"
+                        TextColor="{StaticResource TextMuted}"
+                        Padding="8,0"
+                        WidthRequest="36"
+                        Clicked="OnDropdownClicked" />
+            </Grid>
+        </Border>
+    </Grid>
+</ContentView>

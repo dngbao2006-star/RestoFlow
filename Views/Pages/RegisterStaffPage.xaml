@@ -1,68 +1,122 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage 
+<ContentPage
     x:Class="AppManagermentRestaurant.Views.Pages.RegisterStaffPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="Thêm nhân sự mới"
-    BackgroundColor="#F8F9FA">
+    xmlns:controls="clr-namespace:AppManagermentRestaurant.Controls"
+    BackgroundColor="White"
+    Shell.NavBarIsVisible="False">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="30" Spacing="20" MaximumWidthRequest="500" HorizontalOptions="Center">
+    <Grid RowDefinitions="Auto,*">
+        <controls:AppHeaderView />
 
-            <Label Text="Tạo tài khoản" FontSize="28" FontAttributes="Bold" TextColor="#1B3A6B" HorizontalOptions="Center" Margin="0,0,0,10"/>
+        <Grid Grid.Row="1" Padding="24" RowDefinitions="Auto,*" RowSpacing="18">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                <Button Text="←" Style="{StaticResource SecondaryButton}"
+                        WidthRequest="44" HeightRequest="42" Padding="0"
+                        Clicked="OnCancelClicked" />
+                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                    <Label Text="Thêm nhân sự mới" Style="{StaticResource PageTitle}" />
+                    <Label Text="Tạo tài khoản đăng nhập và phân quyền cho nhân sự."
+                           Style="{StaticResource SecondaryTextStyle}" />
+                </VerticalStackLayout>
+            </Grid>
 
-            <Border Stroke="#DDD" StrokeShape="RoundRectangle 12" Padding="12" BackgroundColor="White">
-                <Grid ColumnDefinitions="Auto,*">
-                    <Label Text="👤" TextColor="#777" FontSize="18" VerticalOptions="Center"/>
-                    <Entry Grid.Column="1" Text="{Binding FullName}" Placeholder="Họ và tên" />
-                </Grid>
-            </Border>
+            <ScrollView Grid.Row="1">
+                <Border Style="{StaticResource CardBorder}"
+                        WidthRequest="680" HorizontalOptions="Center"
+                        Padding="28">
+                    <VerticalStackLayout Spacing="18">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                            <Border WidthRequest="54" HeightRequest="54"
+                                    Background="{StaticResource Primary}"
+                                    Stroke="Transparent" StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 16">
+                                <Label Text="👤" FontSize="24"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="3" VerticalOptions="Center">
+                                <Label Text="Thông tin tài khoản" Style="{StaticResource SectionTitle}" FontSize="20" />
+                                <Label Text="Nhân sự sẽ nhận email xác minh sau khi tài khoản được tạo."
+                                       Style="{StaticResource MutedTextStyle}" FontSize="11" />
+                            </VerticalStackLayout>
+                        </Grid>
 
-            <Border Stroke="#DDD" StrokeShape="RoundRectangle 12" Padding="12" BackgroundColor="White">
-                <Grid ColumnDefinitions="Auto,*">
-                    <Label Text="✉" TextColor="#777" FontSize="18" VerticalOptions="Center"/>
-                    <Entry Grid.Column="1" Text="{Binding Email}" Placeholder="Địa chỉ Email" Keyboard="Email" />
-                </Grid>
-            </Border>
+                        <BoxView HeightRequest="1" Color="{StaticResource BorderLight}" />
 
-            <Border Stroke="#DDD" StrokeShape="RoundRectangle 12" Padding="12" BackgroundColor="White">
-                <Grid ColumnDefinitions="Auto,*">
-                    <Label Text="🔒" TextColor="#777" FontSize="18" VerticalOptions="Center"/>
-                    <Entry Grid.Column="1" Text="{Binding Password}" Placeholder="Mật khẩu (từ 6 ký tự)" IsPassword="True" />
-                </Grid>
-            </Border>
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Họ và tên" FontAttributes="Bold" FontSize="13" />
+                            <Border Style="{StaticResource InputBorder}" Padding="12,2">
+                                <Entry Text="{Binding FullName}" Placeholder="Ví dụ: Nguyễn Văn An" />
+                            </Border>
+                        </VerticalStackLayout>
 
-            <Border Stroke="#DDD" StrokeShape="RoundRectangle 12" Padding="4,0" BackgroundColor="White">
-                <Grid ColumnDefinitions="Auto,*">
-                    <Label Text="💼" TextColor="#777" FontSize="18" VerticalOptions="Center" Margin="12,0,0,0"/>
-                    <Picker Grid.Column="1" Title="Chọn chức vụ" SelectedIndex="{Binding SelectedRoleIndex}">
-                        <Picker.ItemsSource>
-                            <x:Array Type="{x:Type x:String}">
-                                <x:String>Nhân viên</x:String>
-                                <x:String>Quản lý</x:String>
-                            </x:Array>
-                        </Picker.ItemsSource>
-                    </Picker>
-                </Grid>
-            </Border>
+                        <Grid ColumnDefinitions="1.35*,0.65*" ColumnSpacing="12">
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="Địa chỉ email" FontAttributes="Bold" FontSize="13" />
+                                <Border Style="{StaticResource InputBorder}" Padding="12,2">
+                                    <Entry Text="{Binding Email}" Placeholder="nhanvien@example.com" Keyboard="Email" />
+                                </Border>
+                            </VerticalStackLayout>
 
-            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" Color="#1B3A6B" />
+                            <VerticalStackLayout Grid.Column="1" Spacing="6">
+                                <Label Text="Vai trò" FontAttributes="Bold" FontSize="13" />
+                                <Border Style="{StaticResource InputBorder}" Padding="8,0">
+                                    <Picker Title="Chọn vai trò" SelectedIndex="{Binding SelectedRoleIndex}">
+                                        <Picker.ItemsSource>
+                                            <x:Array Type="{x:Type x:String}">
+                                                <x:String>Nhân viên</x:String>
+                                                <x:String>Quản lý</x:String>
+                                            </x:Array>
+                                        </Picker.ItemsSource>
+                                    </Picker>
+                                </Border>
+                            </VerticalStackLayout>
+                        </Grid>
 
-            <Label Text="{Binding StatusMessage}" 
-                   TextColor="{Binding IsError, Converter={StaticResource BooleanNegationConverter}}" 
-                   HorizontalOptions="Center" 
-                   FontAttributes="Bold"/>
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Mật khẩu tạm thời" FontAttributes="Bold" FontSize="13" />
+                            <Border Style="{StaticResource InputBorder}" Padding="12,2">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Entry x:Name="PasswordEntry" Text="{Binding Password}"
+                                           Placeholder="Tối thiểu 6 ký tự" IsPassword="True" />
+                                    <Button Grid.Column="1" Text="👁" BackgroundColor="Transparent"
+                                            WidthRequest="40" Padding="0" Clicked="OnTogglePasswordClicked" />
+                                </Grid>
+                            </Border>
+                        </VerticalStackLayout>
 
-            <Button Text="Tạo tài khoản" 
-                    Command="{Binding RegisterCommand}" 
-                    BackgroundColor="#1B3A6B" 
-                    TextColor="White" 
-                    CornerRadius="12" 
-                    HeightRequest="50" 
-                    FontAttributes="Bold"
-                    Margin="0,10,0,0"
-                    IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanNegationConverter}}"/>
+                        <Border Background="#EFF6FF" Stroke="#BFDBFE" StrokeThickness="1"
+                                StrokeShape="RoundRectangle 10" Padding="12">
+                            <Label Text="Tài khoản chỉ đăng nhập được sau khi người nhận xác minh email."
+                                   TextColor="#1D4ED8" FontSize="12" />
+                        </Border>
 
-        </VerticalStackLayout>
-    </ScrollView>
+                        <Label Text="{Binding StatusMessage}" FontAttributes="Bold" FontSize="12">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding IsError}" Value="True">
+                                    <Setter Property="TextColor" Value="{StaticResource Danger}" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Label" Binding="{Binding IsError}" Value="False">
+                                    <Setter Property="TextColor" Value="{StaticResource TextMuted}" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <Button Text="Hủy" Style="{StaticResource SecondaryButton}"
+                                    Clicked="OnCancelClicked" />
+                            <Button Grid.Column="1" Text="Tạo tài khoản"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Command="{Binding RegisterCommand}"
+                                    IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanNegationConverter}}" />
+                        </Grid>
+
+                        <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                                           Color="{StaticResource Primary}" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Border>
+            </ScrollView>
+        </Grid>
+    </Grid>
 </ContentPage>

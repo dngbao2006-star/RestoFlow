@@ -10,11 +10,10 @@
     <Grid RowDefinitions="Auto,*">
         <controls:AppHeaderView />
 
-        <ScrollView Grid.Row="1">
-            <VerticalStackLayout Padding="24" Spacing="20">
+        <Grid Grid.Row="1" Padding="24" RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="16">
 
                 <!-- ═══ EDIT MODE BANNER ═══ -->
-                <Border x:Name="EditModeBanner" IsVisible="False"
+                <Border Grid.Row="0" x:Name="EditModeBanner" IsVisible="False"
                         Background="#FFF0F0" Stroke="#FFCCCC" StrokeThickness="1"
                         StrokeShape="RoundRectangle 8" Padding="10,6">
                     <Label Text="⚠ Đang ở chế độ chỉnh sửa"
@@ -23,7 +22,7 @@
                 </Border>
 
                 <!-- ═══ HEADER: Title + Edit Button ═══ -->
-                <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                <HorizontalStackLayout Grid.Row="1" Spacing="12" VerticalOptions="Center">
                     <Label Text="Sơ Đồ Khu Vực" Style="{StaticResource PageTitle}" />
                     <Button x:Name="EditButton" Text="Chỉnh sửa"
                             Style="{StaticResource PrimaryButton}"
@@ -31,12 +30,14 @@
                 </HorizontalStackLayout>
 
                 <!-- ═══ STATUS LEGEND ═══ -->
-                <Border Style="{StaticResource CardBorder}">
+                <Border Grid.Row="2" Style="{StaticResource CardBorder}">
                     <HorizontalStackLayout Spacing="10">
                         <Ellipse Fill="{StaticResource TableAvailable}" WidthRequest="10" HeightRequest="10" />
                         <Label Text="Còn trống" Style="{StaticResource SecondaryTextStyle}" />
                         <Ellipse Fill="{StaticResource TableOccupied}" WidthRequest="10" HeightRequest="10" />
                         <Label Text="Có khách" Style="{StaticResource SecondaryTextStyle}" />
+                        <Ellipse Fill="{StaticResource TableOrdered}" WidthRequest="10" HeightRequest="10" />
+                        <Label Text="Đã gọi món" Style="{StaticResource SecondaryTextStyle}" />
                         <Ellipse Fill="{StaticResource TableReserved}" WidthRequest="10" HeightRequest="10" />
                         <Label Text="Đặt trước" Style="{StaticResource SecondaryTextStyle}" />
                         <Ellipse Fill="{StaticResource TableNeedsClearing}" WidthRequest="10" HeightRequest="10" />
@@ -45,7 +46,7 @@
                 </Border>
 
                 <!-- ═══ FLOOR TABS ═══ -->
-                <ScrollView Orientation="Horizontal">
+                <ScrollView Grid.Row="3" Orientation="Horizontal">
                     <HorizontalStackLayout Spacing="8">
                         <Button x:Name="TabGround" Text="Tầng trệt"
                                 Style="{StaticResource PillButton}"
@@ -60,9 +61,9 @@
                 </ScrollView>
 
                 <!-- ═══ TABLE GRID AREA ═══ -->
-                <Border Style="{StaticResource CardBorder}">
-                    <VerticalStackLayout Spacing="12">
-                        <Grid ColumnDefinitions="*,Auto">
+                <Border Grid.Row="4" Style="{StaticResource CardBorder}">
+                    <Grid RowDefinitions="Auto,*" RowSpacing="12">
+                        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
                             <Label x:Name="FloorTitle" Text="Tầng trệt"
                                    Style="{StaticResource SectionTitle}" FontSize="20" />
                             <Button x:Name="AddTableButton" Grid.Column="1"
@@ -72,7 +73,7 @@
                                     Clicked="OnAddTableClicked" />
                         </Grid>
 
-                        <Border Background="{StaticResource AppBackground}"
+                        <Border Grid.Row="1" Background="{StaticResource AppBackground}"
                                 Stroke="{StaticResource BorderStrong}"
                                 StrokeThickness="1.5"
                                 StrokeShape="RoundRectangle 16" Padding="16">
@@ -85,7 +86,7 @@
                                     <DataTemplate>
                                         <Border Background="{StaticResource Surface}"
                                                 Stroke="{Binding StatusColor}"
-                                                StrokeThickness="2"
+                                                StrokeThickness="3"
                                                 StrokeShape="RoundRectangle 12"
                                                 Padding="12" Margin="0,0,8,8"
                                                 HeightRequest="100">
@@ -111,11 +112,10 @@
                                 </CollectionView.ItemTemplate>
                             </CollectionView>
                         </Border>
-                    </VerticalStackLayout>
+                    </Grid>
                 </Border>
 
-            </VerticalStackLayout>
-        </ScrollView>
+        </Grid>
 
         <!-- ═══ OVERLAY MODALS ═══ -->
 
@@ -126,7 +126,7 @@
                     HorizontalOptions="Center" VerticalOptions="Center"
                     WidthRequest="420" MaximumHeightRequest="500">
                 <VerticalStackLayout Spacing="16">
-                    <Label Text="Đặt trước bàn" Style="{StaticResource SectionTitle}" FontSize="20" />
+                    <Label x:Name="ReservationModalTitle" Text="Đặt trước bàn" Style="{StaticResource SectionTitle}" FontSize="20" />
 
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Họ và tên" FontSize="14" FontAttributes="Bold" />
@@ -253,7 +253,38 @@
             </Border>
         </Grid>
 
-        <!-- TABLE ACTION POPUP -->
+        <!-- RESERVED TABLE OPTIONS MODAL -->
+        <Grid x:Name="ReservedOptionsModal" Grid.RowSpan="2"
+              IsVisible="False" BackgroundColor="#80000000">
+            <Border Style="{StaticResource ModalBorder}"
+                    HorizontalOptions="Center" VerticalOptions="Center"
+                    WidthRequest="400" MaximumHeightRequest="300">
+                <VerticalStackLayout Spacing="16">
+                    <Label x:Name="ReservedOptionsTitle" Text=""
+                           Style="{StaticResource SectionTitle}" FontSize="20"
+                           HorizontalOptions="Center" />
+
+                    <HorizontalStackLayout Spacing="12" HorizontalOptions="Center">
+                        <Button Text="🗑 Hủy đặt bàn"
+                                BackgroundColor="#EF4444" TextColor="White"
+                                FontSize="15" HeightRequest="44" Padding="16,8"
+                                CornerRadius="8"
+                                Clicked="OnCancelReservationClicked" />
+                        <Button Text="✏️ Chỉnh sửa"
+                                BackgroundColor="#F59E0B" TextColor="White"
+                                FontSize="15" HeightRequest="44" Padding="16,8"
+                                CornerRadius="8"
+                                Clicked="OnEditReservationClicked" />
+                    </HorizontalStackLayout>
+
+                    <Button Text="Thoát" Style="{StaticResource SecondaryButton}"
+                            FontSize="14" HorizontalOptions="Center"
+                            Clicked="OnReservedOptionsClose" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <!-- EDIT MODE: TABLE ACTION POPUP -->
         <Grid x:Name="TableActionModal" Grid.RowSpan="2"
               IsVisible="False" BackgroundColor="#80000000">
             <Border Style="{StaticResource ModalBorder}"
@@ -264,18 +295,8 @@
                            Style="{StaticResource SectionTitle}" FontSize="20"
                            HorizontalOptions="Center" />
 
-                    <!-- Normal mode buttons -->
-                    <VerticalStackLayout x:Name="NormalModeActions" Spacing="10" IsVisible="True">
-                        <Button Text="🕒  Đặt trước" Style="{StaticResource WarningButton}"
-                                FontSize="15" HeightRequest="44"
-                                Clicked="OnReserveTableClicked" />
-                        <Button Text="✅  Nhận bàn" Style="{StaticResource SuccessButton}"
-                                FontSize="15" HeightRequest="44"
-                                Clicked="OnCheckInTableClicked" />
-                    </VerticalStackLayout>
-
                     <!-- Edit mode buttons -->
-                    <VerticalStackLayout x:Name="EditModeActions" Spacing="10" IsVisible="False">
+                    <VerticalStackLayout Spacing="10">
                         <Button Text="✏️  Chỉnh sửa chỗ ngồi" Style="{StaticResource PrimaryButton}"
                                 FontSize="15" HeightRequest="44"
                                 Clicked="OnEditCapacityClicked" />
@@ -293,4 +314,3 @@
 
     </Grid>
 </ContentPage>
-

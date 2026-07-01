@@ -1,6 +1,7 @@
 using AppManagermentRestaurant.Models;
 using AppManagermentRestaurant.Services;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 
 namespace AppManagermentRestaurant.Views.Pages;
 
@@ -10,7 +11,7 @@ public partial class ChatPage : ContentPage
 {
     private readonly FirebaseService firebaseService = new();
 
-    private IDisposable? chatSubscription;
+    private bool _isObservingMessages;
 
     public ChatPage()
     {
@@ -23,58 +24,34 @@ public partial class ChatPage : ContentPage
     {
         base.OnNavigatedTo(args);
 
-        RefreshPage();
-
-        // Tránh subscribe nhiều lần
-        chatSubscription?.Dispose();
-
-        chatSubscription = firebaseService.ListenForMessages(message =>
+        if (!_isObservingMessages)
         {
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                // Debug
-                Console.WriteLine("===== NEW MESSAGE =====");
-                Console.WriteLine($"MESSAGE: {message.Message}");
-                Console.WriteLine($"SENDER ID: {message.SenderId}");
-                Console.WriteLine($"CURRENT USER ID: {AppContext.Instance.CurrentUser?.FirebaseUid}");
-                Console.WriteLine($"CURRENT USER NAME: {AppContext.Instance.CurrentUser?.Name}");
+            ChatMessages.CollectionChanged += OnChatMessagesChanged;
+            _isObservingMessages = true;
+        }
 
-                bool alreadyExists = ChatMessages.Any(x =>
-                    x.Message == message.Message &&
-                    x.Timestamp == message.Timestamp &&
-                    x.SenderName == message.SenderName);
-
-                if (alreadyExists)
-                    return;
-
-
-                ChatMessages.Add(new ChatMessage
-                {
-                    SenderId = message.SenderId,
-
-                    SenderName = message.SenderName,
-
-                    SenderRole = message.SenderRole,
-
-                    Message = message.Message,
-
-                    Timestamp = message.Timestamp,
-
-                    IsSystem = message.IsSystem
-                });
-
-                AppContext.Instance.RefreshBadges();
-
-                ScrollToLatestMessage();
-            });
-        });
+        AppContext.Instance.MarkChatMessagesRead();
+        RefreshPage();
     }
 
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
 
-        chatSubscription?.Dispose();
+        if (_isObservingMessages)
+        {
+            ChatMessages.CollectionChanged -= OnChatMessagesChanged;
+            _isObservingMessages = false;
+        }
+    }
+
+    private void OnChatMessagesChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            AppContext.Instance.MarkChatMessagesRead();
+            RefreshPage();
+        });
     }
 
     private void RefreshPage()
@@ -153,7 +130,9 @@ public partial class ChatPage : ContentPage
                 IsSystem = false
             };
 
-            await firebaseService.SendMessageAsync(firebaseMessage);
+            var key = await firebaseService.SendMessageAsync(firebaseMessage);
+            AppContext.Instance.AddOrUpdateChatMessage(key, firebaseMessage);
+            AppContext.Instance.RefreshBadges();
 
             MessageEditor.Text = "";
 

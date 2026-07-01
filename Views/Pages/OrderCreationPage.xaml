@@ -17,17 +17,17 @@
     <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,300" ColumnSpacing="20">
         <controls:AppHeaderView Grid.ColumnSpan="2" />
 
-        <ScrollView Grid.Row="1" Grid.Column="0">
-            <VerticalStackLayout Padding="24" Spacing="20">
+        <Grid Grid.Row="1" Grid.Column="0" Padding="24"
+              RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="20">
 
-                <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                <HorizontalStackLayout Grid.Row="0" Spacing="8" VerticalOptions="Center">
                     <Label Text="Bàn" Style="{StaticResource SectionTitle}" />
                     <Label Text="{Binding SelectedOrder.TableNumber}" Style="{StaticResource SectionTitle}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
                     <Label Text="•" Style="{StaticResource SectionTitle}" />
                     <Label Text="{Binding ExistingOrderInfo}" Style="{StaticResource SecondaryTextStyle}" />
                 </HorizontalStackLayout>
 
-                <VerticalStackLayout Spacing="8" Margin="0,0,0,5">
+                <VerticalStackLayout Grid.Row="1" Spacing="8" Margin="0,0,0,5">
                     <Label Text="Chọn bàn để lên đơn:" FontAttributes="Bold" FontSize="13" TextColor="{StaticResource SecondaryTextStyle}" />
 
                     <Border Stroke="#6366F1" StrokeThickness="1" StrokeShape="RoundRectangle 8" BackgroundColor="White" HorizontalOptions="Start" WidthRequest="340" HeightRequest="42" Padding="0">
@@ -51,14 +51,14 @@
                     </Border>
                 </VerticalStackLayout>
 
-                <Border Style="{StaticResource InputBorder}">
+                <Border Grid.Row="2" Style="{StaticResource InputBorder}">
                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
                         <Label Text="🔍" VerticalOptions="Center" FontSize="16" />
                         <Entry Grid.Column="1" Placeholder="Tìm kiếm món ăn..." TextChanged="OnSearchTextChanged" x:Name="SearchEntry" />
                     </Grid>
                 </Border>
 
-                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5" VerticalOptions="Center">
+                <Grid Grid.Row="3" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5" VerticalOptions="Center">
                     <Button x:Name="BtnScrollLeft" Grid.Column="0" Text="&lt;" WidthRequest="30" Padding="0" BackgroundColor="Transparent" TextColor="#333333" FontSize="18" FontAttributes="Bold" Clicked="OnScrollLeftClicked" IsVisible="False" />
 
                     <ScrollView x:Name="FilterScrollView" Grid.Column="1" Orientation="Horizontal" Scrolled="OnFilterScrolled" SizeChanged="OnFilterScrollViewSizeChanged">
@@ -76,7 +76,7 @@
                     <Button x:Name="BtnScrollRight" Grid.Column="2" Text="&gt;" WidthRequest="30" Padding="0" BackgroundColor="Transparent" TextColor="#333333" FontSize="18" FontAttributes="Bold" Clicked="OnScrollRightClicked" IsVisible="False" />
                 </Grid>
 
-                <CollectionView ItemsSource="{Binding FilteredMenuItems}" SelectionMode="None">
+                <CollectionView Grid.Row="4" ItemsSource="{Binding FilteredMenuItems}" SelectionMode="None">
                     <CollectionView.ItemsLayout>
                         <GridItemsLayout Orientation="Vertical" Span="2" />
                     </CollectionView.ItemsLayout>
@@ -98,8 +98,7 @@
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
-            </VerticalStackLayout>
-        </ScrollView>
+        </Grid>
 
         <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource CardBorder}" Margin="0,24,24,24">
             <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="16">
@@ -109,8 +108,8 @@
                     <VerticalStackLayout Spacing="12">
                         <VerticalStackLayout Spacing="8" IsVisible="{Binding HasExistingItems}">
                             <Label Text="📦 Đã gọi trước" FontAttributes="Bold" FontSize="11" Style="{StaticResource SecondaryTextStyle}" />
-                            <CollectionView ItemsSource="{Binding ExistingItems}" SelectionMode="None">
-                                <CollectionView.ItemTemplate>
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding ExistingItems}">
+                                <BindableLayout.ItemTemplate>
                                     <DataTemplate>
                                         <Border Style="{StaticResource InputBorder}" Padding="8" Margin="0,0,0,8" Background="#F5F5F5">
                                             <HorizontalStackLayout Spacing="8">
@@ -126,14 +125,14 @@
                                             </HorizontalStackLayout>
                                         </Border>
                                     </DataTemplate>
-                                </CollectionView.ItemTemplate>
-                            </CollectionView>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
                         </VerticalStackLayout>
 
                         <VerticalStackLayout Spacing="8" IsVisible="{Binding HasNewItems}">
                             <Label Text="➕ Gọi thêm" FontAttributes="Bold" FontSize="11" Style="{StaticResource SecondaryTextStyle}" />
-                            <CollectionView ItemsSource="{Binding NewItems}" SelectionMode="None">
-                                <CollectionView.ItemTemplate>
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding NewItems}">
+                                <BindableLayout.ItemTemplate>
                                     <DataTemplate>
                                         <Border Style="{StaticResource InputBorder}" Padding="8" Margin="0,0,0,12" Stroke="{StaticResource Primary}" StrokeThickness="1">
                                             <VerticalStackLayout Spacing="6">
@@ -165,8 +164,8 @@
                                             </VerticalStackLayout>
                                         </Border>
                                     </DataTemplate>
-                                </CollectionView.ItemTemplate>
-                            </CollectionView>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
                         </VerticalStackLayout>
 
                         <Label Text="😕 Chưa có món nào được thêm" Style="{StaticResource MutedTextStyle}" HorizontalOptions="Center" IsVisible="{Binding HasNoItems}" Margin="0,20" />

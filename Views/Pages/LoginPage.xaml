@@ -20,15 +20,27 @@
 
         <Grid Grid.Column="0" IsVisible="{OnIdiom Phone=False, Default=True}">
             <Image Source="anhnenlogin.jpg" Aspect="AspectFill"/>
+            <!-- Gradient overlay: tối dần từ dưới lên để chữ trắng dễ đọc -->
             <BoxView>
                 <BoxView.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                        <GradientStop Color="#661B3A6B" Offset="0"/>
-                        <GradientStop Color="#221B3A6B" Offset="1"/>
+                        <GradientStop Color="#331B3A6B" Offset="0"/>
+                        <GradientStop Color="#22000000" Offset="0.4"/>
+                        <GradientStop Color="#99000000" Offset="1"/>
                     </LinearGradientBrush>
                 </BoxView.Background>
             </BoxView>
-            <VerticalStackLayout Padding="40" Spacing="16" VerticalOptions="Center">
+
+            <!-- Tên nhà hàng ở góc trên cùng bên trái -->
+            <HorizontalStackLayout Spacing="10" Padding="30,30,0,0" VerticalOptions="Start" HorizontalOptions="Start">
+                <Border Background="White" StrokeThickness="0" StrokeShape="RoundRectangle 8" Padding="10,6">
+                    <Label Text="🍽️" FontSize="16" VerticalOptions="Center" HorizontalOptions="Center"/>
+                </Border>
+                <Label Text="The Golden Plate" FontSize="22" FontAttributes="Bold" TextColor="White" VerticalOptions="Center"/>
+            </HorizontalStackLayout>
+
+            <!-- Tagline ở phần giữa-dưới -->
+            <VerticalStackLayout Padding="40" Spacing="16" VerticalOptions="End" Margin="0,0,0,60">
                 <HorizontalStackLayout Spacing="10">
                     <Border Background="White" StrokeThickness="0" StrokeShape="RoundRectangle 20" Padding="10,5">
                         <Label Text="Chef" TextColor="#1B3A6B" FontAttributes="Bold"/>
@@ -42,42 +54,46 @@
 
         <Grid Grid.Column="1" BackgroundColor="White">
             <ScrollView>
-                <VerticalStackLayout Padding="40" Spacing="20">
-                    <Label Text="Chào mừng quay trở lại" FontSize="28" FontAttributes="Bold"/>
+                <VerticalStackLayout Padding="48,60" Spacing="24" VerticalOptions="Center" MaximumWidthRequest="440">
+                    <Label Text="Chào mừng quay trở lại" FontSize="28" FontAttributes="Bold" TextColor="#1B3A6B"/>
 
-                    <HorizontalStackLayout Spacing="10" Margin="0,10">
-                        <Button Text="Nhân viên" Background="#1B3A6B" TextColor="White" CornerRadius="8" HorizontalOptions="FillAndExpand" Command="{Binding SelectStaffRoleCommand}"/>
-                        <Button Text="Quản lý" Background="#1B3A6B" TextColor="White" CornerRadius="8" HorizontalOptions="FillAndExpand" Command="{Binding SelectManagerRoleCommand}"/>
-                    </HorizontalStackLayout>
-
-                    <Border Stroke="#DDD" StrokeShape="RoundRectangle 12" Padding="12">
+                    <!-- Email input -->
+                    <Border x:Name="EmailBorder" Stroke="#DDD" StrokeShape="RoundRectangle 12" Padding="12">
                         <Grid ColumnDefinitions="Auto,*">
-                            <Label Text="✉" TextColor="#777" FontSize="18" VerticalOptions="Center"/>
-                            <Entry Grid.Column="1" Text="{Binding Email}" Placeholder="Địa chỉ email" IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanNegationConverter}}"/>
+                            <Label x:Name="EmailIcon" Text="✉" TextColor="#9CA3AF" FontSize="18" VerticalOptions="Center"/>
+                            <Entry Grid.Column="1" Text="{Binding Email}" Placeholder="Địa chỉ email" 
+                                   IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanNegationConverter}}"
+                                   Focused="OnEmailEntryFocused" Unfocused="OnEmailEntryUnfocused"/>
                         </Grid>
                     </Border>
 
-                    <Border Stroke="#DDD" StrokeShape="RoundRectangle 12" Padding="12">
+                    <!-- Password input -->
+                    <Border x:Name="PasswordBorder" Stroke="#DDD" StrokeShape="RoundRectangle 12" Padding="12">
                         <Grid ColumnDefinitions="Auto,*,Auto">
-                            <Label Text="🔒" TextColor="#777" FontSize="18" VerticalOptions="Center"/>
-                            <Entry x:Name="PasswordEntry" Grid.Column="1" Text="{Binding Password}" Placeholder="Mật khẩu" IsPassword="True" ReturnType="Done" Completed="OnPasswordCompleted" IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanNegationConverter}}"/>
-                            <ImageButton x:Name="EyeButton" Grid.Column="2" Source="eye_open.png" WidthRequest="28" HeightRequest="28" BackgroundColor="Transparent" Padding="2" VerticalOptions="Center" Clicked="OnTogglePasswordClicked"/>
+                            <Label x:Name="PasswordIcon" Text="🔒" TextColor="#9CA3AF" FontSize="18" VerticalOptions="Center"/>
+                            <Entry x:Name="PasswordEntry" Grid.Column="1" Text="{Binding Password}" Placeholder="Mật khẩu" 
+                                   IsPassword="True" ReturnType="Done" Completed="OnPasswordCompleted" 
+                                   IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanNegationConverter}}"
+                                   Focused="OnPasswordEntryFocused" Unfocused="OnPasswordEntryUnfocused"/>
+                            <ImageButton x:Name="EyeButton" Grid.Column="2" Source="eye_open.png" 
+                                         WidthRequest="28" HeightRequest="28" BackgroundColor="Transparent" 
+                                         Padding="2" VerticalOptions="Center" Clicked="OnTogglePasswordClicked"/>
                         </Grid>
                     </Border>
 
-                    <Label Text="{Binding ErrorMessage}" TextColor="#EF4444" FontSize="13" IsVisible="{Binding HasError}" Margin="0,-10,0,0"/>
+                    <Label Text="{Binding ErrorMessage}" TextColor="#EF4444" FontSize="13" 
+                           IsVisible="{Binding HasError}" Margin="0,-10,0,0"/>
 
-                    <Button Text="Quên mật khẩu?" BackgroundColor="Transparent" TextColor="#1B3A6B" FontAttributes="Bold" HorizontalOptions="Start" Command="{Binding ForgotPasswordCommand}"/>
+                    <!-- Quên mật khẩu: sát nút đăng nhập, căn lề phải -->
+                    <Button Text="Quên mật khẩu?" BackgroundColor="Transparent" TextColor="#1B3A6B" 
+                            FontAttributes="Bold" FontSize="13" HorizontalOptions="End" 
+                            Padding="0" Margin="0,-10,0,-10"
+                            Command="{Binding ForgotPasswordCommand}"/>
 
-                    <Button Text="Đăng nhập" BackgroundColor="#1B3A6B" TextColor="White" CornerRadius="12" HeightRequest="50" IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanNegationConverter}}" Command="{Binding SignInCommand}"/>
-
-                    <Border Background="#F3EEE8" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="16">
-                        <VerticalStackLayout>
-                            <Label Text="Tài khoản demo" FontAttributes="Bold"/>
-                            <Label Text="Nhân viên: 24520222@gm.uit.edu.vn"/>
-                            <Label Text="Quản lý: 24520214@gm.uit.edu.vn"/>
-                        </VerticalStackLayout>
-                    </Border>
+                    <Button Text="Đăng nhập" BackgroundColor="#1B3A6B" TextColor="White" CornerRadius="12" 
+                            HeightRequest="50" FontAttributes="Bold"
+                            IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanNegationConverter}}" 
+                            Command="{Binding SignInCommand}"/>
                 </VerticalStackLayout>
             </ScrollView>
         </Grid>

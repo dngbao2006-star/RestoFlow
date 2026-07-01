@@ -18,6 +18,7 @@ public class DraftOrderService
 
     // Tầng 1: Dictionary lưu draft order theo TableId (RAM)
     private readonly Dictionary<int, Order> _drafts = new();
+    private readonly SemaphoreSlim _diskGate = new(1, 1);
 
     private DraftOrderService() { }
 
@@ -27,7 +28,7 @@ public class DraftOrderService
     public void SaveDraft(int tableId, Order order)
     {
         _drafts[tableId] = order;
-        _ = SaveToDiskAsync(tableId, order);
+        _ = PersistDraftAsync(tableId, order);
     }
 
     /// <summary>
@@ -60,7 +61,49 @@ public class DraftOrderService
     public void ClearDraft(int tableId)
     {
         _drafts.Remove(tableId);
-        _ = DeleteFromDiskAsync(tableId);
+        _ = DeleteDraftFileAsync(tableId);
+    }
+
+    public async Task ClearDraftAsync(int tableId)
+    {
+        _drafts.Remove(tableId);
+        await DeleteDraftFileAsync(tableId);
+    }
+
+    /// <summary>
+    /// Moves a local draft to another table in RAM and local storage.
+    /// </summary>
+    public async Task<bool> TransferDraftAsync(int sourceTableId, Table targetTable)
+    {
+        await _diskGate.WaitAsync();
+        try
+        {
+            var draft = _drafts.TryGetValue(sourceTableId, out var inMemoryDraft)
+                ? inMemoryDraft
+                : await LoadFromDiskAsync(sourceTableId);
+
+            if (draft == null)
+                return false;
+
+            if (_drafts.TryGetValue(targetTable.Id, out var targetDraft) &&
+                !ReferenceEquals(targetDraft, draft) && targetDraft.Items.Count > 0)
+            {
+                throw new InvalidOperationException($"Bàn {targetTable.Number} đang có đơn nháp khác.");
+            }
+
+            _drafts.Remove(sourceTableId);
+            draft.TableId = targetTable.Id;
+            draft.TableNumber = targetTable.Number;
+            _drafts[targetTable.Id] = draft;
+
+            await SaveToDiskAsync(targetTable.Id, draft);
+            await DeleteFromDiskAsync(sourceTableId);
+            return true;
+        }
+        finally
+        {
+            _diskGate.Release();
+        }
     }
 
     /// <summary>
@@ -72,6 +115,32 @@ public class DraftOrderService
     }
 
     // === Tầng 2: Local Storage (JSON) ===
+
+    private async Task PersistDraftAsync(int tableId, Order order)
+    {
+        await _diskGate.WaitAsync();
+        try
+        {
+            await SaveToDiskAsync(tableId, order);
+        }
+        finally
+        {
+            _diskGate.Release();
+        }
+    }
+
+    private async Task DeleteDraftFileAsync(int tableId)
+    {
+        await _diskGate.WaitAsync();
+        try
+        {
+            await DeleteFromDiskAsync(tableId);
+        }
+        finally
+        {
+            _diskGate.Release();
+        }
+    }
 
     private static string GetFilePath(int tableId)
     {

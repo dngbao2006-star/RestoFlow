@@ -10,9 +10,8 @@
     <Grid RowDefinitions="Auto,*">
         <controls:AppHeaderView />
 
-        <ScrollView Grid.Row="1">
-            <VerticalStackLayout Padding="24" Spacing="20">
-                <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+        <Grid Grid.Row="1" Padding="24" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="20">
+                <HorizontalStackLayout Grid.Row="0" Spacing="12" VerticalOptions="Center">
                     <Label Text="Quản lý thực đơn" Style="{StaticResource PageTitle}" />
                     <Button 
                         Text="Thêm món" 
@@ -20,11 +19,11 @@
                         Clicked="OnAddMenuItemClicked" />
                 </HorizontalStackLayout>
 
-                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="12">
                     <Border Style="{StaticResource CardBorder}">
                         <VerticalStackLayout Spacing="6">
                             <Label Text="Tổng số món" FontAttributes="Bold" />
-                            <Label Text="{Binding MenuItems.Count}" FontSize="22" FontAttributes="Bold" />
+                            <Label Text="{Binding TotalMenuItemCount}" FontSize="22" FontAttributes="Bold" />
                         </VerticalStackLayout>
                     </Border>
                     <Border Style="{StaticResource CardBorder}" Grid.Column="1">
@@ -41,29 +40,29 @@
                     </Border>
                 </Grid>
 
-                <Border Style="{StaticResource CardBorder}">
+                <Border Grid.Row="2" Style="{StaticResource CardBorder}">
                     <VerticalStackLayout Spacing="12">
                         <Border Style="{StaticResource InputBorder}">
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
                                 <Label Text="Tìm kiếm" TextColor="{StaticResource TextMuted}" VerticalOptions="Center" />
-                                <Entry Grid.Column="1" Placeholder="Tìm món ăn" />
+                                <Entry Grid.Column="1" Placeholder="Tìm món ăn" TextChanged="OnSearchTextChanged" />
                             </Grid>
                         </Border>
                         <ScrollView Orientation="Horizontal">
                             <HorizontalStackLayout Spacing="8">
-                                <Button Text="Tất cả" Style="{StaticResource PillButton}" />
-                                <Button Text="Khai vị" Style="{StaticResource PillButton}" />
-                                <Button Text="Món chính" Style="{StaticResource PillButton}" />
-                                <Button Text="Canh/Súp" Style="{StaticResource PillButton}" />
-                                <Button Text="Hải sản" Style="{StaticResource PillButton}" />
-                                <Button Text="Tráng miệng" Style="{StaticResource PillButton}" />
-                                <Button Text="Đồ uống" Style="{StaticResource PillButton}" />
+                                <Button Text="Tất cả" Style="{StaticResource PillButton}" Clicked="OnCategoryFilterClicked" CommandParameter="All" />
+                                <Button Text="Khai vị" Style="{StaticResource PillButton}" Clicked="OnCategoryFilterClicked" CommandParameter="Appetizers" />
+                                <Button Text="Món chính" Style="{StaticResource PillButton}" Clicked="OnCategoryFilterClicked" CommandParameter="Main Course" />
+                                <Button Text="Canh/Súp" Style="{StaticResource PillButton}" Clicked="OnCategoryFilterClicked" CommandParameter="Soups" />
+                                <Button Text="Hải sản" Style="{StaticResource PillButton}" Clicked="OnCategoryFilterClicked" CommandParameter="Seafood" />
+                                <Button Text="Tráng miệng" Style="{StaticResource PillButton}" Clicked="OnCategoryFilterClicked" CommandParameter="Desserts" />
+                                <Button Text="Đồ uống" Style="{StaticResource PillButton}" Clicked="OnCategoryFilterClicked" CommandParameter="Drinks" />
                             </HorizontalStackLayout>
                         </ScrollView>
                     </VerticalStackLayout>
                 </Border>
 
-                <CollectionView ItemsSource="{Binding MenuItems}" SelectionMode="None">
+                <CollectionView Grid.Row="3" ItemsSource="{Binding FilteredMenuItems}" SelectionMode="None">
                     <CollectionView.ItemsLayout>
                         <GridItemsLayout Orientation="Vertical" Span="3" />
                     </CollectionView.ItemsLayout>
@@ -82,11 +81,6 @@
                                     <Label Text="{Binding Price, StringFormat='{0:0,0} VND'}" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
                                     <HorizontalStackLayout Spacing="8">
                                         <Button 
-                                            Text="Đổi trạng thái" 
-                                            Style="{StaticResource SecondaryButton}"
-                                            CommandParameter="{Binding .}"
-                                            Clicked="OnToggleStatusClicked" />
-                                        <Button 
                                             Text="Sửa" 
                                             Style="{StaticResource SecondaryButton}"
                                             CommandParameter="{Binding .}"
@@ -102,8 +96,6 @@
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
-            </VerticalStackLayout>
-        </ScrollView>
+        </Grid>
     </Grid>
 </ContentPage>
-

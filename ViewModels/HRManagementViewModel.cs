@@ -19,14 +19,25 @@ public class HRManagementViewModel : ObservableObject
 
     private readonly FirebaseService _firebaseService
     = new FirebaseService();
+    private IDisposable? _presenceSubscription;
 
     public HRManagementViewModel()
     {
         _appContext = AppContext.Instance;
 
-        LoadPresenceAsync();
+    }
 
-        StartRealtimePresence();
+    public async Task ActivateAsync()
+    {
+        await LoadPresenceAsync();
+        if (_presenceSubscription == null)
+            StartRealtimePresence();
+    }
+
+    public void Deactivate()
+    {
+        _presenceSubscription?.Dispose();
+        _presenceSubscription = null;
     }
 
     public string SearchText
@@ -101,7 +112,7 @@ public class HRManagementViewModel : ObservableObject
         set => SetProperty(ref _showStaffDetails, value);
     }
 
-    public ObservableCollection<Staff> FilteredStaff { get; } = new();
+    public ObservableCollection<Staff> FilteredStaff { get; private set; } = new();
 
     public int TotalStaff => _appContext.StaffMembers.Count;
     public int ActiveStaff => _appContext.StaffMembers.Count(s => s.Status == StaffStatus.Active);
@@ -196,11 +207,8 @@ public class HRManagementViewModel : ObservableObject
             })
             .ToList();
 
-        FilteredStaff.Clear();
-        foreach (var staff in filtered)
-        {
-            FilteredStaff.Add(staff);
-        }
+        FilteredStaff = new ObservableCollection<Staff>(filtered);
+        OnPropertyChanged(nameof(FilteredStaff));
 
         OnPropertyChanged(nameof(TotalStaff));
         OnPropertyChanged(nameof(ActiveStaff));
@@ -209,30 +217,29 @@ public class HRManagementViewModel : ObservableObject
         OnPropertyChanged(nameof(ManagerCount));
         OnPropertyChanged(nameof(StaffCount));
     }
-    private async void LoadPresenceAsync()
+    private async Task LoadPresenceAsync()
     {
-        foreach (var staff in _appContext.StaffMembers)
-        {
-            if (string.IsNullOrEmpty(staff.FirebaseUid))
+        var tasks = _appContext.StaffMembers
+            .Where(staff => !string.IsNullOrEmpty(staff.FirebaseUid))
+            .Select(async staff =>
             {
-                continue;
-            }
+                try
+                {
+                    var presence = await _firebaseService.GetPresenceAsync(staff.FirebaseUid)
+                        .WaitAsync(TimeSpan.FromSeconds(8));
+                    staff.IsOnline = presence?.IsOnline == true;
+                    staff.LastSeen = presence?.LastSeen ?? DateTime.MinValue;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[HR] Presence unavailable for {staff.FirebaseUid}: {ex.Message}");
+                }
+            });
 
-            var presence = await _firebaseService
-                .GetPresenceAsync(staff.FirebaseUid);
-
-            if (presence != null)
-            {
-                staff.IsOnline = presence.IsOnline;
-                staff.LastSeen = presence.LastSeen;
-            }
-            else
-            {
-                staff.IsOnline = false;
-            }
-        }
+        await Task.WhenAll(tasks);
 
         FilterStaff();
+        _appContext.RefreshStaffMetrics();
     }
     private void StartRealtimePresence()
     {
@@ -250,11 +257,10 @@ public class HRManagementViewModel : ObservableObject
 
                 staff.IsOnline = presence.IsOnline;
                 staff.LastSeen = presence.LastSeen;
-
-                FilterStaff();
+                _appContext.RefreshStaffMetrics();
             });
         };
 
-        _firebaseService.StartPresenceListener();
+        _presenceSubscription = _firebaseService.StartPresenceListener();
     }
 }

@@ -11,12 +11,14 @@ namespace AppManagermentRestaurant.Controls.Popups;
 public partial class ChatPopup : Popup
 {
     private readonly HeaderViewModel _vm;
+    private bool _eventsDetached;
 
     public ChatPopup(HeaderViewModel viewModel)
     {
         InitializeComponent();
         _vm = viewModel;
         BindingContext = _vm;
+        _vm.AppContext.MarkChatMessagesRead();
 
         // Lắng nghe tin nhắn mới để tự động scroll
         _vm.AppContext.ChatMessages.CollectionChanged += OnMessagesChanged;
@@ -24,6 +26,7 @@ public partial class ChatPopup : Popup
 
         // Scroll đến tin mới nhất khi mở popup
         this.Opened += (_, _) => ScrollToLatest();
+        this.Closed += (_, _) => DetachEvents();
     }
 
     // ─── Gửi tin nhắn qua Entry.Completed (bấm Enter) ────────────────────
@@ -63,9 +66,14 @@ public partial class ChatPopup : Popup
     {
         base.OnHandlerChanging(args);
         if (args.NewHandler is null)
-        {
-            _vm.AppContext.ChatMessages.CollectionChanged -= OnMessagesChanged;
-            _vm.ChatMessageSent -= ScrollToLatest;
-        }
+            DetachEvents();
+    }
+
+    private void DetachEvents()
+    {
+        if (_eventsDetached) return;
+        _eventsDetached = true;
+        _vm.AppContext.ChatMessages.CollectionChanged -= OnMessagesChanged;
+        _vm.ChatMessageSent -= ScrollToLatest;
     }
 }

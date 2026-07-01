@@ -10,68 +10,98 @@
     <Grid RowDefinitions="Auto,*">
         <controls:AppHeaderView />
 
-        <ScrollView Grid.Row="1">
-            <VerticalStackLayout Padding="24" Spacing="20">
-                <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
-                    <Label Text="Invoice Management" Style="{StaticResource PageTitle}" />
-                    <Border Style="{StaticResource BadgeBorder}">
-                        <Label Text="Manager Authorization Required" Style="{StaticResource BadgeText}" />
-                    </Border>
-                </HorizontalStackLayout>
+        <Grid Grid.Row="1" Padding="24" RowDefinitions="Auto,Auto,*" RowSpacing="16">
+            <Label Grid.Row="0" Text="Quản lý hóa đơn" Style="{StaticResource PageTitle}" />
 
-                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
-                    <Border Style="{StaticResource CardBorder}">
-                        <VerticalStackLayout Spacing="6">
-                            <Label Text="Total Invoices" FontAttributes="Bold" />
-                            <Label Text="{Binding Invoices.Count}" FontSize="22" FontAttributes="Bold" />
-                        </VerticalStackLayout>
-                    </Border>
-                    <Border Style="{StaticResource CardBorder}" Grid.Column="1">
-                        <VerticalStackLayout Spacing="6">
-                            <Label Text="Total Revenue" FontAttributes="Bold" />
-                            <Label Text="{Binding Invoices[0].TotalDisplay}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Success}" />
-                        </VerticalStackLayout>
-                    </Border>
-                    <Border Style="{StaticResource CardBorder}" Grid.Column="2">
-                        <VerticalStackLayout Spacing="6">
-                            <Label Text="Total Discounts" FontAttributes="Bold" />
-                            <Label Text="120,000 VND" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Danger}" />
-                        </VerticalStackLayout>
-                    </Border>
-                </Grid>
-
-                <Border Style="{StaticResource CardBorder}">
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                        <Label Text="Search" TextColor="{StaticResource TextMuted}" VerticalOptions="Center" />
-                        <Entry Grid.Column="1" Placeholder="Search by table, server, invoice ID" />
+            <Grid Grid.Row="1" ColumnDefinitions="1.1*,*,*,*,1.2*" ColumnSpacing="10">
+                <Border Style="{StaticResource InputBorder}" Padding="10,0" HeightRequest="48">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                        <Label Text="🔍" VerticalOptions="Center" />
+                        <Entry Grid.Column="1" Placeholder="Tìm mã hóa đơn"
+                               TextChanged="OnSearchTextChanged" FontSize="13" />
                     </Grid>
                 </Border>
+                <controls:SearchableDropdownView x:Name="TableFilter" Grid.Column="1"
+                                                 Placeholder="Số bàn" SelectionChanged="OnFilterChanged" />
+                <controls:SearchableDropdownView x:Name="StaffFilter" Grid.Column="2"
+                                                 Placeholder="Nhân viên" SelectionChanged="OnFilterChanged" />
+                <controls:SearchableDropdownView x:Name="PaymentFilter" Grid.Column="3"
+                                                 Placeholder="Thanh toán" SelectionChanged="OnFilterChanged" />
+                <controls:SearchableDropdownView x:Name="ValueSortFilter" Grid.Column="4"
+                                                 Placeholder="Sắp xếp theo Trị giá" SelectionChanged="OnFilterChanged" />
+                </Grid>
 
-                <CollectionView ItemsSource="{Binding Invoices}" SelectionMode="None">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
-                                <VerticalStackLayout Spacing="8">
+            <CollectionView Grid.Row="2" ItemsSource="{Binding FilteredInvoices}" SelectionMode="None">
+                <CollectionView.EmptyView>
+                    <Label Text="Không tìm thấy hóa đơn phù hợp." TextColor="{StaticResource TextMuted}"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                                <VerticalStackLayout Spacing="7">
                                     <HorizontalStackLayout Spacing="8">
-                                        <Label Text="Table" FontAttributes="Bold" />
-                                        <Label Text="{Binding TableNumber}" FontAttributes="Bold" />
-                                        <Label Text="#" Style="{StaticResource SecondaryTextStyle}" />
-                                        <Label Text="{Binding Id}" Style="{StaticResource SecondaryTextStyle}" />
-                                        <Label Text="{Binding TotalDisplay}" FontAttributes="Bold" TextColor="{StaticResource Primary}" HorizontalOptions="EndAndExpand" />
+                                        <Label Text="{Binding TableNumber, StringFormat='Bàn {0}'}" FontAttributes="Bold" FontSize="16" />
+                                        <Label Text="{Binding Id, StringFormat='• Hóa đơn #{0}'}" Style="{StaticResource SecondaryTextStyle}" />
                                     </HorizontalStackLayout>
+                                    <Label Text="{Binding ServerName, StringFormat='Nhân viên: {0}'}" Style="{StaticResource SecondaryTextStyle}" />
                                     <Label Text="{Binding CreatedAtDisplay}" Style="{StaticResource SecondaryTextStyle}" />
+                                    <Label Text="{Binding PaymentMethodDisplay}" Style="{StaticResource MutedTextStyle}" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1" Spacing="10" HorizontalOptions="End">
+                                    <Label Text="{Binding TotalDisplay}" FontAttributes="Bold" FontSize="17"
+                                           TextColor="{StaticResource Primary}" HorizontalOptions="End" />
                                     <HorizontalStackLayout Spacing="8">
-                                        <Button Text="Apply Discount" Style="{StaticResource SecondaryButton}" />
-                                        <Button Text="Print" Style="{StaticResource SecondaryButton}" />
-                                        <Button Text="Cancel" Style="{StaticResource DangerButton}" />
+                                        <Button Text="Xem chi tiết" Style="{StaticResource SecondaryButton}"
+                                                CommandParameter="{Binding .}" Clicked="OnViewInvoiceClicked" />
+                                        <Button Text="Mở bản in" Style="{StaticResource PrimaryButton}"
+                                                CommandParameter="{Binding .}" Clicked="OnPrintInvoiceClicked" />
                                     </HorizontalStackLayout>
                                 </VerticalStackLayout>
-                            </Border>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-            </VerticalStackLayout>
-        </ScrollView>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+
+        <Grid x:Name="InvoiceDetailModal" Grid.RowSpan="2" IsVisible="False" BackgroundColor="#80000000">
+            <Border Style="{StaticResource ModalBorder}" WidthRequest="520" MaximumHeightRequest="680"
+                    HorizontalOptions="Center" VerticalOptions="Center">
+                <Grid RowDefinitions="Auto,*,Auto" RowSpacing="14">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout Spacing="3">
+                            <Label Text="{Binding SelectedInvoice.Id, StringFormat='Hóa đơn #{0}'}" Style="{StaticResource SectionTitle}" FontSize="20" />
+                            <Label Text="{Binding SelectedInvoice.TableNumber, StringFormat='Bàn {0}'}" Style="{StaticResource SecondaryTextStyle}" />
+                            <Label Text="{Binding SelectedInvoice.CreatedAtDisplay}" Style="{StaticResource MutedTextStyle}" />
+                        </VerticalStackLayout>
+                        <Button Grid.Column="1" Text="Đóng" Style="{StaticResource SecondaryButton}" Clicked="OnCloseDetailClicked" />
+                    </Grid>
+                    <ScrollView Grid.Row="1">
+                        <VerticalStackLayout Spacing="9" BindableLayout.ItemsSource="{Binding SelectedInvoice.Items}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{Binding Name}" FontAttributes="Bold" />
+                                            <Label Text="{Binding Quantity, StringFormat='Số lượng: {0}'}" Style="{StaticResource SecondaryTextStyle}" />
+                                        </VerticalStackLayout>
+                                        <Label Grid.Column="1" Text="{Binding LineTotalDisplay}" FontAttributes="Bold" VerticalOptions="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </ScrollView>
+                    <VerticalStackLayout Grid.Row="2" Spacing="8">
+                        <BoxView HeightRequest="1" Color="{StaticResource BorderLight}" />
+                        <Grid ColumnDefinitions="*,Auto"><Label Text="Tạm tính" /><Label Grid.Column="1" Text="{Binding SelectedInvoice.SubtotalDisplay}" /></Grid>
+                        <Grid ColumnDefinitions="*,Auto"><Label Text="Giảm giá" /><Label Grid.Column="1" Text="{Binding SelectedInvoice.DiscountDisplay}" TextColor="{StaticResource Danger}" /></Grid>
+                        <Grid ColumnDefinitions="*,Auto"><Label Text="Tổng cộng" FontAttributes="Bold" FontSize="16" /><Label Grid.Column="1" Text="{Binding SelectedInvoice.TotalDisplay}" FontAttributes="Bold" FontSize="16" TextColor="{StaticResource Primary}" /></Grid>
+                        <Button Text="Mở bản in" Style="{StaticResource PrimaryButton}" Clicked="OnPrintSelectedClicked" />
+                    </VerticalStackLayout>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </ContentPage>
-

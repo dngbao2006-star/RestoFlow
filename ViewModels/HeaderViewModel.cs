@@ -21,6 +21,9 @@ namespace AppManagermentRestaurant.ViewModels;
 public class HeaderViewModel : ObservableObject
 {
     private string _chatInput = string.Empty;
+    private bool _isSendingChat;
+    private readonly FirebaseService _firebaseService = new();
+    private Command? _sendChatCommand;
 
     public HeaderViewModel(AppContext appContext)
     {
@@ -29,13 +32,11 @@ public class HeaderViewModel : ObservableObject
         var vietnamCulture = new CultureInfo("vi-VN");
         TodayLabel = DateTime.Now.ToString("dddd, dd/MM/yyyy", vietnamCulture);
 
-        // Cập nhật các derived property khi AppContext thay đổi
-        AppContext.PropertyChanged += (_, _) => RefreshDerivedProperties();
-        AppContext.ChatMessages.CollectionChanged += (_, _) => RefreshDerivedProperties();
-        AppContext.Notifications.CollectionChanged += (_, _) => RefreshDerivedProperties();
+        AppContext.PropertyChanged += OnAppContextPropertyChanged;
 
         // Commands
-        SendChatMessageCommand = new Command(SendChatMessage);
+        _sendChatCommand = new Command(async () => await SendChatMessageAsync(), () => CanSendChat);
+        SendChatMessageCommand = _sendChatCommand;
         OpenExpandedChatCommand = new Command(async () => await OpenExpandedChatAsync());
         OpenAccountCommand = new Command(async () => await OpenAccountAsync());
         LogoutCommand = new Command(async () => await LogoutAsync());
@@ -62,11 +63,17 @@ public class HeaderViewModel : ObservableObject
         set
         {
             if (SetProperty(ref _chatInput, value))
+            {
                 OnPropertyChanged(nameof(CanSendChat));
+                _sendChatCommand?.ChangeCanExecute();
+            }
         }
     }
 
-    public bool CanSendChat => !string.IsNullOrWhiteSpace(ChatInput);
+    public bool CanSendChat =>
+        !_isSendingChat &&
+        AppContext.CurrentUser != null &&
+        !string.IsNullOrWhiteSpace(ChatInput);
 
     // ─── Thông tin user hiện tại ──────────────────────────────────────────
 
@@ -104,29 +111,45 @@ public class HeaderViewModel : ObservableObject
 
     // ─── Xử lý gửi tin nhắn ──────────────────────────────────────────────
 
-    private void SendChatMessage()
+    private async Task SendChatMessageAsync()
     {
         var message = ChatInput?.Trim();
-        if (string.IsNullOrWhiteSpace(message)) return;
-
         var user = AppContext.CurrentUser;
-        var now = DateTime.Now;
+        if (string.IsNullOrWhiteSpace(message) || user == null || _isSendingChat) return;
 
-        // TODO [BACKEND]: Thay bằng API POST /api/chat/messages
-        AppContext.ChatMessages.Add(new ChatMessage
+        var firebaseMessage = new FirebaseChatMessage
         {
-            Id = (int)(now.Ticks % int.MaxValue),
-            SenderId = user?.FirebaseUid ?? "",
-            SenderName = user?.Name ?? "Unknown",
-            SenderRole = user?.Role.ToString() ?? "Staff",
+            SenderId = user.FirebaseUid,
+            SenderName = user.Name,
+            SenderRole = user.Role.ToString(),
             Message = message,
-            Timestamp = now,
-            IsSystem = false,
-            IsRead = true
-        });
+            Timestamp = DateTime.Now,
+            IsSystem = false
+        };
 
-        ChatInput = string.Empty;
-        ChatMessageSent?.Invoke();
+        try
+        {
+            _isSendingChat = true;
+            OnPropertyChanged(nameof(CanSendChat));
+            _sendChatCommand?.ChangeCanExecute();
+
+            var key = await _firebaseService.SendMessageAsync(firebaseMessage);
+            AppContext.AddOrUpdateChatMessage(key, firebaseMessage);
+            AppContext.RefreshBadges();
+            ChatInput = string.Empty;
+            ChatMessageSent?.Invoke();
+        }
+        catch
+        {
+            if (Application.Current?.MainPage is Page page)
+                await page.DisplayAlert("Lỗi", "Không thể gửi tin nhắn. Vui lòng kiểm tra kết nối.", "OK");
+        }
+        finally
+        {
+            _isSendingChat = false;
+            OnPropertyChanged(nameof(CanSendChat));
+            _sendChatCommand?.ChangeCanExecute();
+        }
     }
 
     private async Task OpenExpandedChatAsync()
@@ -138,34 +161,66 @@ public class HeaderViewModel : ObservableObject
 
     private async Task OpenAccountAsync()
     {
-        var route = AppContext.IsManager ? AppRoutes.SystemConfig : AppRoutes.Account;
-        await Shell.Current.GoToAsync(route);
+        await Shell.Current.GoToAsync(AppRoutes.Absolute(AppRoutes.Account));
     }
 
     private async Task LogoutAsync()
     {
+        var currentUser = AppContext.CurrentUser;
+
         // Hủy listener xung đột phiên trước khi logout
         AppContext.SessionConflictSubscription?.Dispose();
         AppContext.SessionConflictSubscription = null;
         AppContext.CurrentSessionId = null;
 
-        AppContext.CurrentUser = null;
+        if (currentUser != null)
+        {
+            try
+            {
+                await _firebaseService.SetUserOfflineAsync(currentUser.FirebaseUid, currentUser.Name);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Logout] Could not update presence: {ex.Message}");
+            }
+        }
+
+        ActivityLogService.Instance.LogLogout();
+        if (Application.Current?.MainPage is AppShell shell)
+            shell.BindingContext = null;
+
         await MainThread.InvokeOnMainThreadAsync(App.ShowLogin);
+        AppContext.CurrentUser = null;
     }
 
     // ─── Refresh ─────────────────────────────────────────────────────────
 
-    private void RefreshDerivedProperties()
+    private void OnAppContextPropertyChanged(
+        object? sender,
+        System.ComponentModel.PropertyChangedEventArgs e)
     {
-        OnPropertyChanged(nameof(HasUnreadNotifications));
-        OnPropertyChanged(nameof(HasUnreadMessages));
-        OnPropertyChanged(nameof(Notifications));
-        OnPropertyChanged(nameof(ChatMessages));
-        OnPropertyChanged(nameof(OnlineCount));
-        OnPropertyChanged(nameof(CurrentUserName));
-        OnPropertyChanged(nameof(CurrentUserEmail));
-        OnPropertyChanged(nameof(CurrentUserDisplayName));
-        OnPropertyChanged(nameof(CurrentUserInitial));
-        OnPropertyChanged(nameof(CurrentUserAvatarColor));
+        switch (e.PropertyName)
+        {
+            case nameof(AppContext.UnreadNotifications):
+                OnPropertyChanged(nameof(HasUnreadNotifications));
+                break;
+            case nameof(AppContext.UnreadMessages):
+                OnPropertyChanged(nameof(HasUnreadMessages));
+                break;
+            case nameof(AppContext.OnlineStaffCount):
+                OnPropertyChanged(nameof(OnlineCount));
+                break;
+            case nameof(AppContext.CurrentUser):
+            case nameof(AppContext.IsManager):
+            case nameof(AppContext.IsStaff):
+                OnPropertyChanged(nameof(CurrentUserName));
+                OnPropertyChanged(nameof(CurrentUserEmail));
+                OnPropertyChanged(nameof(CurrentUserDisplayName));
+                OnPropertyChanged(nameof(CurrentUserInitial));
+                OnPropertyChanged(nameof(CurrentUserAvatarColor));
+                OnPropertyChanged(nameof(CanSendChat));
+                _sendChatCommand?.ChangeCanExecute();
+                break;
+        }
     }
 }

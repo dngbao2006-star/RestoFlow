@@ -15,6 +15,15 @@ public class AppContext : ObservableObject
     private Order? _selectedOrder;
     private Table? _selectedTable;
     private bool _isForceLoggingOut;
+    private Task? _initializationTask;
+    private int _orderItemsVersion;
+    private int _lastUnreadNotifications = -1;
+    private int _lastUnreadMessages = -1;
+    private int _lastReadyDishCount = -1;
+    private int _lastPendingDishCount = -1;
+    private int _lastPreparingDishCount = -1;
+    private int _lastServedDishCount = -1;
+    private SystemConfiguration _systemConfiguration = new();
     internal static string? BaseDirectory;
 
     /// <summary>
@@ -36,10 +45,19 @@ public class AppContext : ObservableObject
 
         Notifications.CollectionChanged += (_, _) => RefreshBadges();
         ChatMessages.CollectionChanged += (_, _) => RefreshBadges();
-        Orders.CollectionChanged += (_, _) => RefreshBadges();
+        Orders.CollectionChanged += (_, _) => NotifyOrderItemsChanged();
+        Tables.CollectionChanged += (_, _) => RefreshTableMetrics();
+        StaffMembers.CollectionChanged += (_, _) => RefreshStaffMetrics();
+        Invoices.CollectionChanged += (_, _) => RefreshFinancials();
+        RevenueDaily.CollectionChanged += (_, _) => RefreshFinancials();
+        RevenueWeekly.CollectionChanged += (_, _) => RefreshFinancials();
+        RevenueMonthly.CollectionChanged += (_, _) => RefreshFinancials();
     }
 
-    public async Task InitializeAsync()
+    public Task InitializeOnceAsync()
+        => _initializationTask ??= InitializeCoreAsync();
+
+    private async Task InitializeCoreAsync()
     {
         await _dataStore.SeedAsync(this);
         SelectedOrder = Orders.FirstOrDefault();
@@ -55,6 +73,16 @@ public class AppContext : ObservableObject
             {
                 OnPropertyChanged(nameof(IsStaff));
                 OnPropertyChanged(nameof(IsManager));
+                OnPropertyChanged(nameof(IsAuthenticated));
+
+                if (value != null)
+                {
+                    foreach (var message in ChatMessages.Where(message => message.SenderId == value.FirebaseUid))
+                    {
+                        message.IsRead = true;
+                    }
+                }
+
                 RefreshBadges();
             }
         }
@@ -62,12 +90,13 @@ public class AppContext : ObservableObject
 
     public bool IsStaff => CurrentUser?.Role == StaffRole.Staff;
     public bool IsManager => CurrentUser?.Role == StaffRole.Manager;
+    public bool IsAuthenticated => CurrentUser != null;
 
     public ObservableCollection<Order> Orders { get; } = new();
     public ObservableCollection<Order> FilteredOrders { get; } = new();
     public ObservableCollection<Table> Tables { get; } = new();
     public ObservableCollection<FoodItem> MenuItems { get; } = new();
-    public ObservableCollection<FoodItem> FilteredMenuItems { get; } = new();
+    public ObservableCollection<FoodItem> FilteredMenuItems { get; private set; } = new();
     public ObservableCollection<Notification> Notifications { get; } = new();
     public ObservableCollection<ChatMessage> ChatMessages { get; } = new();
     public ObservableCollection<Order> OrderHistory { get; } = new();
@@ -77,6 +106,12 @@ public class AppContext : ObservableObject
     public ObservableCollection<RevenuePoint> RevenueWeekly { get; } = new();
     public ObservableCollection<RevenuePoint> RevenueMonthly { get; } = new();
     public ObservableCollection<DishRevenue> TopDishes { get; } = new();
+
+    public SystemConfiguration SystemConfiguration
+    {
+        get => _systemConfiguration;
+        set => SetProperty(ref _systemConfiguration, value ?? new SystemConfiguration());
+    }
 
     public Order? SelectedOrder
     {
@@ -90,8 +125,12 @@ public class AppContext : ObservableObject
         set => SetProperty(ref _selectedTable, value);
     }
 
-    public int UnreadNotifications => Notifications.Count(notification => !notification.Read);
-    public int UnreadMessages => ChatMessages.Count(message => !message.IsSystem && !message.IsRead);
+    public IEnumerable<Notification> VisibleNotifications => Notifications.Where(IsNotificationVisible);
+    public int UnreadNotifications => VisibleNotifications.Count(notification => !HasCurrentUserRead(notification));
+    public int UnreadMessages => ChatMessages.Count(message =>
+        !message.IsSystem &&
+        !message.IsRead &&
+        message.SenderId != CurrentUser?.FirebaseUid);
     public int ReadyDishCount => Orders.SelectMany(order => order.Items).Count(item => item.Status == DishStatus.Ready);
 
     public int PendingDishCount => Orders.SelectMany(order => order.Items).Count(item => item.Status == DishStatus.Pending);
@@ -99,6 +138,7 @@ public class AppContext : ObservableObject
     public int ServedDishCount => Orders.SelectMany(order => order.Items).Count(item => item.Status == DishStatus.Served);
 
     public IEnumerable<OrderItem> ReadyItems => Orders.SelectMany(order => order.Items).Where(item => item.Status == DishStatus.Ready);
+    public int OrderItemsVersion => _orderItemsVersion;
 
     public string StaffChatTitle => UnreadMessages > 0 ? $"Chat ({UnreadMessages})" : "Chat";
     public string DishStatusTitle => ReadyDishCount > 0 ? $"Món ăn ({ReadyDishCount})" : "Món ăn";
@@ -108,6 +148,7 @@ public class AppContext : ObservableObject
     public int OccupiedCount => Tables.Count(table => table.Status == TableStatus.Occupied);
     public int ReservedCount => Tables.Count(table => table.Status == TableStatus.Reserved);
     public int NeedsClearingCount => Tables.Count(table => table.Status == TableStatus.NeedsClearing);
+    public int OnlineStaffCount => StaffMembers.Count(staff => staff.IsOnline);
     public int AvailableMenuItemCount => MenuItems.Count(item => !item.OutOfStock && item.Available);
     public int OutOfStockMenuItemCount => MenuItems.Count(item => item.OutOfStock || !item.Available);
 
@@ -115,10 +156,11 @@ public class AppContext : ObservableObject
     public IEnumerable<Table> SecondFloorTables => Tables.Where(table => table.Floor == "Second Floor");
     public IEnumerable<Table> GardenTables => Tables.Where(table => table.Floor == "Garden");
 
-    public string TodayRevenueDisplay => RevenueDaily.Count > 0 ? RevenueDaily[Math.Min(6, RevenueDaily.Count - 1)].ValueDisplay : Formatters.FormatCurrency(0);
+    public string TodayRevenueDisplay => Formatters.FormatCurrency(RevenueDaily.Sum(point => point.Value));
     public string AvgPerDayDisplay => RevenueWeekly.Count > 0 ? Formatters.FormatCurrency(RevenueWeekly.Average(point => point.Value)) : Formatters.FormatCurrency(0);
     public string TotalRevenueDisplay => RevenueWeekly.Count > 0 ? Formatters.FormatCurrency(RevenueWeekly.Sum(point => point.Value)) : Formatters.FormatCurrency(0);
     public int TotalOrdersCount => Invoices.Count;
+    public string InvoiceRevenueDisplay => Formatters.FormatCurrency(Invoices.Sum(invoice => invoice.Total));
     public string AvgOrderValueDisplay => Invoices.Count > 0 ? Formatters.FormatCurrency(Invoices.Average(i => i.Total)) : Formatters.FormatCurrency(0);
     public string TotalDiscountDisplay => Invoices.Count > 0 ? Formatters.FormatCurrency(Invoices.Sum(i => i.Discount)) : Formatters.FormatCurrency(0);
 
@@ -128,27 +170,160 @@ public class AppContext : ObservableObject
 
     public void MarkNotificationsRead()
     {
-        // TODO: [BACKEND] - Chỗ này gọi API cập nhật trạng thái đã đọc cho danh sách thông báo.
-        foreach (var notification in Notifications)
+        var uid = CurrentUser?.FirebaseUid;
+        if (string.IsNullOrWhiteSpace(uid)) return;
+
+        foreach (var notification in VisibleNotifications)
         {
-            notification.Read = true;
+            notification.ReadBy ??= new Dictionary<string, bool>();
+            notification.ReadBy[uid] = true;
         }
 
         RefreshBadges();
     }
 
+    public bool HasCurrentUserRead(Notification notification)
+    {
+        if (notification.Read) return true; // compatibility with legacy records
+        var uid = CurrentUser?.FirebaseUid;
+        return !string.IsNullOrWhiteSpace(uid)
+            && notification.ReadBy?.TryGetValue(uid, out var hasRead) == true
+            && hasRead;
+    }
+
+    private bool IsNotificationVisible(Notification notification)
+    {
+        if (string.IsNullOrWhiteSpace(notification.Audience) || notification.Audience == "All") return true;
+        return CurrentUser?.Role switch
+        {
+            StaffRole.Staff => notification.Audience.Equals("Staff", StringComparison.OrdinalIgnoreCase),
+            StaffRole.Manager => notification.Audience.Equals("Manager", StringComparison.OrdinalIgnoreCase),
+            _ => false
+        };
+    }
+
+    public void ReplaceFilteredMenuItems(IEnumerable<FoodItem> items)
+    {
+        FilteredMenuItems = new ObservableCollection<FoodItem>(items);
+        OnPropertyChanged(nameof(FilteredMenuItems));
+    }
+
+    public void MarkChatMessagesRead()
+    {
+        foreach (var message in ChatMessages.Where(message => message.SenderId != CurrentUser?.FirebaseUid))
+        {
+            message.IsRead = true;
+        }
+
+        RefreshBadges();
+    }
+
+    public ChatMessage AddOrUpdateChatMessage(string firebaseKey, FirebaseChatMessage source)
+    {
+        var existing = ChatMessages.FirstOrDefault(message => message.FirebaseKey == firebaseKey);
+        if (existing != null)
+        {
+            return existing;
+        }
+
+        var message = new ChatMessage
+        {
+            FirebaseKey = firebaseKey,
+            Id = StringComparer.Ordinal.GetHashCode(firebaseKey),
+            SenderId = source.SenderId,
+            SenderName = source.SenderName,
+            SenderRole = source.SenderRole,
+            Message = source.Message,
+            Timestamp = source.Timestamp,
+            IsSystem = source.IsSystem,
+            IsRead = source.SenderId == CurrentUser?.FirebaseUid
+        };
+
+        ChatMessages.Add(message);
+        return message;
+    }
+
     public void RefreshBadges()
     {
-        OnPropertyChanged(nameof(UnreadNotifications));
-        OnPropertyChanged(nameof(UnreadMessages));
-        OnPropertyChanged(nameof(ReadyDishCount));
-        OnPropertyChanged(nameof(PendingDishCount));
-        OnPropertyChanged(nameof(PreparingDishCount));
-        OnPropertyChanged(nameof(ServedDishCount));
-        OnPropertyChanged(nameof(ReadyItems));
-        OnPropertyChanged(nameof(StaffChatTitle));
-        OnPropertyChanged(nameof(DishStatusTitle));
-        OnPropertyChanged(nameof(NotificationsTitle));
+        var unreadNotifications = UnreadNotifications;
+        if (_lastUnreadNotifications != unreadNotifications)
+        {
+            _lastUnreadNotifications = unreadNotifications;
+            OnPropertyChanged(nameof(UnreadNotifications));
+            OnPropertyChanged(nameof(NotificationsTitle));
+        }
+
+        var unreadMessages = UnreadMessages;
+        if (_lastUnreadMessages != unreadMessages)
+        {
+            _lastUnreadMessages = unreadMessages;
+            OnPropertyChanged(nameof(UnreadMessages));
+            OnPropertyChanged(nameof(StaffChatTitle));
+        }
+
+        var ready = ReadyDishCount;
+        if (_lastReadyDishCount != ready)
+        {
+            _lastReadyDishCount = ready;
+            OnPropertyChanged(nameof(ReadyDishCount));
+            OnPropertyChanged(nameof(ReadyItems));
+            OnPropertyChanged(nameof(DishStatusTitle));
+        }
+
+        var pending = PendingDishCount;
+        if (_lastPendingDishCount != pending)
+        {
+            _lastPendingDishCount = pending;
+            OnPropertyChanged(nameof(PendingDishCount));
+        }
+
+        var preparing = PreparingDishCount;
+        if (_lastPreparingDishCount != preparing)
+        {
+            _lastPreparingDishCount = preparing;
+            OnPropertyChanged(nameof(PreparingDishCount));
+        }
+
+        var served = ServedDishCount;
+        if (_lastServedDishCount != served)
+        {
+            _lastServedDishCount = served;
+            OnPropertyChanged(nameof(ServedDishCount));
+        }
+    }
+
+    public void NotifyOrderItemsChanged()
+    {
+        unchecked { _orderItemsVersion++; }
+        OnPropertyChanged(nameof(OrderItemsVersion));
+        RefreshBadges();
+    }
+
+    public void RefreshFinancials()
+    {
+        OnPropertyChanged(nameof(TodayRevenueDisplay));
+        OnPropertyChanged(nameof(AvgPerDayDisplay));
+        OnPropertyChanged(nameof(TotalRevenueDisplay));
+        OnPropertyChanged(nameof(TotalOrdersCount));
+        OnPropertyChanged(nameof(InvoiceRevenueDisplay));
+        OnPropertyChanged(nameof(AvgOrderValueDisplay));
+        OnPropertyChanged(nameof(TotalDiscountDisplay));
+    }
+
+    public void RefreshTableMetrics()
+    {
+        OnPropertyChanged(nameof(AvailableCount));
+        OnPropertyChanged(nameof(OccupiedCount));
+        OnPropertyChanged(nameof(ReservedCount));
+        OnPropertyChanged(nameof(NeedsClearingCount));
+        OnPropertyChanged(nameof(GroundFloorTables));
+        OnPropertyChanged(nameof(SecondFloorTables));
+        OnPropertyChanged(nameof(GardenTables));
+    }
+
+    public void RefreshStaffMetrics()
+    {
+        OnPropertyChanged(nameof(OnlineStaffCount));
     }
 
     public void TransferOrder(int targetTableId)
@@ -275,6 +450,10 @@ public class AppContext : ObservableObject
                 // Set null SAU khi binding đã ngắt
                 CurrentUser = null;
             });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Session] Force logout failed safely: {ex}");
         }
         finally
         {

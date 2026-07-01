@@ -19,5 +19,13 @@ public class Invoice
 
     public string TotalDisplay => Formatters.FormatCurrency(Total);
 
+    public string SubtotalDisplay => Formatters.FormatCurrency(Items.Sum(item => item.LineTotal));
+
+    public string DiscountDisplay => Formatters.FormatCurrency(Discount);
+
+    public string PaymentMethodDisplay => PaymentMethod == PaymentMethod.Qr
+        ? "Chuyển khoản QR"
+        : "Tiền mặt";
+
     public bool HasDiscount => Discount > 0;
 }

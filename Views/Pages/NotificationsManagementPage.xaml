@@ -12,64 +12,68 @@
 
         <ScrollView Grid.Row="1" Grid.Column="0">
             <VerticalStackLayout Padding="24" Spacing="20">
-                <Label Text="Send Notification" Style="{StaticResource PageTitle}" />
+                <Label Text="Gửi thông báo" Style="{StaticResource PageTitle}" />
 
                 <Border Style="{StaticResource CardBorder}">
                     <VerticalStackLayout Spacing="12">
-                        <Label Text="Type" FontAttributes="Bold" />
-                        <HorizontalStackLayout Spacing="8">
-                            <Button Text="Info" Style="{StaticResource PillButton}" />
-                            <Button Text="Warning" Style="{StaticResource PillButton}" />
-                            <Button Text="Success" Style="{StaticResource PillButton}" />
-                        </HorizontalStackLayout>
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <Label Text="Nội dung thông báo" FontAttributes="Bold" VerticalOptions="Center" />
+                            <Button x:Name="ImportantToggleButton" Grid.Column="1" Text="Quan trọng"
+                                    Style="{StaticResource PillButton}" Clicked="OnImportantClicked" />
+                        </Grid>
 
                         <Border Style="{StaticResource InputBorder}">
-                            <Entry Placeholder="Title" />
+                            <Entry x:Name="TitleEntry" Placeholder="Tiêu đề" MaxLength="100" />
                         </Border>
 
                         <Border Style="{StaticResource InputBorder}">
-                            <Editor Placeholder="Message" AutoSize="TextChanges" />
+                            <Editor x:Name="MessageEditor" Placeholder="Nội dung thông báo" AutoSize="TextChanges"
+                                    MaxLength="500" MinimumHeightRequest="110" />
                         </Border>
 
-                        <Border Style="{StaticResource InputBorder}">
-                            <Label Text="Will be sent to: All active staff members (3)" Style="{StaticResource SecondaryTextStyle}" />
-                        </Border>
-
-                        <Button Text="Send to All Staff" Style="{StaticResource PrimaryButton}" />
+                        <Label x:Name="ValidationLabel" IsVisible="False" TextColor="{StaticResource Danger}" FontSize="12" />
+                        <Button x:Name="SendButton" Text="Gửi thông báo"
+                                Style="{StaticResource PrimaryButton}" Clicked="OnSendClicked" />
                     </VerticalStackLayout>
                 </Border>
             </VerticalStackLayout>
         </ScrollView>
 
-        <ScrollView Grid.Row="1" Grid.Column="1">
-            <VerticalStackLayout Padding="24" Spacing="20">
-                <Label Text="Recent Notifications" Style="{StaticResource PageTitle}" />
+        <Grid Grid.Row="1" Grid.Column="1" Padding="24" RowDefinitions="Auto,*" RowSpacing="20">
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Text="Thông báo gần đây" Style="{StaticResource PageTitle}" />
+                <Label Grid.Column="1" Text="{Binding RecentNotifications.Count, StringFormat='{0} thông báo'}"
+                       Style="{StaticResource SecondaryTextStyle}" VerticalOptions="Center" />
+            </Grid>
 
-                <Border Style="{StaticResource CardBorder}">
-                    <VerticalStackLayout Spacing="12">
-                        <CollectionView ItemsSource="{Binding Notifications}" SelectionMode="None">
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Style="{StaticResource InputBorder}" Padding="12" Margin="0,0,0,8">
-                                        <HorizontalStackLayout Spacing="8">
-                                            <Border Background="{Binding TypeColor}" Stroke="{Binding TypeColor}" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="6">
-                                                <Label Text="{Binding TypeLabel}" TextColor="White" FontSize="10" />
-                                            </Border>
-                                            <VerticalStackLayout Spacing="2">
-                                                <Label Text="{Binding Title}" FontAttributes="Bold" />
-                                                <Label Text="{Binding Message}" Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
-                                                <Label Text="{Binding TimestampDisplay}" Style="{StaticResource MutedTextStyle}" FontSize="11" />
-                                            </VerticalStackLayout>
-                                            <Button Text="X" Style="{StaticResource SecondaryButton}" HorizontalOptions="EndAndExpand" />
-                                        </HorizontalStackLayout>
+            <Border Grid.Row="1" Style="{StaticResource CardBorder}">
+                <CollectionView ItemsSource="{Binding RecentNotifications}" SelectionMode="None">
+                    <CollectionView.EmptyView>
+                        <Label Text="Chưa có thông báo nào." TextColor="{StaticResource TextMuted}"
+                               HorizontalOptions="Center" VerticalOptions="Center" />
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource InputBorder}" Padding="12" Margin="0,0,0,8">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                    <Border Background="{Binding TypeColor}" Stroke="Transparent" StrokeThickness="0"
+                                            StrokeShape="RoundRectangle 10" Padding="7" VerticalOptions="Start">
+                                        <Label Text="{Binding ImportanceLabel}" TextColor="White" FontSize="10" />
                                     </Border>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
-                    </VerticalStackLayout>
-                </Border>
-            </VerticalStackLayout>
-        </ScrollView>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="3">
+                                        <Label Text="{Binding Title}" FontAttributes="Bold" />
+                                        <Label Text="{Binding Message}" Style="{StaticResource SecondaryTextStyle}" FontSize="12" />
+                                        <Label Text="{Binding TimestampDisplay}" Style="{StaticResource MutedTextStyle}" FontSize="11" />
+                                    </VerticalStackLayout>
+                                    <Button Grid.Column="2" Text="Xóa" Style="{StaticResource DangerButton}"
+                                            Padding="10,6" VerticalOptions="Start" CommandParameter="{Binding .}"
+                                            Clicked="OnDeleteClicked" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Border>
+        </Grid>
     </Grid>
 </ContentPage>
-

@@ -9,14 +9,43 @@ namespace AppManagermentRestaurant.Controls.Popups;
 /// </summary>
 public partial class NotificationPopup : Popup
 {
+    public IReadOnlyList<Models.Notification> Notifications { get; }
+    public IReadOnlyList<Models.Notification> ImportantNotifications { get; }
+    public IReadOnlyList<Models.Notification> NormalNotifications { get; }
+    public bool HasNoImportantNotifications => ImportantNotifications.Count == 0;
+    public bool HasNoNormalNotifications => NormalNotifications.Count == 0;
+
     public NotificationPopup()
     {
         InitializeComponent();
-        // Bind trực tiếp vào AppContext để lấy danh sách thông báo thực
-        // TODO [BACKEND]: Thay AppContext.Instance bằng dữ liệu từ API khi kết nối backend
-        BindingContext = AppContext.Instance;
+        Notifications = AppContext.Instance.VisibleNotifications
+            .OrderByDescending(notification => notification.Timestamp)
+            .ToList();
+        ImportantNotifications = Notifications
+            .Where(notification => notification.IsImportant)
+            .ToList();
+        NormalNotifications = Notifications
+            .Where(notification => !notification.IsImportant)
+            .ToList();
+        BindingContext = this;
 
-        // Đánh dấu đã đọc khi mở popup
+        var unread = Notifications
+            .Where(notification => !AppContext.Instance.HasCurrentUserRead(notification))
+            .ToList();
         AppContext.Instance.MarkNotificationsRead();
+        _ = PersistReadStateSafelyAsync(unread);
+    }
+
+    private static async Task PersistReadStateSafelyAsync(IReadOnlyCollection<Models.Notification> notifications)
+    {
+        try
+        {
+            await new FirebaseService().MarkNotificationsReadAsync(notifications)
+                .WaitAsync(TimeSpan.FromSeconds(12));
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Notifications] Mark read failed safely: {ex.Message}");
+        }
     }
 }

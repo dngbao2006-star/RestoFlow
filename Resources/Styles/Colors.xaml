@@ -26,6 +26,7 @@
     <Color x:Key="TableOccupied">#EF4444</Color>
     <Color x:Key="TableReserved">#F59E0B</Color>
     <Color x:Key="TableNeedsClearing">#6B7280</Color>
+    <Color x:Key="TableOrdered">#3B82F6</Color>
 
     <Color x:Key="White">#FFFFFF</Color>
     <Color x:Key="Black">#000000</Color>

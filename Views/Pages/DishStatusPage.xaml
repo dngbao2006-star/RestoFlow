@@ -13,18 +13,16 @@
         <controls:AppHeaderView />
 
         <!-- Content -->
-        <ScrollView Grid.Row="1">
-
-            <VerticalStackLayout Padding="24" Spacing="20">
+        <Grid Grid.Row="1" Padding="24" RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="20">
 
                 <!-- Title -->
-                <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                <HorizontalStackLayout Grid.Row="0" Spacing="12" VerticalOptions="Center">
                     <Label Text="Trạng thái món ăn"
                            Style="{StaticResource PageTitle}" />
                 </HorizontalStackLayout>
 
                 <!-- STATUS SUMMARY -->
-                <Grid ColumnDefinitions="*,*,*,*"
+                <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*"
                       ColumnSpacing="12">
 
                     <!-- Pending -->
@@ -155,7 +153,7 @@
                 </Grid>
 
                 <!-- READY ALERT -->
-                <Border Style="{StaticResource CardBorder}"
+                <Border Grid.Row="2" Style="{StaticResource CardBorder}"
                         Background="#E8F7EE"
                         Stroke="{StaticResource Success}"
                         StrokeThickness="2"
@@ -180,6 +178,7 @@
 
                         <!-- READY ITEMS FROM FIREBASE -->
                         <CollectionView ItemsSource="{Binding ReadyDishList}"
+                                        HeightRequest="150"
                                         SelectionMode="None">
 
                             <CollectionView.ItemsLayout>
@@ -253,11 +252,11 @@
                 </Border>
 
                 <!-- ORDER LIST -->
-                <Label Text="Danh sách đơn hàng"
+                <Label Grid.Row="3" Text="Danh sách đơn hàng"
                        Style="{StaticResource SectionTitle}"
                        FontSize="18" />
 
-                <CollectionView ItemsSource="{Binding FilteredOrders}"
+                <CollectionView Grid.Row="4" ItemsSource="{Binding FilteredOrders}"
                                 SelectionMode="None">
 
                     <CollectionView.ItemsLayout>
@@ -374,9 +373,7 @@
 
                 </CollectionView>
 
-            </VerticalStackLayout>
-
-        </ScrollView>
+        </Grid>
 
     </Grid>
 

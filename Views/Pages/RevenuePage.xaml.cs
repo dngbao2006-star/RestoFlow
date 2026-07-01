@@ -13,6 +13,18 @@ public partial class RevenuePage : ContentPage
         BindingContext = _vm;
     }
 
+    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+    {
+        base.OnNavigatedTo(args);
+        _vm.Activate();
+    }
+
+    protected override void OnNavigatingFrom(NavigatingFromEventArgs args)
+    {
+        _vm.Deactivate();
+        base.OnNavigatingFrom(args);
+    }
+
     private void OnPeriodFilterClicked(object sender, EventArgs e)
     {
         if (sender is not Button btn || btn.CommandParameter is not string period) return;
@@ -24,6 +36,7 @@ public partial class RevenuePage : ContentPage
         var activeBg = Color.FromArgb("#F5F0E8");
         BtnToday.BackgroundColor = defaultBg;
         BtnWeek.BackgroundColor = defaultBg;
+        BtnMonth.BackgroundColor = defaultBg;
         BtnYear.BackgroundColor = defaultBg;
 
         // Highlight the active button

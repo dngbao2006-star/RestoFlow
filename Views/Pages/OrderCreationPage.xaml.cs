@@ -2,6 +2,7 @@ using AppManagermentRestaurant.Models;
 using AppManagermentRestaurant.Services;
 using AppManagermentRestaurant.Constants;
 using System.Collections.ObjectModel;
+using AppManagermentRestaurant.Helpers;
 
 namespace AppManagermentRestaurant.Views.Pages;
 
@@ -17,6 +18,7 @@ public partial class OrderCreationPage : ContentPage
     private ObservableCollection<Table> _activeTables = new();
     private Table _selectedActiveTable;
     private HashSet<int> _itemsSubmittedPreviously = new();
+    private int _switchRequestId;
 
     /// <summary>
     /// Order nháp chỉ tồn tại local, CHƯA được thêm vào AppContext.Orders.
@@ -83,7 +85,8 @@ public partial class OrderCreationPage : ContentPage
             AppContext.Instance.SelectedTable = targetTable;
             _selectedActiveTable = targetTable;
             OnPropertyChanged(nameof(SelectedActiveTable));
-            await SwitchTableDataAsync(targetTable);
+            var requestId = ++_switchRequestId;
+            await SwitchTableDataAsync(targetTable, requestId);
         }
         else
         {
@@ -95,8 +98,10 @@ public partial class OrderCreationPage : ContentPage
         _isLoadingData = false;
     }
 
-    private async Task SwitchTableDataAsync(Table table)
+    private async Task SwitchTableDataAsync(Table table, int requestId)
     {
+        if (requestId != _switchRequestId) return;
+
         // Reset draft khi chuyển bàn
         _draftOrder = null;
 
@@ -121,6 +126,7 @@ public partial class OrderCreationPage : ContentPage
         {
             // Bàn có khách nhưng CHƯA có order → thử khôi phục draft
             var restoredDraft = await DraftOrderService.Instance.GetDraftAsync(table.Id);
+            if (requestId != _switchRequestId) return;
 
             if (restoredDraft != null)
             {
@@ -201,7 +207,8 @@ public partial class OrderCreationPage : ContentPage
                 if (value != null && !_isLoadingData)
                 {
                     AppContext.Instance.SelectedTable = value;
-                    _ = SwitchTableDataAsync(value);
+                    var requestId = ++_switchRequestId;
+                    _ = SwitchTableDataAsync(value, requestId);
                 }
             }
         }
@@ -307,21 +314,17 @@ public partial class OrderCreationPage : ContentPage
 
     private void ApplyFilters()
     {
-        AppContext.Instance.FilteredMenuItems.Clear();
-
         var items = AppContext.Instance.MenuItems
             .Where(item =>
             {
-                var categoryMatch = _selectedFilter == "All" || item.Category == _selectedFilter;
+                var categoryMatch = MenuCategoryHelper.Matches(item.Category, _selectedFilter);
                 var searchMatch = string.IsNullOrEmpty(_searchText) ||
                                  item.Name.ToLower().Contains(_searchText);
                 return categoryMatch && searchMatch;
             });
 
-        foreach (var item in items)
-        {
-            AppContext.Instance.FilteredMenuItems.Add(item);
-        }
+        AppContext.Instance.ReplaceFilteredMenuItems(items);
+        OnPropertyChanged(nameof(FilteredMenuItems));
     }
 
     private void OnFilterScrolled(object sender, ScrolledEventArgs e)
@@ -352,30 +355,27 @@ public partial class OrderCreationPage : ContentPage
         }
     }
 
-    private void OnScrollLeftClicked(object sender, EventArgs e)
+    private async void OnScrollLeftClicked(object sender, EventArgs e)
     {
         double target = Math.Max(0, FilterScrollView.ScrollX - 150);
-        FilterScrollView.ScrollToAsync(target, 0, true);
+        await FilterScrollView.ScrollToAsync(target, 0, true);
     }
 
-    private void OnScrollRightClicked(object sender, EventArgs e)
+    private async void OnScrollRightClicked(object sender, EventArgs e)
     {
         double maxScroll = FilterScrollView.ContentSize.Width - FilterScrollView.Width;
         double target = Math.Min(maxScroll, FilterScrollView.ScrollX + 150);
-        FilterScrollView.ScrollToAsync(target, 0, true);
+        await FilterScrollView.ScrollToAsync(target, 0, true);
     }
 
-    private void OnAddMenuItemClicked(object sender, EventArgs e)
+    private async void OnAddMenuItemClicked(object sender, EventArgs e)
     {
         if (sender is not Button button || button.CommandParameter is not Models.FoodItem menuItem || AppContext.Instance.SelectedOrder is null)
             return;
 
         if (menuItem.OutOfStock)
         {
-            MainThread.BeginInvokeOnMainThread(async () =>
-            {
-                await DisplayAlert("Thông báo", "Món này hiện đã hết hàng", "OK");
-            });
+            await DisplayAlert("Thông báo", "Món này hiện đã hết hàng", "OK");
             return;
         }
 
@@ -539,80 +539,104 @@ public partial class OrderCreationPage : ContentPage
 
     private async void OnSubmitOrderClicked(object sender, EventArgs e)
     {
-        //Kiem tra bam gui don lien tuc
         if (_isSubmitting) return;
         _isSubmitting = true;
 
-        if (AppContext.Instance.SelectedOrder?.Items.Count == 0)
+        try
         {
-            await DisplayAlert("Thông báo", "Vui lòng thêm ít nhất một món trước khi gửi", "OK");
-            _isSubmitting = false;
-            return;
-        }
+            var order = AppContext.Instance.SelectedOrder;
+            if (order == null || order.Items.Count == 0)
+            {
+                await DisplayAlert("Thông báo", "Vui lòng thêm ít nhất một món trước khi gửi.", "OK");
+                return;
+            }
 
-        var order = AppContext.Instance.SelectedOrder;
-        if (order == null)
-        {
-            _isSubmitting = false;
-            return;
-        }
+            var newItems = order.Items
+                .Where(item => !_itemsSubmittedPreviously.Contains(item.Id))
+                .ToList();
+            if (newItems.Count == 0)
+            {
+                await DisplayAlert("Thông báo", "Không có món mới để gửi lên bếp.", "OK");
+                return;
+            }
 
-        var confirm = await DisplayAlert(
-            "Xác nhận đơn hàng",
-            $"Bàn {order.TableNumber}\nTổng: {order.TotalDisplay}\n\nGửi đơn lên bếp?",
-            "Có",
-            "Không");
+            var confirm = await DisplayAlert(
+                "Xác nhận đơn hàng",
+                $"Bàn {order.TableNumber}\nTổng: {order.TotalDisplay}\n\nGửi {newItems.Sum(item => item.Quantity)} món mới lên bếp?",
+                "Có", "Không");
+            if (!confirm) return;
 
-        if (!confirm)
-        {
-            _isSubmitting = false;
-            return;
-        }
+            var table = AppContext.Instance.Tables.FirstOrDefault(t => t.Id == order.TableId)
+                     ?? AppContext.Instance.Tables.FirstOrDefault(t => t.Number == order.TableNumber);
+            if (table == null)
+            {
+                await DisplayAlert("Lỗi", "Không tìm thấy bàn của đơn hàng.", "OK");
+                return;
+            }
 
-        // Gộp các món trùng MenuItemId lại thành 1 entry duy nhất
-        MergeOrderItems(order);
+            var isDraft = ReferenceEquals(_draftOrder, order);
+            var previousTableState = new
+            {
+                table.Status,
+                table.CurrentOrderId,
+                table.HasOrdered,
+                table.OrderItemCount,
+                table.OrderTotal
+            };
 
-        var table = AppContext.Instance.Tables.FirstOrDefault(t => t.Id == order.TableId)
-                 ?? AppContext.Instance.Tables.FirstOrDefault(t => t.Number == order.TableNumber);
-        if (table != null)
-        {
-            table.Status = TableStatus.Occupied;
-            table.CurrentOrderId = order.Id;
-            table.HasOrdered = true;
-            table.OrderItemCount = order.Items.Count;
-            table.OrderTotal = order.TotalDisplay;
+            try
+            {
+                if (isDraft)
+                    await _firebase.CreateOrderAsync(order);
+
+                foreach (var item in newItems)
+                {
+                    item.Status = DishStatus.Pending;
+                    await _firebase.SaveOrderItemAsync(order, item);
+                }
+
+                table.Status = TableStatus.Occupied;
+                table.CurrentOrderId = order.Id;
+                table.HasOrdered = true;
+                table.OrderItemCount = order.Items.Sum(item => item.Quantity);
+                table.OrderTotal = order.TotalDisplay;
+                await _firebase.UpdateTableAsync(table);
+            }
+            catch
+            {
+                table.Status = previousTableState.Status;
+                table.CurrentOrderId = previousTableState.CurrentOrderId;
+                table.HasOrdered = previousTableState.HasOrdered;
+                table.OrderItemCount = previousTableState.OrderItemCount;
+                table.OrderTotal = previousTableState.OrderTotal;
+                throw;
+            }
+
+            foreach (var item in newItems)
+                _itemsSubmittedPreviously.Add(item.Id);
+
+            if (isDraft)
+            {
+                if (!AppContext.Instance.Orders.Any(existing => existing.Id == order.Id))
+                    AppContext.Instance.Orders.Add(order);
+                await DraftOrderService.Instance.ClearDraftAsync(order.TableId);
+                _draftOrder = null;
+            }
+
             AppContext.Instance.SelectedTable = table;
-            _ = _firebase.UpdateTableAsync(table);
-        }
+            AppContext.Instance.RefreshBadges();
+            ActivityLogService.Instance.LogOrderCreation(order.TableNumber.ToString());
 
-        // === CHÍNH THỨC thêm order vào AppContext.Orders nếu là draft ===
-        if (_draftOrder != null && _draftOrder.Id == order.Id)
-        {
-            AppContext.Instance.Orders.Add(order);
-
-            // Dọn dẹp draft (RAM + disk)
-            DraftOrderService.Instance.ClearDraft(order.TableId);
-            _draftOrder = null;
-        }
-
-        // Sync order + items to Firebase
-        _itemsSubmittedPreviously.Clear();
-        _ = _firebase.CreateOrderAsync(order);
-        foreach (var item in order.Items)
-        {
-            item.Status = DishStatus.Pending;
-            _itemsSubmittedPreviously.Add(item.Id);
-            _ = _firebase.SaveOrderItemAsync(order, item);
-        }
-
-        AppContext.Instance.RefreshBadges();
-        ActivityLogService.Instance.LogOrderCreation(order.TableNumber.ToString());
-
-        await MainThread.InvokeOnMainThreadAsync(async () =>
-        {
-            await DisplayAlert("Thành công", "Đơn hàng đã được gửi lên bếp", "OK");
+            await DisplayAlert("Thành công", "Đơn hàng đã được gửi lên bếp.", "OK");
             await Shell.Current.GoToAsync(AppRoutes.Absolute(AppRoutes.TableMap));
-        });
-        _isSubmitting = false;
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Lỗi", $"Không thể gửi đơn hàng: {ex.Message}", "Đóng");
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
     }
 }

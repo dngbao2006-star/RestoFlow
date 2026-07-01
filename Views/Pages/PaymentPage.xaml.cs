@@ -12,6 +12,7 @@ public partial class PaymentPage : ContentPage
     private readonly FirebaseService _firebase = new();
     private string? _qrImageUrl;
     private bool _isQrLoading;
+    private bool _isProcessingPayment;
 
     private ObservableCollection<Order> _activeOrders = new();
 
@@ -32,6 +33,9 @@ public partial class PaymentPage : ContentPage
         _selectedPaymentMethod = null;
         DiscountCodeEntry.Text = "";
         DiscountErrorLabel.IsVisible = false;
+
+        // 0. Dọn dẹp hóa đơn lỗi (stale invoices cho đơn còn Active)
+        CleanupStaleInvoices();
 
         // 1. Tải bàn CÓ THỂ THANH TOÁN và sắp xếp (Bàn số nhỏ nhất đứng đầu)
         _activeOrders.Clear();
@@ -69,6 +73,42 @@ public partial class PaymentPage : ContentPage
         OnPropertyChanged(nameof(IsQRSelected));
         OnPropertyChanged(nameof(IsCashSelected));
         OnPropertyChanged(nameof(CanConfirmPayment));
+    }
+
+    /// <summary>
+    /// Xóa các hóa đơn mồ côi (stale invoices) — hóa đơn đã tồn tại trong Invoices
+    /// nhưng đơn hàng tương ứng vẫn còn ở trạng thái Active (chưa thanh toán xong).
+    /// Đây là dữ liệu lỗi do thanh toán trước đó bị gián đoạn giữa chừng.
+    /// </summary>
+    private void CleanupStaleInvoices()
+    {
+        var activeOrderIds = AppContext.Instance.Orders
+            .Where(o => o.Status == OrderStatus.Active)
+            .Select(o => o.Id)
+            .ToHashSet();
+
+        var staleInvoices = AppContext.Instance.Invoices
+            .Where(inv => activeOrderIds.Contains(inv.OrderId))
+            .ToList();
+
+        foreach (var stale in staleInvoices)
+        {
+            AppContext.Instance.Invoices.Remove(stale);
+            // Xóa bất đồng bộ trên Firebase (fire-and-forget, lỗi thì bỏ qua)
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    var key = $"invoice_{stale.Id}";
+                    await _firebase.DeleteInvoiceAsync(key);
+                    System.Diagnostics.Debug.WriteLine($"[Payment] Cleaned stale invoice #{stale.Id} for active order #{stale.OrderId}");
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[Payment] Failed to clean stale invoice #{stale.Id}: {ex.Message}");
+                }
+            });
+        }
     }
 
     public bool HasSelectedOrder => _selectedTableOrder != null;
@@ -251,7 +291,7 @@ public partial class PaymentPage : ContentPage
         _isFormattingCash = false;
     }
 
-    private void OnApplyDiscountClicked(object sender, EventArgs e)
+    private async void OnApplyDiscountClicked(object sender, EventArgs e)
     {
         var discountCode = DiscountCodeEntry.Text?.ToUpper().Trim();
 
@@ -290,14 +330,13 @@ public partial class PaymentPage : ContentPage
         OnPropertyChanged(nameof(DiscountDisplay));
         UpdateQrCode();
 
-        MainThread.BeginInvokeOnMainThread(async () =>
-        {
-            await DisplayAlert("Thành công", $"Áp dụng mã giảm giá thành công: {Formatters.FormatCurrency(discountAmount)}", "OK");
-        });
+        await DisplayAlert("Thành công", $"Áp dụng mã giảm giá thành công: {Formatters.FormatCurrency(discountAmount)}", "OK");
     }
 
     private async void OnConfirmPaymentClicked(object sender, EventArgs e)
     {
+        if (_isProcessingPayment) return;
+
         if (!_selectedPaymentMethod.HasValue)
         {
             await DisplayAlert("Lỗi", "Vui lòng chọn phương thức thanh toán", "OK");
@@ -327,31 +366,140 @@ public partial class PaymentPage : ContentPage
         if (!confirm) return;
 
         var order = SelectedTableOrder;
-
-        order.Status = OrderStatus.Paid;
-        order.PaymentMethod = _selectedPaymentMethod.Value;
-
         var table = AppContext.Instance.Tables.FirstOrDefault(t => t.Id == order.TableId)
                  ?? AppContext.Instance.Tables.FirstOrDefault(t => t.Number == order.TableNumber);
-        if (table != null)
+        if (table == null)
         {
+            await DisplayAlert("Lỗi", "Không tìm thấy bàn của đơn hàng.", "OK");
+            return;
+        }
+
+        // Kiểm tra và xử lý hóa đơn đã tồn tại
+        var existingInvoice = AppContext.Instance.Invoices.FirstOrDefault(invoice => invoice.OrderId == order.Id);
+        if (existingInvoice != null)
+        {
+            if (order.Status == OrderStatus.Active)
+            {
+                // Đơn hàng vẫn Active nhưng đã có invoice → invoice mồ côi từ lần thanh toán lỗi trước.
+                // Xóa invoice cũ và cho phép thanh toán lại.
+                AppContext.Instance.Invoices.Remove(existingInvoice);
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        var delKey = $"invoice_{existingInvoice.Id}";
+                        await _firebase.DeleteInvoiceAsync(delKey);
+                        System.Diagnostics.Debug.WriteLine($"[Payment] Removed stale invoice #{existingInvoice.Id} for retry.");
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[Payment] Stale invoice cleanup error: {ex.Message}");
+                    }
+                });
+            }
+            else
+            {
+                await DisplayAlert("Thông báo", "Đơn hàng này đã có hóa đơn thanh toán.", "OK");
+                RefreshPage();
+                return;
+            }
+        }
+
+        _isProcessingPayment = true;
+        try
+        {
+            var paidAt = DateTime.Now;
+            var invoiceId = AppContext.Instance.Invoices.Count == 0
+                ? 1
+                : AppContext.Instance.Invoices.Max(invoice => invoice.Id) + 1;
+            var invoice = new Invoice
+            {
+                Id = invoiceId,
+                OrderId = order.Id,
+                TableNumber = order.TableNumber,
+                ServerName = order.ServerName,
+                CreatedAt = paidAt,
+                PaymentMethod = _selectedPaymentMethod.Value,
+                Discount = order.Discount,
+                Total = order.Total,
+                Items = order.Items.ToList()
+            };
+
+            await _firebase.CompletePaymentAsync(order, table, invoice);
+
+            RevenueUpdateResult? revenueUpdate = null;
+            Exception? revenueError = null;
+            try
+            {
+                revenueUpdate = await _firebase.IncrementRevenueAsync(paidAt, invoice.Total);
+            }
+            catch (Exception ex)
+            {
+                revenueError = ex;
+            }
+
+            order.Status = OrderStatus.Paid;
+            order.PaymentMethod = invoice.PaymentMethod;
             table.Status = TableStatus.NeedsClearing;
             table.CurrentOrderId = null;
             table.HasOrdered = false;
             table.OrderTotal = string.Empty;
             table.OrderItemCount = 0;
 
+            if (!AppContext.Instance.Invoices.Any(existing => existing.OrderId == order.Id))
+                AppContext.Instance.Invoices.Add(invoice);
+            AppContext.Instance.Orders.Remove(order);
+            if (!AppContext.Instance.OrderHistory.Any(existing => existing.Id == order.Id))
+                AppContext.Instance.OrderHistory.Add(order);
+
+            if (revenueUpdate != null)
+            {
+                ApplyRevenuePoint(AppContext.Instance.RevenueDaily, revenueUpdate.DailyLabel, revenueUpdate.DailyValue);
+                ApplyRevenuePoint(AppContext.Instance.RevenueWeekly, revenueUpdate.WeeklyLabel, revenueUpdate.WeeklyValue);
+                ApplyRevenuePoint(AppContext.Instance.RevenueMonthly, revenueUpdate.MonthlyLabel, revenueUpdate.MonthlyValue);
+            }
+
             ActivityLogService.Instance.LogPayment(table.Number.ToString());
-            _ = _firebase.UpdateTableAsync(table);
+            AppContext.Instance.SelectedOrder = null;
+            AppContext.Instance.SelectedTable = null;
+            AppContext.Instance.RefreshBadges();
+
+            if (revenueError == null)
+            {
+                await DisplayAlert("Thành công", $"✓ Đã thanh toán Bàn {order.TableNumber}\nSố tiền: {order.TotalDisplay}", "OK");
+            }
+            else
+            {
+                await DisplayAlert(
+                    "Đã thanh toán",
+                    $"Hóa đơn đã được lưu, nhưng cập nhật báo cáo doanh thu chưa thành công: {revenueError.Message}",
+                    "OK");
+            }
+
+            RefreshPage();
         }
-        _ = _firebase.UpdateOrderStatusAsync(order);
+        catch (Exception ex)
+        {
+            await DisplayAlert("Lỗi", $"Không thể hoàn tất thanh toán: {ex.Message}", "OK");
+        }
+        finally
+        {
+            _isProcessingPayment = false;
+        }
+    }
 
-        AppContext.Instance.SelectedOrder = null;
-        AppContext.Instance.SelectedTable = null;
+    private static void ApplyRevenuePoint(
+        ObservableCollection<RevenuePoint> collection, string label, decimal value)
+    {
+        var existing = collection.FirstOrDefault(point =>
+            string.Equals(point.Label, label, StringComparison.OrdinalIgnoreCase));
+        var replacement = new RevenuePoint { Label = label, Value = value };
+        if (existing == null)
+        {
+            collection.Add(replacement);
+            return;
+        }
 
-        await DisplayAlert("Thành công", $"✓ Đã thanh toán Bàn {order.TableNumber}\nSố tiền: {order.TotalDisplay}", "OK");
-
-        RefreshPage();
-        AppContext.Instance.RefreshBadges();
+        collection[collection.IndexOf(existing)] = replacement;
     }
 }

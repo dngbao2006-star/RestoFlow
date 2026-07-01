@@ -87,8 +87,8 @@
                         <BoxView HeightRequest="1" Color="{StaticResource BorderLight}" />
 
                         <Label Text="Danh sách món ăn" FontAttributes="Bold" FontSize="12" />
-                        <CollectionView ItemsSource="{Binding SelectedTableOrder.Items}" SelectionMode="None">
-                            <CollectionView.ItemTemplate>
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding SelectedTableOrder.Items}">
+                            <BindableLayout.ItemTemplate>
                                 <DataTemplate>
                                     <Grid ColumnDefinitions="*,Auto,Auto" Padding="8,4" ColumnSpacing="12" RowSpacing="2">
                                         <VerticalStackLayout Spacing="2">
@@ -99,8 +99,8 @@
                                         <Label Grid.Column="2" Text="{Binding LineTotalDisplay}" FontAttributes="Bold" FontSize="12" VerticalOptions="Center" HorizontalOptions="End" />
                                     </Grid>
                                 </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
 
                         <BoxView HeightRequest="1" Color="{StaticResource BorderLight}" />
 

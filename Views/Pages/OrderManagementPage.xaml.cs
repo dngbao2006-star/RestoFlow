@@ -1,6 +1,7 @@
 using AppManagermentRestaurant.Models;
 using AppManagermentRestaurant.Services;
 using System.Collections.ObjectModel;
+using AppManagermentRestaurant.Helpers;
 
 namespace AppManagermentRestaurant.Views.Pages;
 
@@ -9,6 +10,7 @@ namespace AppManagermentRestaurant.Views.Pages;
 /// </summary>
 internal class OrderItemSnapshot
 {
+    public string FirebaseKey { get; set; } = "";
     public int Id { get; set; }
     public int MenuItemId { get; set; }
     public string Name { get; set; } = "";
@@ -22,7 +24,10 @@ internal class OrderItemSnapshot
 public partial class OrderManagementPage : ContentPage
 {
     private readonly FirebaseService _firebase = new();
-    private string _currentStatusFilter = "All";
+    private string _orderSearchText = string.Empty;
+    private string _areaFilter = string.Empty;
+    private string _dishStatusFilter = string.Empty;
+    private string _staffFilter = string.Empty;
     private string _modalCategoryFilter = "All";
     private string _modalSearchText = string.Empty;
 
@@ -35,6 +40,9 @@ public partial class OrderManagementPage : ContentPage
     private Order? _orderBeingEdited;
     private readonly Dictionary<int, OrderItemSnapshot> _originalSnapshots = new();
     private readonly List<OrderItem> _addedItems = new();
+    private readonly List<(OrderItem Item, int Index)> _removedItems = new();
+    private bool _isSavingEdits;
+    private bool _isObservingContext;
 
     public ObservableCollection<FoodItem> ModalFilteredMenuItems { get; set; } = new();
 
@@ -42,34 +50,50 @@ public partial class OrderManagementPage : ContentPage
     {
         InitializeComponent();
         BindingContext = this;
-
-        AppContext.Instance.PropertyChanged += OnAppContextPropertyChanged;
+        AreaFilter.ItemsSource = new[] { "Tầng trệt", "Tầng 2", "Sân vườn" };
+        DishStatusFilter.ItemsSource = new[] { "Chờ xử lý", "Đang làm", "Sẵn sàng", "Đã phục vụ" };
     }
 
     private void OnAppContextPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            OnPropertyChanged(nameof(FilteredOrders));
-            OnPropertyChanged(nameof(OrderSummaryText));
-        });
+        if (e.PropertyName != nameof(AppContext.OrderItemsVersion) || _isSavingEdits)
+            return;
+
+        RefreshPage();
     }
 
     protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
-        MainThread.BeginInvokeOnMainThread(RefreshPage);
+        if (!_isObservingContext)
+        {
+            AppContext.Instance.PropertyChanged += OnAppContextPropertyChanged;
+            _isObservingContext = true;
+        }
+        RefreshPage();
     }
 
     protected override void OnNavigatingFrom(NavigatingFromEventArgs args)
     {
-        // Persist pending edits when leaving page — they remain in memory
-        // so returning to this page keeps the edits alive
+        if (_isObservingContext)
+        {
+            AppContext.Instance.PropertyChanged -= OnAppContextPropertyChanged;
+            _isObservingContext = false;
+        }
         base.OnNavigatingFrom(args);
     }
 
     private void RefreshPage()
     {
+        StaffFilter.ItemsSource = AppContext.Instance.Orders
+            .Where(order => order.Status == OrderStatus.Active && order.Items.Count > 0)
+            .Select(order => order.ServerName?.Trim())
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Select(name => name!)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(name => name)
+            .ToArray();
+
         OnPropertyChanged(nameof(FilteredOrders));
         OnPropertyChanged(nameof(OrderSummaryText));
     }
@@ -82,7 +106,7 @@ public partial class OrderManagementPage : ContentPage
     {
         get
         {
-            var activeOrders = AppContext.Instance.Orders.Where(o => o.Items.Count > 0).ToList();
+            var activeOrders = FilteredOrders.ToList();
             var totalItems = activeOrders.Sum(o => o.Items.Sum(i => i.Quantity));
             return $"{activeOrders.Count} đơn đang hoạt động · {totalItems} món";
         }
@@ -96,21 +120,77 @@ public partial class OrderManagementPage : ContentPage
                 .Where(o => o.Items.Count > 0 && o.Status == OrderStatus.Active)
                 .AsEnumerable();
 
-            if (_currentStatusFilter != "All")
+            if (!string.IsNullOrWhiteSpace(_orderSearchText))
             {
-                var statusEnum = _currentStatusFilter switch
+                var search = _orderSearchText.Trim();
+                orders = orders.Where(order =>
+                    order.TableNumber.ToString().Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                    order.Id.ToString().Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                    order.Items.Any(item => item.Name.Contains(search, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            if (!string.IsNullOrWhiteSpace(_areaFilter))
+            {
+                var floor = _areaFilter switch
                 {
-                    "Pending" => DishStatus.Pending,
-                    "Preparing" => DishStatus.Preparing,
-                    "Ready" => DishStatus.Ready,
-                    "Served" => DishStatus.Served,
-                    _ => DishStatus.Pending
+                    var value when value.Contains("Tầng trệt", StringComparison.OrdinalIgnoreCase) => "Ground Floor",
+                    var value when value.Contains("Tầng 2", StringComparison.OrdinalIgnoreCase) => "Second Floor",
+                    var value when value.Contains("Sân vườn", StringComparison.OrdinalIgnoreCase) => "Garden",
+                    _ => string.Empty
                 };
-                orders = orders.Where(o => o.Items.Any(item => item.Status == statusEnum));
+
+                if (!string.IsNullOrWhiteSpace(floor))
+                {
+                    orders = orders.Where(order =>
+                    {
+                        var table = AppContext.Instance.Tables.FirstOrDefault(item => item.Id == order.TableId)
+                                    ?? AppContext.Instance.Tables.FirstOrDefault(item => item.Number == order.TableNumber);
+                        return string.Equals(table?.Floor, floor, StringComparison.OrdinalIgnoreCase);
+                    });
+                }
+            }
+
+            if (TryGetDishStatus(_dishStatusFilter, out var dishStatus))
+                orders = orders.Where(order => order.Items.Any(item => item.Status == dishStatus));
+
+            if (!string.IsNullOrWhiteSpace(_staffFilter))
+            {
+                var staff = _staffFilter.Trim();
+                orders = orders.Where(order => order.ServerName.Contains(staff, StringComparison.OrdinalIgnoreCase));
             }
 
             return orders.OrderByDescending(o => o.CreatedAt);
         }
+    }
+
+    private static bool TryGetDishStatus(string text, out DishStatus status)
+    {
+        if (text.Contains("Chờ", StringComparison.OrdinalIgnoreCase))
+        {
+            status = DishStatus.Pending;
+            return true;
+        }
+
+        if (text.Contains("Đang", StringComparison.OrdinalIgnoreCase))
+        {
+            status = DishStatus.Preparing;
+            return true;
+        }
+
+        if (text.Contains("Sẵn", StringComparison.OrdinalIgnoreCase))
+        {
+            status = DishStatus.Ready;
+            return true;
+        }
+
+        if (text.Contains("phục vụ", StringComparison.OrdinalIgnoreCase))
+        {
+            status = DishStatus.Served;
+            return true;
+        }
+
+        status = default;
+        return false;
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -142,11 +222,15 @@ public partial class OrderManagementPage : ContentPage
         _orderBeingEdited = order;
         order.HasPendingEdits = true;
 
+        if (_addedItems.Contains(item))
+            return;
+
         // Snapshot original state (only once per item)
         if (!_originalSnapshots.ContainsKey(item.Id))
         {
             _originalSnapshots[item.Id] = new OrderItemSnapshot
             {
+                FirebaseKey = item.FirebaseKey,
                 Id = item.Id,
                 MenuItemId = item.MenuItemId,
                 Name = item.Name,
@@ -166,12 +250,19 @@ public partial class OrderManagementPage : ContentPage
         _orderBeingEdited = null;
         _originalSnapshots.Clear();
         _addedItems.Clear();
+        _removedItems.Clear();
     }
 
     // ── Cancel button ──
     private void OnCancelEditsClicked(object? sender, EventArgs e)
     {
         if (sender is not Button { CommandParameter: Order order }) return;
+
+        foreach (var removed in _removedItems.OrderBy(entry => entry.Index))
+        {
+            if (!order.Items.Contains(removed.Item))
+                order.Items.Insert(Math.Min(removed.Index, order.Items.Count), removed.Item);
+        }
 
         // Rollback all snapshots
         foreach (var snap in _originalSnapshots.Values)
@@ -180,11 +271,11 @@ public partial class OrderManagementPage : ContentPage
             if (item != null)
             {
                 item.MenuItemId = snap.MenuItemId;
+                item.FirebaseKey = snap.FirebaseKey;
                 item.Name = snap.Name;
                 item.Price = snap.Price;
                 item.Quantity = snap.Quantity;
                 item.Notes = snap.Notes;
-                item.Status = DishStatus.Pending; // force re-trigger
                 item.Status = snap.Status;
             }
         }
@@ -205,34 +296,46 @@ public partial class OrderManagementPage : ContentPage
     private async void OnConfirmEditsClicked(object? sender, EventArgs e)
     {
         if (sender is not Button { CommandParameter: Order order }) return;
+        if (_isSavingEdits) return;
+        _isSavingEdits = true;
 
         try
         {
-            // Save all modified items to Firebase
-            foreach (var snap in _originalSnapshots.Values)
-            {
-                var item = order.Items.FirstOrDefault(i => i.Id == snap.Id);
-                if (item != null)
-                {
-                    await _firebase.UpdateOrderItemStatusAsync(item.Id, item.Status);
-                    await _firebase.UpdateOrderItemFieldsAsync(item.Id, item.Quantity, item.Notes);
-                }
-            }
+            var operations = new List<Task>();
+            operations.AddRange(_removedItems.Select(removed =>
+                _firebase.DeleteOrderItemAsync(order, removed.Item)));
+            operations.AddRange(_originalSnapshots.Values
+                .Select(snapshot => order.Items.FirstOrDefault(item => item.Id == snapshot.Id))
+                .Where(item => item != null)
+                .Select(item => _firebase.SaveOrderItemAsync(order, item!)));
+            operations.AddRange(_addedItems.Select(item => _firebase.SaveOrderItemAsync(order, item)));
 
-            // Save newly added items
-            foreach (var added in _addedItems)
+            await Task.WhenAll(operations).WaitAsync(TimeSpan.FromSeconds(15));
+
+            var table = AppContext.Instance.Tables.FirstOrDefault(candidate => candidate.Id == order.TableId)
+                     ?? AppContext.Instance.Tables.FirstOrDefault(candidate => candidate.Number == order.TableNumber);
+            if (table != null)
             {
-                await _firebase.SaveOrderItemAsync(order, added);
+                table.OrderItemCount = order.Items.Sum(item => item.Quantity);
+                table.OrderTotal = order.TotalDisplay;
+                table.HasOrdered = order.Items.Count > 0;
+                await _firebase.UpdateTableAsync(table);
             }
 
             order.NotifyItemsChanged();
             ClearPendingState();
             OnPropertyChanged(nameof(FilteredOrders));
             OnPropertyChanged(nameof(OrderSummaryText));
+            AppContext.Instance.NotifyOrderItemsChanged();
+            await DisplayAlert("Thành công", "Đã lưu toàn bộ thay đổi của đơn hàng.", "OK");
         }
         catch (Exception ex)
         {
             await DisplayAlert("Lỗi", $"Không thể lưu thay đổi: {ex.Message}", "OK");
+        }
+        finally
+        {
+            _isSavingEdits = false;
         }
     }
 
@@ -240,11 +343,18 @@ public partial class OrderManagementPage : ContentPage
     //  FILTER & REFRESH
     // ═══════════════════════════════════════════════════════════════
 
-    private void OnOrderStatusFilterClicked(object? sender, EventArgs e)
+    private void OnOrderSearchTextChanged(object? sender, TextChangedEventArgs e)
     {
-        if (sender is not Button btn || btn.CommandParameter is not string filter) return;
-        _currentStatusFilter = filter;
-        OnPropertyChanged(nameof(FilteredOrders));
+        _orderSearchText = e.NewTextValue ?? string.Empty;
+        RefreshPage();
+    }
+
+    private void OnOrderFilterChanged(object? sender, EventArgs e)
+    {
+        _areaFilter = AreaFilter.Text.Trim();
+        _dishStatusFilter = DishStatusFilter.Text.Trim();
+        _staffFilter = StaffFilter.Text.Trim();
+        RefreshPage();
     }
 
     private void OnRefreshClicked(object? sender, EventArgs e) => RefreshPage();
@@ -279,7 +389,6 @@ public partial class OrderManagementPage : ContentPage
         if (newStatus == item.Status) return;
 
         MarkOrderDirty(parentOrder, item);
-        item.Status = DishStatus.Pending; // force different first
         item.Status = newStatus;
         parentOrder.NotifyItemsChanged();
         OnPropertyChanged(nameof(FilteredOrders));
@@ -288,6 +397,25 @@ public partial class OrderManagementPage : ContentPage
     // ═══════════════════════════════════════════════════════════════
     //  QUANTITY CONTROLS
     // ═══════════════════════════════════════════════════════════════
+
+    private void RemovePendingItem(Order order, OrderItem item)
+    {
+        var index = order.Items.IndexOf(item);
+        if (_addedItems.Remove(item))
+        {
+            _originalSnapshots.Remove(item.Id);
+        }
+        else
+        {
+            MarkOrderDirty(order, item);
+            if (_removedItems.All(entry => entry.Item != item))
+                _removedItems.Add((item, index));
+        }
+
+        order.Items.Remove(item);
+        if (_originalSnapshots.Count == 0 && _addedItems.Count == 0 && _removedItems.Count == 0)
+            ClearPendingState();
+    }
 
     private async void OnDecreaseQtyTapped(object? sender, TappedEventArgs e)
     {
@@ -303,8 +431,7 @@ public partial class OrderManagementPage : ContentPage
                 "Xóa món", $"Bạn muốn xóa \"{item.Name}\" khỏi đơn hàng?", "Xóa", "Hủy");
             if (!confirmed) return;
 
-            MarkOrderDirty(parentOrder, item);
-            parentOrder.Items.Remove(item);
+            RemovePendingItem(parentOrder, item);
             parentOrder.NotifyItemsChanged();
             OnPropertyChanged(nameof(FilteredOrders));
             OnPropertyChanged(nameof(OrderSummaryText));
@@ -356,8 +483,7 @@ public partial class OrderManagementPage : ContentPage
                 entry.Text = item.Quantity.ToString();
                 return;
             }
-            MarkOrderDirty(parentOrder, item);
-            parentOrder.Items.Remove(item);
+            RemovePendingItem(parentOrder, item);
         }
         else
         {
@@ -476,14 +602,13 @@ public partial class OrderManagementPage : ContentPage
         var items = AppContext.Instance.MenuItems.AsEnumerable();
 
         if (_modalCategoryFilter != "All")
-            items = items.Where(i => i.Category.Equals(_modalCategoryFilter, StringComparison.OrdinalIgnoreCase));
+            items = items.Where(i => MenuCategoryHelper.Matches(i.Category, _modalCategoryFilter));
 
         if (!string.IsNullOrWhiteSpace(_modalSearchText))
             items = items.Where(i => i.Name.Contains(_modalSearchText, StringComparison.OrdinalIgnoreCase));
 
-        ModalFilteredMenuItems.Clear();
-        foreach (var item in items)
-            ModalFilteredMenuItems.Add(item);
+        ModalFilteredMenuItems = new ObservableCollection<FoodItem>(items);
+        OnPropertyChanged(nameof(ModalFilteredMenuItems));
 
         ModalMenuItems.ItemsSource = ModalFilteredMenuItems;
     }

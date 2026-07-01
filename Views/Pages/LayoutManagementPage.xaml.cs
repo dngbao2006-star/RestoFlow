@@ -10,9 +10,12 @@ public partial class LayoutManagementPage : ContentPage
     private bool _isEditMode = false;
     private string _currentFloor = "Ground Floor";
     private Table? _selectedTable;
+    private bool _isObservingTables;
+    private int _refreshScheduled;
+    private bool _isEditingReservation = false;
 
     // Filtered tables for the current floor tab
-    public ObservableCollection<Table> FilteredTables { get; } = new();
+    public ObservableCollection<Table> FilteredTables { get; private set; } = new();
 
     public LayoutManagementPage()
     {
@@ -25,9 +28,31 @@ public partial class LayoutManagementPage : ContentPage
         SetActiveTab("Ground Floor");
         RefreshFilteredTables();
 
-        // Listen for table collection changes to auto-refresh the grid
-        AppContext.Instance.Tables.CollectionChanged += (_, _) => RefreshFilteredTables();
     }
+
+    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+    {
+        base.OnNavigatedTo(args);
+        if (!_isObservingTables)
+        {
+            AppContext.Instance.Tables.CollectionChanged += OnTablesCollectionChanged;
+            _isObservingTables = true;
+        }
+        RefreshFilteredTables();
+    }
+
+    protected override void OnNavigatingFrom(NavigatingFromEventArgs args)
+    {
+        if (_isObservingTables)
+        {
+            AppContext.Instance.Tables.CollectionChanged -= OnTablesCollectionChanged;
+            _isObservingTables = false;
+        }
+        base.OnNavigatingFrom(args);
+    }
+
+    private void OnTablesCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        => RefreshFilteredTables();
 
     // ═══════════════════════════════════════════════════════════════════
     // FLOOR TAB SWITCHING
@@ -76,16 +101,25 @@ public partial class LayoutManagementPage : ContentPage
 
     private void RefreshFilteredTables()
     {
+        if (Interlocked.Exchange(ref _refreshScheduled, 1) == 1)
+            return;
+
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            FilteredTables.Clear();
-            var tables = AppContext.Instance.Tables
-                .Where(t => t.Floor == _currentFloor)
-                .OrderBy(t => t.Number);
-            foreach (var table in tables)
-                FilteredTables.Add(table);
+            try
+            {
+                var tables = AppContext.Instance.Tables
+                    .Where(t => t.Floor == _currentFloor)
+                    .OrderBy(t => t.Number)
+                    .ToList();
+                FilteredTables = new ObservableCollection<Table>(tables);
 
-            TablesCollection.ItemsSource = FilteredTables;
+                TablesCollection.ItemsSource = FilteredTables;
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _refreshScheduled, 0);
+            }
         });
     }
 
@@ -113,21 +147,47 @@ public partial class LayoutManagementPage : ContentPage
     }
 
     // ═══════════════════════════════════════════════════════════════════
-    // TABLE TAP → SHOW ACTION BUTTONS
+    // TABLE TAP → DIFFERENT BEHAVIOR PER STATUS
     // ═══════════════════════════════════════════════════════════════════
 
-    private void OnTableTapped(object sender, TappedEventArgs e)
+    private async void OnTableTapped(object sender, TappedEventArgs e)
     {
         if (e.Parameter is not Table table) return;
 
         _selectedTable = table;
-        ActionModalTitle.Text = table.DisplayNumber;
 
-        // Show different buttons based on mode
-        NormalModeActions.IsVisible = !_isEditMode;
-        EditModeActions.IsVisible = _isEditMode;
+        // In edit mode, show the edit action modal
+        if (_isEditMode)
+        {
+            ActionModalTitle.Text = table.DisplayNumber;
+            TableActionModal.IsVisible = true;
+            return;
+        }
 
-        TableActionModal.IsVisible = true;
+        // Normal mode: behavior depends on table status
+        switch (table.Status)
+        {
+            case TableStatus.Occupied:
+                // Both "Có khách" (red) and "Đã gọi món" (blue) show the same toast
+                await DisplayAlert("Thông báo", "Bàn này đã có khách.", "Đóng");
+                break;
+
+            case TableStatus.Available:
+                // Green table → show Reservation modal to reserve
+                ShowReservationModal(isEditing: false);
+                break;
+
+            case TableStatus.NeedsClearing:
+                // Gray table → show alert
+                await DisplayAlert("Thông báo", "Bàn phải được dọn trước khi đặt chỗ.", "Đóng");
+                break;
+
+            case TableStatus.Reserved:
+                // Yellow table → show reserved options modal
+                ReservedOptionsTitle.Text = table.DisplayNumber;
+                ReservedOptionsModal.IsVisible = true;
+                break;
+        }
     }
 
     private void OnTableActionClose(object sender, EventArgs e)
@@ -137,25 +197,94 @@ public partial class LayoutManagementPage : ContentPage
     }
 
     // ═══════════════════════════════════════════════════════════════════
-    // NORMAL MODE: RESERVATION
+    // RESERVED TABLE OPTIONS MODAL
     // ═══════════════════════════════════════════════════════════════════
 
-    private void OnReserveTableClicked(object sender, EventArgs e)
+    private void OnReservedOptionsClose(object sender, EventArgs e)
     {
-        TableActionModal.IsVisible = false;
+        ReservedOptionsModal.IsVisible = false;
+        _selectedTable = null;
+    }
 
-        // Reset fields
-        ReserveNameEntry.Text = string.Empty;
-        ReservePhoneEntry.Text = string.Empty;
-        ReserveTimePicker.Time = DateTime.Now.TimeOfDay;
+    private async void OnCancelReservationClicked(object sender, EventArgs e)
+    {
+        if (_selectedTable == null) return;
+
+        bool confirmed = await DisplayAlert(
+            "Xác nhận hủy đặt bàn",
+            $"Bạn có chắc chắn muốn hủy đặt bàn {_selectedTable.DisplayNumber}?",
+            "Xác nhận", "Hủy");
+
+        if (!confirmed) return;
+
+        var previous = (_selectedTable.Status, _selectedTable.ReservedFor,
+            _selectedTable.ReservedPhone, _selectedTable.ReservedAt);
+        try
+        {
+            _selectedTable.Status = TableStatus.Available;
+            _selectedTable.ReservedFor = null;
+            _selectedTable.ReservedPhone = null;
+            _selectedTable.ReservedAt = null;
+
+            await _firebaseService.UpdateTableAsync(_selectedTable).WaitAsync(TimeSpan.FromSeconds(12));
+
+            ReservedOptionsModal.IsVisible = false;
+            _selectedTable = null;
+            RefreshFilteredTables();
+        }
+        catch (Exception ex)
+        {
+            _selectedTable.Status = previous.Status;
+            _selectedTable.ReservedFor = previous.ReservedFor;
+            _selectedTable.ReservedPhone = previous.ReservedPhone;
+            _selectedTable.ReservedAt = previous.ReservedAt;
+            await DisplayAlert("Lỗi", $"Không thể hủy đặt bàn: {ex.Message}", "Đóng");
+        }
+    }
+
+    private void OnEditReservationClicked(object sender, EventArgs e)
+    {
+        if (_selectedTable == null) return;
+
+        ReservedOptionsModal.IsVisible = false;
+
+        // Show reservation modal in edit mode with pre-filled data
+        ShowReservationModal(isEditing: true);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // RESERVATION MODAL (shared for new reservation & editing)
+    // ═══════════════════════════════════════════════════════════════════
+
+    private void ShowReservationModal(bool isEditing)
+    {
+        _isEditingReservation = isEditing;
+
+        if (isEditing && _selectedTable != null)
+        {
+            // Pre-fill with existing reservation data
+            ReservationModalTitle.Text = $"Chỉnh sửa đặt bàn - {_selectedTable.DisplayNumber}";
+            ReserveNameEntry.Text = _selectedTable.ReservedFor ?? string.Empty;
+            ReservePhoneEntry.Text = _selectedTable.ReservedPhone ?? string.Empty;
+            ReserveTimePicker.Time = _selectedTable.ReservedAt?.TimeOfDay ?? DateTime.Now.TimeOfDay;
+        }
+        else
+        {
+            // New reservation - clear fields
+            ReservationModalTitle.Text = "Đặt trước bàn";
+            ReserveNameEntry.Text = string.Empty;
+            ReservePhoneEntry.Text = string.Empty;
+            ReserveTimePicker.Time = DateTime.Now.TimeOfDay;
+        }
+
         ReserveErrorLabel.IsVisible = false;
-
         ReservationModal.IsVisible = true;
     }
 
     private void OnReservationCancel(object sender, EventArgs e)
     {
         ReservationModal.IsVisible = false;
+        _isEditingReservation = false;
     }
 
     private async void OnReservationConfirm(object sender, EventArgs e)
@@ -177,6 +306,8 @@ public partial class LayoutManagementPage : ContentPage
 
         if (_selectedTable == null) return;
 
+        var previous = (_selectedTable.Status, _selectedTable.ReservedFor,
+            _selectedTable.ReservedPhone, _selectedTable.ReservedAt);
         try
         {
             var reserveTime = DateTime.Today.Add(ReserveTimePicker.Time ?? DateTime.Now.TimeOfDay);
@@ -186,44 +317,20 @@ public partial class LayoutManagementPage : ContentPage
             _selectedTable.ReservedPhone = ReservePhoneEntry.Text.Trim();
             _selectedTable.ReservedAt = reserveTime;
 
-            await _firebaseService.UpdateTableAsync(_selectedTable);
+            await _firebaseService.UpdateTableAsync(_selectedTable).WaitAsync(TimeSpan.FromSeconds(12));
 
             ReservationModal.IsVisible = false;
+            _isEditingReservation = false;
             RefreshFilteredTables();
         }
         catch (Exception ex)
         {
+            _selectedTable.Status = previous.Status;
+            _selectedTable.ReservedFor = previous.ReservedFor;
+            _selectedTable.ReservedPhone = previous.ReservedPhone;
+            _selectedTable.ReservedAt = previous.ReservedAt;
             ReserveErrorLabel.Text = $"Lỗi: {ex.Message}";
             ReserveErrorLabel.IsVisible = true;
-        }
-    }
-
-    // ═══════════════════════════════════════════════════════════════════
-    // NORMAL MODE: CHECK-IN (Nhận bàn)
-    // ═══════════════════════════════════════════════════════════════════
-
-    private async void OnCheckInTableClicked(object sender, EventArgs e)
-    {
-        if (_selectedTable == null) return;
-
-        TableActionModal.IsVisible = false;
-
-        try
-        {
-            // Chuyển trạng thái từ "Đặt trước" sang "Chưa gọi món" (Occupied, HasOrdered = false)
-            _selectedTable.Status = TableStatus.Occupied;
-            _selectedTable.HasOrdered = false;
-            _selectedTable.ArrivalTime = DateTime.Now;
-            _selectedTable.ReservedFor = null;
-            _selectedTable.ReservedPhone = null;
-            _selectedTable.ReservedAt = null;
-
-            await _firebaseService.UpdateTableAsync(_selectedTable);
-            RefreshFilteredTables();
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Lỗi", $"Không thể nhận bàn: {ex.Message}", "Đóng");
         }
     }
 
@@ -268,9 +375,9 @@ public partial class LayoutManagementPage : ContentPage
         // Validate capacity
         if (string.IsNullOrWhiteSpace(NewTableCapacityEntry.Text) ||
             !int.TryParse(NewTableCapacityEntry.Text.Trim(), out int capacity) ||
-            capacity < 1 || capacity > 6)
+            capacity < 1 || capacity > 50)
         {
-            AddTableErrorLabel.Text = "Số chỗ ngồi phải nằm trong khoảng từ 1 đến 6.";
+            AddTableErrorLabel.Text = "Số chỗ ngồi phải nằm trong khoảng từ 1 đến 50.";
             AddTableErrorLabel.IsVisible = true;
             return;
         }
@@ -327,9 +434,9 @@ public partial class LayoutManagementPage : ContentPage
     {
         if (string.IsNullOrWhiteSpace(EditCapacityEntry.Text) ||
             !int.TryParse(EditCapacityEntry.Text.Trim(), out int newCapacity) ||
-            newCapacity < 1 || newCapacity > 6)
+            newCapacity < 1 || newCapacity > 50)
         {
-            EditCapacityErrorLabel.Text = "Số chỗ ngồi phải nằm trong khoảng từ 1 đến 6.";
+            EditCapacityErrorLabel.Text = "Số chỗ ngồi phải nằm trong khoảng từ 1 đến 50.";
             EditCapacityErrorLabel.IsVisible = true;
             return;
         }
@@ -338,8 +445,17 @@ public partial class LayoutManagementPage : ContentPage
 
         try
         {
+            var previousCapacity = _selectedTable.Capacity;
             _selectedTable.Capacity = newCapacity;
-            await _firebaseService.UpdateTableAsync(_selectedTable);
+            try
+            {
+                await _firebaseService.UpdateTableAsync(_selectedTable).WaitAsync(TimeSpan.FromSeconds(12));
+            }
+            catch
+            {
+                _selectedTable.Capacity = previousCapacity;
+                throw;
+            }
 
             EditCapacityModal.IsVisible = false;
             RefreshFilteredTables();
@@ -355,8 +471,31 @@ public partial class LayoutManagementPage : ContentPage
     // EDIT MODE: DELETE TABLE
     // ═══════════════════════════════════════════════════════════════════
 
-    private void OnDeleteTableClicked(object sender, EventArgs e)
+    private async void OnDeleteTableClicked(object sender, EventArgs e)
     {
+        if (_selectedTable == null) return;
+
+        // Block deletion of tables with active orders (Đã gọi món)
+        if (HasActiveOrder(_selectedTable))
+        {
+            await DisplayAlert("Không thể xóa bàn", "Bàn đang có đơn hoạt động. Hãy thanh toán hoặc xử lý đơn trước.", "Đóng");
+            return;
+        }
+
+        // Block deletion of tables with status "Có khách" (Occupied, not ordered)
+        if (_selectedTable.Status == TableStatus.Occupied && !_selectedTable.HasOrdered)
+        {
+            await DisplayAlert("Không thể xóa bàn", "Bàn đang có khách ngồi. Không thể xóa bàn khi đang phục vụ khách.", "Đóng");
+            return;
+        }
+
+        // Block deletion of tables with status "Đặt trước" (Reserved)
+        if (_selectedTable.Status == TableStatus.Reserved)
+        {
+            await DisplayAlert("Không thể xóa bàn", "Bàn đã được đặt trước. Vui lòng hủy đặt bàn trước khi xóa.", "Đóng");
+            return;
+        }
+
         TableActionModal.IsVisible = false;
 
         DeleteConfirmLabel.Text = $"Bạn có muốn xóa bàn {_selectedTable?.DisplayNumber} không?";
@@ -371,6 +510,27 @@ public partial class LayoutManagementPage : ContentPage
     private async void OnDeleteTableConfirm(object sender, EventArgs e)
     {
         if (_selectedTable == null) return;
+
+        if (HasActiveOrder(_selectedTable))
+        {
+            DeleteTableModal.IsVisible = false;
+            await DisplayAlert("Không thể xóa bàn", "Bàn vừa phát sinh đơn hoạt động nên thao tác xóa đã bị chặn.", "Đóng");
+            return;
+        }
+
+        if (_selectedTable.Status == TableStatus.Occupied)
+        {
+            DeleteTableModal.IsVisible = false;
+            await DisplayAlert("Không thể xóa bàn", "Bàn vừa chuyển sang trạng thái có khách nên thao tác xóa đã bị chặn.", "Đóng");
+            return;
+        }
+
+        if (_selectedTable.Status == TableStatus.Reserved)
+        {
+            DeleteTableModal.IsVisible = false;
+            await DisplayAlert("Không thể xóa bàn", "Bàn vừa được đặt trước nên thao tác xóa đã bị chặn.", "Đóng");
+            return;
+        }
 
         try
         {
@@ -390,4 +550,11 @@ public partial class LayoutManagementPage : ContentPage
             await DisplayAlert("Lỗi", $"Không thể xóa bàn: {ex.Message}", "Đóng");
         }
     }
+
+    private static bool HasActiveOrder(Table table)
+        => table.HasOrdered
+           || table.CurrentOrderId.HasValue
+           || AppContext.Instance.Orders.Any(order =>
+               order.Status == OrderStatus.Active &&
+               (order.TableId == table.Id || order.TableNumber == table.Number));
 }

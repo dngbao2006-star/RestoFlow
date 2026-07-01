@@ -125,7 +125,7 @@
     <ShellContent
         Title="Tài khoản"
         Route="{x:Static constants:AppRoutes.Account}"
-        IsVisible="{Binding IsStaff}"
+        IsVisible="{Binding IsAuthenticated}"
         ContentTemplate="{DataTemplate pages:AccountManagementPage}" />
 
     <!-- ═══════════════════════════════════════════════════════════════ -->

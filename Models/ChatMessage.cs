@@ -4,6 +4,7 @@ namespace AppManagermentRestaurant.Models;
 
 public class ChatMessage
 {
+    public string FirebaseKey { get; set; } = string.Empty;
     public int Id { get; set; }
     public string SenderId { get; set; } = string.Empty;
     public string SenderName { get; set; } = string.Empty;

@@ -15,70 +15,45 @@
             <!-- ════════════════════════════════════════════════════ -->
             <!--  LEFT: STAFF LIST (full width when no detail)      -->
             <!-- ════════════════════════════════════════════════════ -->
-            <ScrollView>
-                <VerticalStackLayout Padding="24" Spacing="20">
+            <Grid Padding="24" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="16">
 
                     <!-- Header -->
-                    <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                    <HorizontalStackLayout Grid.Row="0" Spacing="12" VerticalOptions="Center">
                         <Label Text="Quản lý nhân sự" Style="{StaticResource PageTitle}" />
                         <Button Text="+ Thêm nhân viên"
                                 Clicked="OnAddEmployeeClicked"
                                 Style="{StaticResource PrimaryButton}" />
                     </HorizontalStackLayout>
 
-                    <!-- Statistics Cards -->
-                    <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
-                        <Border Style="{StaticResource CardBorder}">
-                            <VerticalStackLayout Spacing="6">
-                                <Label Text="Tổng nhân sự" FontAttributes="Bold" FontSize="12" TextColor="{StaticResource TextMuted}" />
-                                <Label Text="{Binding TotalStaff}" FontSize="24" FontAttributes="Bold" />
-                            </VerticalStackLayout>
+                    <!-- Compact search and searchable filters -->
+                    <Grid Grid.Row="1" ColumnDefinitions="1.35*,*,*" ColumnSpacing="12">
+                        <Border Style="{StaticResource InputBorder}" Padding="12,0" HeightRequest="48">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                <Label Text="🔍" VerticalOptions="Center" FontSize="15" />
+                                <Entry Grid.Column="1"
+                                       Placeholder="Tìm tên hoặc email"
+                                       Text="{Binding SearchText}"
+                                       FontSize="13" />
+                            </Grid>
                         </Border>
-                        <Border Style="{StaticResource CardBorder}" Grid.Column="1">
-                            <VerticalStackLayout Spacing="6">
-                                <Label Text="Đang hoạt động" FontAttributes="Bold" FontSize="12" TextColor="{StaticResource TextMuted}" />
-                                <Label Text="{Binding ActiveStaff}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource Success}" />
-                            </VerticalStackLayout>
-                        </Border>
-                        <Border Style="{StaticResource CardBorder}" Grid.Column="2">
-                            <VerticalStackLayout Spacing="6">
-                                <Label Text="Quản lý" FontAttributes="Bold" FontSize="12" TextColor="{StaticResource TextMuted}" />
-                                <Label Text="{Binding ManagerCount}" FontSize="24" FontAttributes="Bold" />
-                            </VerticalStackLayout>
-                        </Border>
-                        <Border Style="{StaticResource CardBorder}" Grid.Column="3">
-                            <VerticalStackLayout Spacing="6">
-                                <Label Text="Đã khóa" FontAttributes="Bold" FontSize="12" TextColor="{StaticResource TextMuted}" />
-                                <Label Text="{Binding LockedStaff}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource Danger}" />
-                            </VerticalStackLayout>
-                        </Border>
+
+                        <controls:SearchableDropdownView Grid.Column="1"
+                                                         x:Name="RoleFilter"
+                                                         Placeholder="Vai trò"
+                                                         SelectionChanged="OnRoleFilterChanged" />
+
+                        <controls:SearchableDropdownView Grid.Column="2"
+                                                         x:Name="StatusFilter"
+                                                         Placeholder="Trạng thái"
+                                                         SelectionChanged="OnStatusFilterChanged" />
                     </Grid>
 
-                    <!-- Search Only -->
-                    <Border Style="{StaticResource InputBorder}">
-                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                            <Label Text="🔍" VerticalOptions="Center" FontSize="16" />
-                            <Entry Grid.Column="1"
-                                   Placeholder="Tìm theo tên hoặc email..."
-                                   Text="{Binding SearchText}"
-                                   FontSize="14" />
-                            <Button Grid.Column="2"
-                                    Text="✕"
-                                    Clicked="OnClearSearchClicked"
-                                    Background="Transparent"
-                                    TextColor="{StaticResource TextMuted}"
-                                    Padding="0"
-                                    WidthRequest="40"
-                                    HeightRequest="40" />
-                        </Grid>
-                    </Border>
-
                     <!-- Staff Count -->
-                    <Label Text="{Binding FilteredStaff.Count, StringFormat='Hiển thị {0} nhân sự'}"
+                    <Label Grid.Row="2" Text="{Binding FilteredStaff.Count, StringFormat='Hiển thị {0} nhân sự'}"
                            FontSize="12" TextColor="{StaticResource TextMuted}" FontAttributes="Bold" />
 
                     <!-- Staff List -->
-                    <CollectionView ItemsSource="{Binding FilteredStaff}" SelectionMode="None">
+                    <CollectionView Grid.Row="3" ItemsSource="{Binding FilteredStaff}" SelectionMode="None">
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
                                 <Border Style="{StaticResource CardBorder}"
@@ -113,17 +88,6 @@
                                                         BackgroundColor="{Binding Status, Converter={StaticResource StatusColorConverter}}">
                                                     <Label Text="{Binding StatusLabel}" Style="{StaticResource BadgeText}" FontSize="10" />
                                                 </Border>
-                                                <Border Style="{StaticResource BadgeBorder}" Padding="8,2">
-                                                    <Border.Triggers>
-                                                        <DataTrigger TargetType="Border" Binding="{Binding IsOnline}" Value="True">
-                                                            <Setter Property="BackgroundColor" Value="#22C55E" />
-                                                        </DataTrigger>
-                                                        <DataTrigger TargetType="Border" Binding="{Binding IsOnline}" Value="False">
-                                                            <Setter Property="BackgroundColor" Value="#9CA3AF" />
-                                                        </DataTrigger>
-                                                    </Border.Triggers>
-                                                    <Label Text="{Binding OnlineStatus}" Style="{StaticResource BadgeText}" FontSize="10" />
-                                                </Border>
                                             </HorizontalStackLayout>
                                         </VerticalStackLayout>
 
@@ -149,8 +113,7 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
 
-                </VerticalStackLayout>
-            </ScrollView>
+            </Grid>
 
             <!-- ════════════════════════════════════════════════════ -->
             <!--  RIGHT: STAFF DETAIL PANEL (appears on click)     -->
@@ -239,13 +202,13 @@
                             </VerticalStackLayout>
                         </Border>
 
-                        <!-- Action Buttons (Edit only for Staff role) -->
+                        <!-- Nhân viên có thể được sửa/xóa; quản lý chỉ được tự sửa chính mình. -->
                         <VerticalStackLayout Spacing="8">
                             <Button x:Name="BtnEditStaff"
                                     Text="✏️ Chỉnh sửa"
                                     Clicked="OnEditStaffClicked"
                                     Style="{StaticResource PrimaryButton}" />
-                            <Button Text="🗑️ Xóa nhân sự"
+                            <Button x:Name="BtnDeleteStaff" Text="🗑️ Xóa nhân sự"
                                     Clicked="OnDeleteStaffClicked"
                                     Style="{StaticResource DangerButton}" />
                         </VerticalStackLayout>
@@ -278,7 +241,7 @@
                         <Grid Padding="24,20"
                               ColumnDefinitions="*,Auto"
                               Background="#F9FAFB">
-                            <Label Text="✏️ Chỉnh sửa thông tin nhân viên"
+                            <Label x:Name="EditModalTitle" Text="✏️ Chỉnh sửa thông tin nhân sự"
                                    FontSize="18"
                                    FontAttributes="Bold"
                                    TextColor="#1E3A5F"
@@ -305,19 +268,31 @@
                         <!-- Modal Body -->
                         <VerticalStackLayout Padding="24" Spacing="16">
 
+                            <!-- Name -->
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="Họ và tên" FontAttributes="Bold" FontSize="12" TextColor="#6B7280" />
+                                <Border Style="{StaticResource InputBorder}" Padding="12,8">
+                                    <Entry x:Name="EditName"
+                                           Placeholder="Nhập họ và tên..."
+                                           FontSize="14" />
+                                </Border>
+                            </VerticalStackLayout>
+
                             <!-- Email -->
                             <VerticalStackLayout Spacing="6">
                                 <Label Text="Email" FontAttributes="Bold" FontSize="12" TextColor="#6B7280" />
                                 <Border Style="{StaticResource InputBorder}" Padding="12,8">
-                                    <Entry x:Name="EditEmail"
-                                           Placeholder="Nhập email..."
-                                           FontSize="14"
-                                           Keyboard="Email" />
-                                </Border>
-                            </VerticalStackLayout>
+                                     <Entry x:Name="EditEmail"
+                                            Placeholder="Nhập email..."
+                                            FontSize="14"
+                                            Keyboard="Email"
+                                            IsReadOnly="True" />
+                                 </Border>
+                                <Label Text="Email đăng nhập không thể đổi tại đây." FontSize="10" TextColor="{StaticResource TextMuted}" />
+                             </VerticalStackLayout>
 
                             <!-- Phone -->
-                            <VerticalStackLayout Spacing="6">
+                            <VerticalStackLayout x:Name="EditStatusSection" Spacing="6">
                                 <Label Text="Số điện thoại" FontAttributes="Bold" FontSize="12" TextColor="#6B7280" />
                                 <Border Style="{StaticResource InputBorder}" Padding="12,8">
                                     <Entry x:Name="EditPhone"

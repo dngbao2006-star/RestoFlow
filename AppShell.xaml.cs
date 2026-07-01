@@ -46,6 +46,19 @@ public partial class AppShell : Shell
 
         ActivityLogService.Instance.LogLogout();
 
+        var currentUser = AppContext.Instance.CurrentUser;
+        if (currentUser != null)
+        {
+            try
+            {
+                await new FirebaseService().SetUserOfflineAsync(currentUser.FirebaseUid, currentUser.Name);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Logout] Could not update presence: {ex.Message}");
+            }
+        }
+
         // Hủy listener xung đột phiên trước khi logout
         AppContext.Instance.SessionConflictSubscription?.Dispose();
         AppContext.Instance.SessionConflictSubscription = null;
@@ -58,6 +71,13 @@ public partial class AppShell : Shell
 
     private async void OnSignOutTapped(object sender, TappedEventArgs e)
     {
-        await HandleSignOutAsync();
+        try
+        {
+            await HandleSignOutAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Logout] Unexpected failure handled: {ex}");
+        }
     }
 }

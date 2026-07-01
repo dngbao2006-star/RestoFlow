@@ -54,7 +54,6 @@
                                         <Label Text="{Binding TimestampDisplay}" Style="{StaticResource MutedTextStyle}" FontSize="10" />
                                     </VerticalStackLayout>
                                 </Border>
-                                <Label Text="{Binding SenderName}" FontSize="11" FontAttributes="Bold" Margin="0,-2,0,0" />
                             </VerticalStackLayout>
 
                             <!-- Right (My message) -->

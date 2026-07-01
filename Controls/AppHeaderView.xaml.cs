@@ -19,12 +19,15 @@ namespace AppManagermentRestaurant.Controls;
 /// </summary>
 public partial class AppHeaderView : ContentView
 {
+    private static HeaderViewModel? _sharedViewModel;
+    public static HeaderViewModel SharedViewModel
+        => _sharedViewModel ??= new HeaderViewModel(AppContext.Instance);
     public HeaderViewModel ViewModel { get; }
 
     public AppHeaderView()
     {
         InitializeComponent();
-        ViewModel = new HeaderViewModel(AppContext.Instance);
+        ViewModel = SharedViewModel;
         BindingContext = ViewModel;
     }
 
@@ -34,15 +37,13 @@ public partial class AppHeaderView : ContentView
         var page = FindParentPage();
         if (page is null) return;
 
-        AppContext.Instance.MarkNotificationsRead();
-
         var popup = new NotificationPopup();
 
         // QUAN TRỌNG: Gán Anchor = button đang được nhấn.
         // Thiếu dòng này là nguyên nhân popup hiện ở đầu màn hình thay vì bên dưới nút.
         popup.Anchor = (View)sender;
 
-        await page.ShowPopupAsync(popup);
+        await ShowPopupSafelyAsync(page, popup);
     }
 
     // ─── Nút Chat ─────────────────────────────────────────────────────────
@@ -56,7 +57,7 @@ public partial class AppHeaderView : ContentView
         // Gán Anchor để popup hiện ngay bên dưới nút chat
         popup.Anchor = (View)sender;
 
-        await page.ShowPopupAsync(popup);
+        await ShowPopupSafelyAsync(page, popup);
     }
 
     // ─── Nút Tài khoản ────────────────────────────────────────────────────
@@ -70,7 +71,7 @@ public partial class AppHeaderView : ContentView
         // Gán Anchor để popup hiện ngay bên dưới nút tài khoản
         popup.Anchor = (View)sender;
 
-        await page.ShowPopupAsync(popup);
+        await ShowPopupSafelyAsync(page, popup);
     }
 
     // ─── Helper: tìm Page cha để gọi ShowPopupAsync ───────────────────────
@@ -84,5 +85,18 @@ public partial class AppHeaderView : ContentView
             current = current.Parent;
         }
         return Application.Current?.MainPage;
+    }
+
+    private static async Task ShowPopupSafelyAsync(Page page, Popup popup)
+    {
+        try
+        {
+            await page.ShowPopupAsync(popup);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[HeaderPopup] Could not open popup: {ex}");
+            await page.DisplayAlert("Lỗi", "Không thể mở cửa sổ này. Vui lòng thử lại.", "OK");
+        }
     }
 }

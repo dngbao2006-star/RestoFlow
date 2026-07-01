@@ -10,82 +10,80 @@
     <Grid RowDefinitions="Auto,*">
         <controls:AppHeaderView />
 
-        <ScrollView Grid.Row="1">
-            <VerticalStackLayout Padding="24" Spacing="20" WidthRequest="768" HorizontalOptions="Center">
-                <Label Text="System Configuration" Style="{StaticResource PageTitle}" />
+        <Grid Grid.Row="1" Padding="24" RowDefinitions="Auto,Auto,*" RowSpacing="16" WidthRequest="820" HorizontalOptions="Center">
+            <Label Text="Cấu hình hệ thống" Style="{StaticResource PageTitle}" />
 
-                <ScrollView Orientation="Horizontal">
-                    <HorizontalStackLayout Spacing="8">
-                        <Button Text="Restaurant Info" Style="{StaticResource PillButton}" />
-                        <Button Text="Payment and QR" Style="{StaticResource PillButton}" />
-                        <Button Text="Invoice Settings" Style="{StaticResource PillButton}" />
-                    </HorizontalStackLayout>
-                </ScrollView>
+            <ScrollView Grid.Row="1" Orientation="Horizontal">
+                <HorizontalStackLayout Spacing="8">
+                    <Button Text="Thông tin nhà hàng" Style="{StaticResource PillButton}" CommandParameter="Restaurant" Clicked="OnSectionClicked" />
+                    <Button Text="Thanh toán và QR" Style="{StaticResource PillButton}" CommandParameter="Payment" Clicked="OnSectionClicked" />
+                    <Button Text="Thiết lập hóa đơn" Style="{StaticResource PillButton}" CommandParameter="Invoice" Clicked="OnSectionClicked" />
+                </HorizontalStackLayout>
+            </ScrollView>
 
-                <Border Style="{StaticResource CardBorder}">
-                    <VerticalStackLayout Spacing="12">
-                        <Label Text="Restaurant Info" Style="{StaticResource SectionTitle}" FontSize="20" />
-                        <Border Style="{StaticResource InputBorder}">
-                            <Entry Placeholder="Restaurant Name" Text="Classic Restaurant" />
-                        </Border>
-                        <Border Style="{StaticResource InputBorder}">
-                            <Entry Placeholder="Phone" Text="0900 999 888" />
-                        </Border>
-                        <Border Style="{StaticResource InputBorder}">
-                            <Entry Placeholder="Email" Text="hello@goldenplate.vn" />
-                        </Border>
-                        <Border Style="{StaticResource InputBorder}">
-                            <Entry Placeholder="Tax ID" Text="0312345678" />
-                        </Border>
-                        <Border Style="{StaticResource InputBorder}">
-                            <Editor Placeholder="Full Address" AutoSize="TextChanges" Text="District 1, Ho Chi Minh City" />
-                        </Border>
-                    </VerticalStackLayout>
-                </Border>
+            <ScrollView x:Name="ConfigScroll" Grid.Row="2">
+                <VerticalStackLayout Spacing="20">
+                    <Border x:Name="RestaurantSection" Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="Thông tin nhà hàng" Style="{StaticResource SectionTitle}" FontSize="20" />
+                            <Label Text="Tên nhà hàng" FontAttributes="Bold" FontSize="13" />
+                            <Border Style="{StaticResource InputBorder}"><Entry Text="{Binding Configuration.RestaurantName}" Placeholder="Tên nhà hàng" /></Border>
+                            <Label Text="Số điện thoại" FontAttributes="Bold" FontSize="13" />
+                            <Border Style="{StaticResource InputBorder}"><Entry Text="{Binding Configuration.Phone}" Placeholder="Số điện thoại" Keyboard="Telephone" /></Border>
+                            <Label Text="Email" FontAttributes="Bold" FontSize="13" />
+                            <Border Style="{StaticResource InputBorder}"><Entry Text="{Binding Configuration.Email}" Placeholder="Email" Keyboard="Email" /></Border>
+                            <Label Text="Mã số thuế" FontAttributes="Bold" FontSize="13" />
+                            <Border Style="{StaticResource InputBorder}"><Entry Text="{Binding Configuration.TaxId}" Placeholder="Mã số thuế" /></Border>
+                            <Label Text="Địa chỉ" FontAttributes="Bold" FontSize="13" />
+                            <Border Style="{StaticResource InputBorder}"><Editor Text="{Binding Configuration.Address}" Placeholder="Địa chỉ đầy đủ" AutoSize="TextChanges" /></Border>
+                        </VerticalStackLayout>
+                    </Border>
 
-                <Border Style="{StaticResource CardBorder}">
-                    <VerticalStackLayout Spacing="12">
-                        <Label Text="Payment and QR" Style="{StaticResource SectionTitle}" FontSize="20" />
-                        <Border Style="{StaticResource InputBorder}">
-                            <Entry Placeholder="Bank Name" Text="Vietcombank" />
-                        </Border>
-                        <Border Style="{StaticResource InputBorder}">
-                            <Entry Placeholder="Account Number" Text="1024688888" />
-                        </Border>
-                        <Border Style="{StaticResource InputBorder}">
-                            <Entry Placeholder="Account Name" Text="The Golden Plate" />
-                        </Border>
-                        <Border Style="{StaticResource InputBorder}">
-                            <Entry Placeholder="Branch" Text="Ben Thanh" />
-                        </Border>
-                        <Border Background="White" Stroke="{StaticResource BorderLight}" StrokeThickness="1" StrokeShape="RoundRectangle 12" Padding="20">
-                            <Label Text="QR PREVIEW" HorizontalOptions="Center" TextColor="{StaticResource Primary}" FontAttributes="Bold" />
-                        </Border>
-                    </VerticalStackLayout>
-                </Border>
+                    <Border x:Name="PaymentSection" Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="Thanh toán và QR" Style="{StaticResource SectionTitle}" FontSize="20" />
+                            <Label Text="Mã BIN là mã ngân hàng 6 chữ số dùng để tạo VietQR." Style="{StaticResource SecondaryTextStyle}" />
+                            <Label Text="Tên ngân hàng" FontAttributes="Bold" FontSize="13" />
+                            <Border Style="{StaticResource InputBorder}"><Entry Text="{Binding Configuration.BankName}" Placeholder="Ví dụ: Vietcombank" /></Border>
+                            <Label Text="Mã BIN ngân hàng" FontAttributes="Bold" FontSize="13" />
+                            <Border Style="{StaticResource InputBorder}"><Entry Text="{Binding Configuration.BankBin}" Placeholder="Ví dụ: 970436" Keyboard="Numeric" MaxLength="6" /></Border>
+                            <Label Text="Số tài khoản" FontAttributes="Bold" FontSize="13" />
+                            <Border Style="{StaticResource InputBorder}"><Entry Text="{Binding Configuration.AccountNumber}" Placeholder="Số tài khoản" Keyboard="Numeric" /></Border>
+                            <Label Text="Tên chủ tài khoản" FontAttributes="Bold" FontSize="13" />
+                            <Border Style="{StaticResource InputBorder}"><Entry Text="{Binding Configuration.AccountName}" Placeholder="Tên chủ tài khoản" /></Border>
+                            <Label Text="Chi nhánh" FontAttributes="Bold" FontSize="13" />
+                            <Border Style="{StaticResource InputBorder}"><Entry Text="{Binding Configuration.Branch}" Placeholder="Chi nhánh" /></Border>
+                            <Border Background="{StaticResource AppBackground}" Stroke="{StaticResource BorderStrong}" StrokeThickness="1" StrokeShape="RoundRectangle 12" Padding="16">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="Thông tin sẽ hiển thị trên QR" FontAttributes="Bold" />
+                                    <Label Text="{Binding Configuration.BankName}" />
+                                    <Label Text="{Binding Configuration.AccountNumber}" Style="{StaticResource SecondaryTextStyle}" />
+                                    <Label Text="{Binding Configuration.AccountName}" Style="{StaticResource SecondaryTextStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </VerticalStackLayout>
+                    </Border>
 
-                <Border Style="{StaticResource CardBorder}">
-                    <VerticalStackLayout Spacing="12">
-                        <Label Text="Invoice Settings" Style="{StaticResource SectionTitle}" FontSize="20" />
-                        <Border Style="{StaticResource InputBorder}">
-                            <Entry Placeholder="VAT Rate (%)" Text="8" Keyboard="Numeric" />
-                        </Border>
-                        <Border Style="{StaticResource InputBorder}">
-                            <Editor Placeholder="Footer Note" AutoSize="TextChanges" Text="Thank you for dining with us." />
-                        </Border>
-                        <Border Background="{StaticResource AppBackground}" Stroke="{StaticResource BorderStrong}" StrokeThickness="1" StrokeShape="RoundRectangle 12" Padding="16">
-                            <VerticalStackLayout Spacing="4">
-                                <Label Text="Invoice Preview" FontAttributes="Bold" />
-                                <Label Text="The Golden Plate" FontFamily="{StaticResource DisplayFont}" FontSize="16" />
-                                <Label Text="District 1, Ho Chi Minh City" Style="{StaticResource SecondaryTextStyle}" />
-                                <Label Text="VAT: 8%" Style="{StaticResource SecondaryTextStyle}" />
-                            </VerticalStackLayout>
-                        </Border>
-                        <Button Text="Save Changes" Style="{StaticResource PrimaryButton}" />
-                    </VerticalStackLayout>
-                </Border>
-            </VerticalStackLayout>
-        </ScrollView>
+                    <Border x:Name="InvoiceSection" Style="{StaticResource CardBorder}">
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="Thiết lập hóa đơn" Style="{StaticResource SectionTitle}" FontSize="20" />
+                            <Label Text="Lời nhắn cuối hóa đơn" FontAttributes="Bold" FontSize="13" />
+                            <Border Style="{StaticResource InputBorder}"><Editor Text="{Binding Configuration.InvoiceFooter}" Placeholder="Lời cảm ơn" AutoSize="TextChanges" /></Border>
+                            <Border Background="{StaticResource AppBackground}" Stroke="{StaticResource BorderStrong}" StrokeThickness="1" StrokeShape="RoundRectangle 12" Padding="16">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="Xem trước phần đầu hóa đơn" FontAttributes="Bold" />
+                                    <Label Text="{Binding Configuration.RestaurantName}" FontFamily="{StaticResource DisplayFont}" FontSize="17" />
+                                    <Label Text="{Binding Configuration.Address}" Style="{StaticResource SecondaryTextStyle}" />
+                                    <Label Text="{Binding Configuration.TaxId, StringFormat='MST: {0}'}" Style="{StaticResource SecondaryTextStyle}" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Label x:Name="ValidationLabel" IsVisible="False" TextColor="{StaticResource Danger}" FontSize="12" />
+                    <Button x:Name="SaveButton" Text="Lưu thay đổi" Style="{StaticResource PrimaryButton}" Clicked="OnSaveClicked" />
+                </VerticalStackLayout>
+            </ScrollView>
+        </Grid>
     </Grid>
 </ContentPage>
-

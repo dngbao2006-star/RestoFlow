@@ -1,6 +1,7 @@
 using AppManagermentRestaurant.Constants;
 using AppManagermentRestaurant.Services;
 using AppManagermentRestaurant.ViewModels;
+using AppManagermentRestaurant.Controls;
 using CommunityToolkit.Maui.Views;
 
 namespace AppManagermentRestaurant.Controls.Popups;
@@ -17,14 +18,20 @@ public partial class AccountPopup : Popup
     {
         InitializeComponent();
         // Bind HeaderViewModel để lấy CurrentUserName, CurrentUserEmail
-        BindingContext = new HeaderViewModel(AppContext.Instance);
+        BindingContext = AppHeaderView.SharedViewModel;
     }
 
     private async void OnProfileClicked(object sender, EventArgs e)
     {
         Close();
-        var route = AppContext.Instance.IsManager ? AppRoutes.SystemConfig : AppRoutes.Account;
-        await Shell.Current.GoToAsync(AppRoutes.Absolute(route)); // => //tai-khoan or //cau-hinh
+        try
+        {
+            await Shell.Current.GoToAsync(AppRoutes.Absolute(AppRoutes.Account));
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[AccountPopup] Navigation failed: {ex}");
+        }
     }
 
     private async void OnLogoutClicked(object sender, EventArgs e)
@@ -41,15 +48,25 @@ public partial class AccountPopup : Popup
         // Cập nhật OFFLINE lên Firebase
         if (currentUser != null)
         {
-            await _firebaseService.SetUserOfflineAsync(
-                currentUser.FirebaseUid,
-                currentUser.Name);
+            try
+            {
+                await _firebaseService.SetUserOfflineAsync(
+                    currentUser.FirebaseUid,
+                    currentUser.Name);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Logout] Could not update presence: {ex.Message}");
+            }
         }
 
-        // Xóa user hiện tại khỏi app
-        AppContext.Instance.CurrentUser = null;
+        ActivityLogService.Instance.LogLogout();
+
+        if (Application.Current?.MainPage is AppShell shell)
+            shell.BindingContext = null;
 
         // Quay về màn hình login
         await MainThread.InvokeOnMainThreadAsync(App.ShowLogin);
+        AppContext.Instance.CurrentUser = null;
     }
 }

@@ -8,10 +8,12 @@ namespace AppManagermentRestaurant.Views.Pages;
 public partial class DishStatusPage : ContentPage
 {
     private DishStatus? _selectedStatusFilter;
+    private bool _isObservingContext;
+    private readonly HashSet<string> _servingItems = new();
 
-    private FirebaseService firebase = new FirebaseService();
+    private readonly FirebaseService firebase = new();
 
-    public ObservableCollection<DishReady> ReadyDishList { get; set; }
+    public ObservableCollection<DishReady> ReadyDishList { get; private set; }
         = new ObservableCollection<DishReady>();
 
     public bool IsPendingSelected => _selectedStatusFilter == DishStatus.Pending;
@@ -24,39 +26,82 @@ public partial class DishStatusPage : ContentPage
         InitializeComponent();
         BindingContext = this;
 
-        AppContext.Instance.PropertyChanged += OnAppContextPropertyChanged;
     }
 
-    private void OnAppContextPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+    private void OnAppContextPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        OnPropertyChanged(nameof(PendingDishCount));
-        OnPropertyChanged(nameof(PreparingDishCount));
-        OnPropertyChanged(nameof(ReadyDishCount));
-        OnPropertyChanged(nameof(ServedDishCount));
-        OnPropertyChanged(nameof(HasReadyItems));
-        OnPropertyChanged(nameof(ReadyItemsCount));
-        OnPropertyChanged(nameof(FilteredOrders));
+        switch (e.PropertyName)
+        {
+            case nameof(AppContext.OrderItemsVersion):
+                RefreshReadyDishes();
+                OnPropertyChanged(nameof(FilteredOrders));
+                break;
+            case nameof(AppContext.PendingDishCount):
+                OnPropertyChanged(nameof(PendingDishCount));
+                break;
+            case nameof(AppContext.PreparingDishCount):
+                OnPropertyChanged(nameof(PreparingDishCount));
+                break;
+            case nameof(AppContext.ReadyDishCount):
+                OnPropertyChanged(nameof(ReadyDishCount));
+                OnPropertyChanged(nameof(HasReadyItems));
+                OnPropertyChanged(nameof(ReadyItemsCount));
+                break;
+            case nameof(AppContext.ServedDishCount):
+                OnPropertyChanged(nameof(ServedDishCount));
+                break;
+        }
     }
 
-    protected override async void OnNavigatedTo(NavigatedToEventArgs args)
+    protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
         base.OnNavigatedTo(args);
-
-        await LoadDishReady();
-
-        MainThread.BeginInvokeOnMainThread(RefreshPage);
+        if (!_isObservingContext)
+        {
+            AppContext.Instance.PropertyChanged += OnAppContextPropertyChanged;
+            _isObservingContext = true;
+        }
+        RefreshReadyDishes();
+        RefreshPage();
     }
 
-    private async Task LoadDishReady()
+    protected override void OnNavigatingFrom(NavigatingFromEventArgs args)
     {
-        ReadyDishList.Clear();
-
-        var data = await firebase.GetDishReadyAsync();
-
-        foreach (var item in data)
+        if (_isObservingContext)
         {
-            ReadyDishList.Add(item);
+            AppContext.Instance.PropertyChanged -= OnAppContextPropertyChanged;
+            _isObservingContext = false;
         }
+        base.OnNavigatingFrom(args);
+    }
+
+    private void RefreshReadyDishes()
+    {
+        var readyDishes = new List<DishReady>();
+
+        foreach (var order in AppContext.Instance.Orders.Where(order => order.Status == OrderStatus.Active))
+        {
+            foreach (var item in order.Items.Where(item => item.Status == DishStatus.Ready))
+            {
+                readyDishes.Add(new DishReady
+                {
+                    Id = item.Id,
+                    DishName = item.Name,
+                    Image = item.Image,
+                    Quantity = item.Quantity,
+                    TableId = order.TableId,
+                    TableNumber = order.TableNumber,
+                    Status = item.Status.ToString(),
+                    CreatedAt = order.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss"),
+                    MenuItemId = item.MenuItemId,
+                    OrderId = order.Id,
+                    ParentOrder = order,
+                    SourceItem = item
+                });
+            }
+        }
+
+        ReadyDishList = new ObservableCollection<DishReady>(readyDishes);
 
         OnPropertyChanged(nameof(ReadyDishList));
         OnPropertyChanged(nameof(HasReadyItems));
@@ -147,44 +192,41 @@ public partial class DishStatusPage : ContentPage
         if (button.CommandParameter is not DishReady item)
             return;
 
+        var operationKey = $"{item.OrderId}:{item.Id}:{item.SourceItem?.FirebaseKey}";
+        if (!_servingItems.Add(operationKey)) return;
+
+        OrderItem? orderItem = null;
         try
         {
-            // Update OrderItem status to Served based on OrderId and MenuItemId
-            await firebase.UpdateOrderItemStatusByOrderAndMenuItemAsync(item.OrderId, item.MenuItemId, DishStatus.Served);
+            var order = item.ParentOrder
+                     ?? AppContext.Instance.Orders.FirstOrDefault(order => order.Id == item.OrderId);
+            orderItem = item.SourceItem
+                     ?? order?.Items.FirstOrDefault(source => source.Id == item.Id);
+            if (order == null || orderItem == null)
+                throw new InvalidOperationException("Không tìm thấy món trong đơn hàng.");
 
-            // Update AppContext Orders collection
-            var order = AppContext.Instance.Orders.FirstOrDefault(o => o.Id == item.OrderId);
-            if (order != null)
-            {
-                var orderItem = order.Items.FirstOrDefault(oi => oi.MenuItemId == item.MenuItemId);
-                if (orderItem != null)
-                {
-                    orderItem.Status = DishStatus.Served;
-                }
-            }
+            button.IsEnabled = false;
+            button.Text = "Đang cập nhật…";
 
-            // Delete DishReady
-            await firebase.DeleteDishReadyAsync(item.Id);
+            // Optimistic UI: respond immediately, then synchronize in background.
+            orderItem.Status = DishStatus.Served;
+            AppContext.Instance.NotifyOrderItemsChanged();
 
-            // Remove from UI immediately
-            ReadyDishList.Remove(item);
-
-            // Update UI properties immediately
-            OnPropertyChanged(nameof(ReadyDishList));
-            OnPropertyChanged(nameof(HasReadyItems));
-            OnPropertyChanged(nameof(ReadyItemsCount));
-            OnPropertyChanged(nameof(ReadyDishCount));
-            OnPropertyChanged(nameof(PendingDishCount));
-            OnPropertyChanged(nameof(PreparingDishCount));
-            OnPropertyChanged(nameof(ServedDishCount));
-            OnPropertyChanged(nameof(FilteredOrders));
+            await firebase.UpdateOrderItemStatusAsync(order, orderItem, DishStatus.Served)
+                .WaitAsync(TimeSpan.FromSeconds(12));
         }
         catch (Exception ex)
         {
-            MainThread.BeginInvokeOnMainThread(async () =>
+            if (orderItem != null)
             {
-                await DisplayAlert("Lỗi", $"Không thể cập nhật trạng thái: {ex.Message}", "OK");
-            });
+                orderItem.Status = DishStatus.Ready;
+                AppContext.Instance.NotifyOrderItemsChanged();
+            }
+            await DisplayAlert("Lỗi", $"Không thể cập nhật trạng thái: {ex.Message}", "OK");
+        }
+        finally
+        {
+            _servingItems.Remove(operationKey);
         }
     }
 }

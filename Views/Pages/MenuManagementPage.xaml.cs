@@ -1,16 +1,82 @@
 using AppManagermentRestaurant.Models;
 using AppManagermentRestaurant.Services;
+using System.Collections.ObjectModel;
+using AppManagermentRestaurant.Helpers;
 
 namespace AppManagermentRestaurant.Views.Pages;
 
 public partial class MenuManagementPage : ContentPage
 {
-    private FirebaseService _firebaseService = new();
+    private readonly FirebaseService _firebaseService = new();
+    private string _searchText = string.Empty;
+    private string _categoryFilter = "All";
+    private bool _isObservingMenu;
+
+    public ObservableCollection<FoodItem> FilteredMenuItems { get; private set; } = new();
+    public int TotalMenuItemCount => AppContext.Instance.MenuItems.Count;
+    public int AvailableMenuItemCount => AppContext.Instance.MenuItems.Count(item => item.Available && !item.OutOfStock);
+    public int OutOfStockMenuItemCount => AppContext.Instance.MenuItems.Count(item => !item.Available || item.OutOfStock);
 
     public MenuManagementPage()
     {
         InitializeComponent();
-        BindingContext = AppContext.Instance;
+        BindingContext = this;
+        RefreshMenu();
+    }
+
+    protected override void OnNavigatedTo(NavigatedToEventArgs args)
+    {
+        base.OnNavigatedTo(args);
+        if (!_isObservingMenu)
+        {
+            AppContext.Instance.MenuItems.CollectionChanged += OnMenuCollectionChanged;
+            _isObservingMenu = true;
+        }
+        RefreshMenu();
+    }
+
+    protected override void OnNavigatingFrom(NavigatingFromEventArgs args)
+    {
+        if (_isObservingMenu)
+        {
+            AppContext.Instance.MenuItems.CollectionChanged -= OnMenuCollectionChanged;
+            _isObservingMenu = false;
+        }
+        base.OnNavigatingFrom(args);
+    }
+
+    private void OnMenuCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        => RefreshMenu();
+
+    private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
+    {
+        _searchText = e.NewTextValue?.Trim() ?? string.Empty;
+        RefreshMenu();
+    }
+
+    private void OnCategoryFilterClicked(object sender, EventArgs e)
+    {
+        if (sender is Button { CommandParameter: string category })
+        {
+            _categoryFilter = category;
+            RefreshMenu();
+        }
+    }
+
+    private void RefreshMenu()
+    {
+        var items = AppContext.Instance.MenuItems.AsEnumerable();
+        if (_categoryFilter != "All")
+            items = items.Where(item => MenuCategoryHelper.Matches(item.Category, _categoryFilter));
+        if (!string.IsNullOrWhiteSpace(_searchText))
+            items = items.Where(item => item.Name.Contains(_searchText, StringComparison.OrdinalIgnoreCase));
+
+        FilteredMenuItems = new ObservableCollection<FoodItem>(items.OrderBy(item => item.Name));
+        OnPropertyChanged(nameof(FilteredMenuItems));
+
+        OnPropertyChanged(nameof(TotalMenuItemCount));
+        OnPropertyChanged(nameof(AvailableMenuItemCount));
+        OnPropertyChanged(nameof(OutOfStockMenuItemCount));
     }
 
     private async void OnAddMenuItemClicked(object sender, EventArgs e)
@@ -60,42 +126,24 @@ public partial class MenuManagementPage : ContentPage
         {
             try
             {
-                // Vô hiệu hóa button trong khi xử lý
                 button.IsEnabled = false;
-
-                // Animation khi nhấn button
-                await button.ScaleTo(0.95, 100);
-                await button.ScaleTo(1, 100);
-
-                // Toggle trạng thái
                 item.OutOfStock = !item.OutOfStock;
-
-                // Lưu lên Firebase
-                await _firebaseService.SaveMenuItemAsync(item);
-
-                // Hiệu ứng thành công
-                button.BackgroundColor = item.OutOfStock ? Color.FromArgb("#F44336") : Color.FromArgb("#4CAF50");
-                await button.ScaleTo(1.05, 100);
-                await button.ScaleTo(1, 100);
-
-                // Reset màu
-                await Task.Delay(500);
-                button.BackgroundColor = null;
+                RefreshMenu();
+                await _firebaseService.SaveMenuItemAsync(item).WaitAsync(TimeSpan.FromSeconds(12));
 
                 // Thông báo
                 string status = item.OutOfStock ? "Hết hàng" : "Còn hàng";
                 await DisplayAlert("Thành công", $"Cập nhật thành công: {status}", "OK");
 
-                // Force refresh UI để hiển thị text button mới
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    button.IsEnabled = true;
-                });
             }
             catch (Exception ex)
             {
                 await DisplayAlert("Lỗi", $"Lỗi cập nhật trạng thái: {ex.Message}", "OK");
                 item.OutOfStock = !item.OutOfStock; // Revert
+                RefreshMenu();
+            }
+            finally
+            {
                 button.IsEnabled = true;
             }
         }

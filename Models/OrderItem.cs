@@ -1,10 +1,12 @@
 using AppManagermentRestaurant.Helpers;
 using Microsoft.Maui.Graphics;
+using System.Text.Json.Serialization;
 
 namespace AppManagermentRestaurant.Models;
 
 public class OrderItem : ObservableObject
 {
+    private string _firebaseKey = string.Empty;
     private int _id;
     private int _menuItemId;
     private string _name = string.Empty;
@@ -13,6 +15,13 @@ public class OrderItem : ObservableObject
     private string? _notes;
     private DishStatus _status;
     private string _image = string.Empty;
+
+    [JsonIgnore]
+    public string FirebaseKey
+    {
+        get => _firebaseKey;
+        set => SetProperty(ref _firebaseKey, value);
+    }
 
     public int Id
     {
