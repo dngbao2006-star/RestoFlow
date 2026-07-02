@@ -307,7 +307,7 @@
                                         <ScrollView>
 
                                             <VerticalStackLayout
-                                                BindableLayout.ItemsSource="{Binding Items}"
+                                                BindableLayout.ItemsSource="{Binding DisplayItems}"
                                                 Spacing="10">
 
                                                 <BindableLayout.ItemTemplate>

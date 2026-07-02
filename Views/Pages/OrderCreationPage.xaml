@@ -112,17 +112,30 @@
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
                                         <Border Style="{StaticResource InputBorder}" Padding="8" Margin="0,0,0,8" Background="#F5F5F5">
-                                            <HorizontalStackLayout Spacing="8">
-                                                <Image Source="{Binding Image}" HeightRequest="36" WidthRequest="36" Aspect="AspectFill" />
-                                                <VerticalStackLayout Spacing="2" HorizontalOptions="FillAndExpand">
-                                                    <Label Text="{Binding Name}" FontAttributes="Bold" FontSize="11" LineBreakMode="TailTruncation" />
-                                                    <Label Text="{Binding Notes, StringFormat='📝 {0}'}" Style="{StaticResource SecondaryTextStyle}" FontSize="8" IsVisible="{Binding Notes, Converter={StaticResource HasValueConverter}}" />
-                                                </VerticalStackLayout>
-                                                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="End">
-                                                    <Label Text="{Binding Quantity, StringFormat='x{0}'}" FontAttributes="Bold" FontSize="11" />
-                                                    <Label Text="{Binding LineTotalDisplay}" Style="{StaticResource SecondaryTextStyle}" FontSize="9" />
-                                                </VerticalStackLayout>
-                                            </HorizontalStackLayout>
+                                            <VerticalStackLayout Spacing="4">
+                                                <HorizontalStackLayout Spacing="8">
+                                                    <Image Source="{Binding Image}" HeightRequest="36" WidthRequest="36" Aspect="AspectFill" />
+                                                    <VerticalStackLayout Spacing="2" HorizontalOptions="FillAndExpand">
+                                                        <Label Text="{Binding Name}" FontAttributes="Bold" FontSize="11" LineBreakMode="TailTruncation" />
+                                                        <Label Text="{Binding Notes, StringFormat='📝 {0}'}" Style="{StaticResource SecondaryTextStyle}" FontSize="8" IsVisible="{Binding Notes, Converter={StaticResource HasValueConverter}}" />
+                                                    </VerticalStackLayout>
+                                                </HorizontalStackLayout>
+                                                <HorizontalStackLayout Spacing="4">
+                                                    <HorizontalStackLayout Spacing="6" HorizontalOptions="StartAndExpand">
+                                                        <Button Text="−" FontSize="16" FontAttributes="Bold" Padding="2" HeightRequest="32" WidthRequest="32"
+                                                                TextColor="Black" BackgroundColor="#E5E7EB"
+                                                                Clicked="OnDecreaseQuantityClicked" CommandParameter="{Binding .}" />
+                                                        <Label Text="{Binding Quantity}" FontAttributes="Bold" VerticalOptions="Center"
+                                                               HorizontalOptions="Center" MinimumWidthRequest="24" FontSize="14" />
+                                                        <Button Text="+" FontSize="16" FontAttributes="Bold" Padding="2" HeightRequest="32" WidthRequest="32"
+                                                                TextColor="Black" BackgroundColor="#E5E7EB"
+                                                                Clicked="OnIncreaseQuantityClicked" CommandParameter="{Binding .}" />
+                                                    </HorizontalStackLayout>
+                                                    <Label Text="{Binding LineTotalDisplay}" FontAttributes="Bold" FontSize="10"
+                                                           Style="{StaticResource SecondaryTextStyle}"
+                                                           HorizontalOptions="End" VerticalOptions="Center" />
+                                                </HorizontalStackLayout>
+                                            </VerticalStackLayout>
                                         </Border>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
@@ -154,9 +167,13 @@
 
                                                 <HorizontalStackLayout Spacing="6" Margin="0,4,0,0">
                                                     <HorizontalStackLayout Spacing="4" HorizontalOptions="StartAndExpand">
-                                                        <Button Text="−" FontSize="14" Padding="3" HeightRequest="28" WidthRequest="28" Clicked="OnDecreaseQuantityClicked" CommandParameter="{Binding .}" />
+                                                        <Button Text="−" FontSize="14" FontAttributes="Bold" Padding="3" HeightRequest="28" WidthRequest="28"
+                                                                TextColor="Black" BackgroundColor="#E5E7EB"
+                                                                Clicked="OnDecreaseQuantityClicked" CommandParameter="{Binding .}" />
                                                         <Label Text="{Binding Quantity}" FontAttributes="Bold" VerticalOptions="Center" HorizontalOptions="Center" MinimumWidthRequest="24" FontSize="12" />
-                                                        <Button Text="+" FontSize="14" Padding="3" HeightRequest="28" WidthRequest="28" Clicked="OnIncreaseQuantityClicked" CommandParameter="{Binding .}" />
+                                                        <Button Text="+" FontSize="14" FontAttributes="Bold" Padding="3" HeightRequest="28" WidthRequest="28"
+                                                                TextColor="Black" BackgroundColor="#E5E7EB"
+                                                                Clicked="OnIncreaseQuantityClicked" CommandParameter="{Binding .}" />
                                                     </HorizontalStackLayout>
                                                     <Label Text="{Binding LineTotalDisplay}" FontAttributes="Bold" HorizontalOptions="FillAndExpand" FontSize="12" HorizontalTextAlignment="End" />
                                                     <Button Text="✕" FontSize="14" TextColor="{StaticResource Danger}" Padding="4" HeightRequest="28" WidthRequest="28" Clicked="OnDeleteItemClicked" CommandParameter="{Binding .}" />

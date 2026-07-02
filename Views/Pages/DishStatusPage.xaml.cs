@@ -131,7 +131,7 @@ public partial class DishStatusPage : ContentPage
     public int ReadyDishCount => ReadyDishList.Count;
     public int ServedDishCount => AppContext.Instance.ServedDishCount;
 
-    public IEnumerable<Order> FilteredOrders
+    public IEnumerable<DishStatusDisplayOrder> FilteredOrders
     {
         get
         {
@@ -148,7 +148,7 @@ public partial class DishStatusPage : ContentPage
                     o.Items.Any(item => item.Status == _selectedStatusFilter));
             }
 
-            return orders;
+            return orders.Select(o => new DishStatusDisplayOrder(o));
         }
     }
 
@@ -229,4 +229,70 @@ public partial class DishStatusPage : ContentPage
             _servingItems.Remove(operationKey);
         }
     }
+}
+
+/// <summary>
+/// Display wrapper for Order in DishStatusPage.
+/// Merges items with the same MenuItemId and "Served" status into a single display row.
+/// Other statuses remain separate.
+/// </summary>
+public class DishStatusDisplayOrder
+{
+    private readonly Order _order;
+
+    public DishStatusDisplayOrder(Order order)
+    {
+        _order = order;
+
+        var displayItems = new List<OrderItem>();
+
+        // Group served items by MenuItemId (same dish name)
+        var servedGroups = order.Items
+            .Where(i => i.Status == DishStatus.Served)
+            .GroupBy(i => i.MenuItemId)
+            .ToList();
+
+        foreach (var group in servedGroups)
+        {
+            if (group.Count() == 1)
+            {
+                displayItems.Add(group.First());
+            }
+            else
+            {
+                // Create a merged display item
+                var first = group.First();
+                var mergedItem = new OrderItem
+                {
+                    Id = first.Id,
+                    MenuItemId = first.MenuItemId,
+                    Name = first.Name,
+                    Price = first.Price,
+                    Quantity = group.Sum(i => i.Quantity),
+                    Status = DishStatus.Served,
+                    Image = first.Image,
+                    Notes = string.Join("; ", group
+                        .Where(i => !string.IsNullOrWhiteSpace(i.Notes))
+                        .Select(i => i.Notes!)
+                        .Distinct())
+                };
+                if (string.IsNullOrWhiteSpace(mergedItem.Notes))
+                    mergedItem.Notes = null;
+                displayItems.Add(mergedItem);
+            }
+        }
+
+        // Add non-served items as-is
+        foreach (var item in order.Items.Where(i => i.Status != DishStatus.Served))
+        {
+            displayItems.Add(item);
+        }
+
+        DisplayItems = displayItems;
+    }
+
+    // Proxy properties for XAML binding
+    public int TableNumber => _order.TableNumber;
+    public string CreatedAtDisplay => _order.CreatedAtDisplay;
+    public List<OrderItem> DisplayItems { get; }
 }

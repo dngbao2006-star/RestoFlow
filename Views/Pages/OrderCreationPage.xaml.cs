@@ -395,9 +395,18 @@ public partial class OrderCreationPage : ContentPage
         AutoSaveDraft();
     }
 
-    private void OnIncreaseQuantityClicked(object sender, EventArgs e)
+    private async void OnIncreaseQuantityClicked(object sender, EventArgs e)
     {
         if (sender is not Button button || button.CommandParameter is not OrderItem orderItem) return;
+
+        if (_itemsSubmittedPreviously.Contains(orderItem.Id))
+        {
+            var confirm = await DisplayAlert(
+                "Xác nhận thay đổi",
+                $"Tăng số lượng \"{orderItem.Name}\" từ {orderItem.Quantity} → {orderItem.Quantity + 1}?",
+                "Đồng ý", "Hủy");
+            if (!confirm) return;
+        }
 
         orderItem.Quantity++;
         AppContext.Instance.SelectedOrder?.NotifyItemsChanged();
@@ -406,9 +415,29 @@ public partial class OrderCreationPage : ContentPage
         AutoSaveDraft();
     }
 
-    private void OnDecreaseQuantityClicked(object sender, EventArgs e)
+    private async void OnDecreaseQuantityClicked(object sender, EventArgs e)
     {
         if (sender is not Button button || button.CommandParameter is not OrderItem orderItem) return;
+
+        if (_itemsSubmittedPreviously.Contains(orderItem.Id))
+        {
+            if (orderItem.Quantity <= 1)
+            {
+                var confirm = await DisplayAlert(
+                    "Xác nhận xóa",
+                    $"Xóa \"{orderItem.Name}\" khỏi đơn hàng?",
+                    "Xóa", "Hủy");
+                if (!confirm) return;
+            }
+            else
+            {
+                var confirm = await DisplayAlert(
+                    "Xác nhận thay đổi",
+                    $"Giảm số lượng \"{orderItem.Name}\" từ {orderItem.Quantity} → {orderItem.Quantity - 1}?",
+                    "Đồng ý", "Hủy");
+                if (!confirm) return;
+            }
+        }
 
         if (orderItem.Quantity > 1)
         {
@@ -589,9 +618,47 @@ public partial class OrderCreationPage : ContentPage
                 if (isDraft)
                     await _firebase.CreateOrderAsync(order);
 
-                foreach (var item in newItems)
+                // Gộp các món mới cùng MenuItemId với món đã submit trước đó
+                var itemsToSave = new List<OrderItem>();
+                var itemsToDelete = new List<OrderItem>();
+
+                foreach (var newItem in newItems)
                 {
-                    item.Status = DishStatus.Pending;
+                    // Tìm item đã submit trước đó cùng MenuItemId
+                    var existingItem = order.Items.FirstOrDefault(item =>
+                        item.MenuItemId == newItem.MenuItemId &&
+                        _itemsSubmittedPreviously.Contains(item.Id));
+
+                    if (existingItem != null)
+                    {
+                        // Gộp: cộng số lượng vào item cũ, gộp notes
+                        existingItem.Quantity += newItem.Quantity;
+                        if (!string.IsNullOrWhiteSpace(newItem.Notes))
+                        {
+                            existingItem.Notes = string.IsNullOrWhiteSpace(existingItem.Notes)
+                                ? newItem.Notes
+                                : $"{existingItem.Notes}; {newItem.Notes}";
+                        }
+                        itemsToSave.Add(existingItem);
+                        itemsToDelete.Add(newItem);
+                    }
+                    else
+                    {
+                        // Không có item cũ trùng → save bình thường
+                        newItem.Status = DishStatus.Pending;
+                        itemsToSave.Add(newItem);
+                    }
+                }
+
+                // Xóa các item mới đã được gộp vào item cũ
+                foreach (var item in itemsToDelete)
+                {
+                    order.Items.Remove(item);
+                }
+
+                // Save tất cả items cần cập nhật lên Firebase
+                foreach (var item in itemsToSave)
+                {
                     await _firebase.SaveOrderItemAsync(order, item);
                 }
 
@@ -612,7 +679,9 @@ public partial class OrderCreationPage : ContentPage
                 throw;
             }
 
-            foreach (var item in newItems)
+            // Cập nhật tracking: tất cả items còn lại đều đã submit
+            _itemsSubmittedPreviously.Clear();
+            foreach (var item in order.Items)
                 _itemsSubmittedPreviously.Add(item.Id);
 
             if (isDraft)
@@ -623,8 +692,10 @@ public partial class OrderCreationPage : ContentPage
                 _draftOrder = null;
             }
 
+            order.NotifyItemsChanged();
             AppContext.Instance.SelectedTable = table;
             AppContext.Instance.RefreshBadges();
+            AppContext.Instance.NotifyOrderItemsChanged();
             ActivityLogService.Instance.LogOrderCreation(order.TableNumber.ToString());
 
             await DisplayAlert("Thành công", "Đơn hàng đã được gửi lên bếp.", "OK");

@@ -105,7 +105,59 @@
                                         StrokeShape="RoundRectangle 16"
                                         Padding="0">
 
-                                    <Grid RowDefinitions="Auto,*,Auto">
+                                    <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+                                        <!-- ══════ QUICK STATUS BAR ══════ -->
+                                        <Border Grid.Row="1"
+                                                Background="#F0F4F8"
+                                                StrokeThickness="0"
+                                                Padding="8,6">
+                                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                                <Label Text="⚡" FontSize="12" VerticalOptions="Center" />
+                                                <HorizontalStackLayout Grid.Column="1" Spacing="6">
+                                                    <Border Background="#FEF3C7" StrokeThickness="0"
+                                                            StrokeShape="RoundRectangle 6"
+                                                            Padding="8,4">
+                                                        <Border.GestureRecognizers>
+                                                            <TapGestureRecognizer Tapped="OnQuickStatusTapped"
+                                                                                  CommandParameter="Pending" />
+                                                        </Border.GestureRecognizers>
+                                                        <Label Text="Chờ xử lý" FontSize="10" FontAttributes="Bold"
+                                                               TextColor="#D97706" VerticalOptions="Center" />
+                                                    </Border>
+                                                    <Border Background="#DBEAFE" StrokeThickness="0"
+                                                            StrokeShape="RoundRectangle 6"
+                                                            Padding="8,4">
+                                                        <Border.GestureRecognizers>
+                                                            <TapGestureRecognizer Tapped="OnQuickStatusTapped"
+                                                                                  CommandParameter="Preparing" />
+                                                        </Border.GestureRecognizers>
+                                                        <Label Text="Đang làm" FontSize="10" FontAttributes="Bold"
+                                                               TextColor="#2563EB" VerticalOptions="Center" />
+                                                    </Border>
+                                                    <Border Background="#D1FAE5" StrokeThickness="0"
+                                                            StrokeShape="RoundRectangle 6"
+                                                            Padding="8,4">
+                                                        <Border.GestureRecognizers>
+                                                            <TapGestureRecognizer Tapped="OnQuickStatusTapped"
+                                                                                  CommandParameter="Ready" />
+                                                        </Border.GestureRecognizers>
+                                                        <Label Text="Sẵn sàng" FontSize="10" FontAttributes="Bold"
+                                                               TextColor="#059669" VerticalOptions="Center" />
+                                                    </Border>
+                                                    <Border Background="#E0E7FF" StrokeThickness="0"
+                                                            StrokeShape="RoundRectangle 6"
+                                                            Padding="8,4">
+                                                        <Border.GestureRecognizers>
+                                                            <TapGestureRecognizer Tapped="OnQuickStatusTapped"
+                                                                                  CommandParameter="Served" />
+                                                        </Border.GestureRecognizers>
+                                                        <Label Text="Đã phục vụ" FontSize="10" FontAttributes="Bold"
+                                                               TextColor="#4338CA" VerticalOptions="Center" />
+                                                    </Border>
+                                                </HorizontalStackLayout>
+                                            </Grid>
+                                        </Border>
 
                                         <!-- ══════ CARD HEADER ══════ -->
                                         <Border Background="#1E3A5F"
@@ -152,7 +204,7 @@
                                         </Border>
 
                                         <!-- ══════ CARD BODY ══════ -->
-                                        <Border Grid.Row="1"
+                                        <Border Grid.Row="2"
                                                 Background="White"
                                                 StrokeThickness="0"
                                                 Padding="12"
@@ -322,7 +374,7 @@
                                         </Border>
 
                                         <!-- ══════ CARD FOOTER (pending edits) ══════ -->
-                                        <Border Grid.Row="2"
+                                        <Border Grid.Row="3"
                                                 Background="#FFF7ED"
                                                 StrokeThickness="0"
                                                 StrokeShape="RoundRectangle 0,0,16,16"

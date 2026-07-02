@@ -159,7 +159,7 @@ public partial class OrderManagementPage : ContentPage
                 orders = orders.Where(order => order.ServerName.Contains(staff, StringComparison.OrdinalIgnoreCase));
             }
 
-            return orders.OrderByDescending(o => o.CreatedAt);
+            return orders.OrderBy(o => o.CreatedAt);
         }
     }
 
@@ -372,7 +372,7 @@ public partial class OrderManagementPage : ContentPage
         if (await GuardPendingEditsAsync(parentOrder)) return;
 
         var result = await DisplayActionSheet(
-            $"Trạng thái: {item.Name}", "Hủy", null,
+            $"Trạng thái: {item.Name} (x{item.Quantity})", "Hủy", null,
             "Chờ xử lý", "Đang làm", "Sẵn sàng", "Đã phục vụ");
 
         if (string.IsNullOrEmpty(result) || result == "Hủy") return;
@@ -388,9 +388,106 @@ public partial class OrderManagementPage : ContentPage
 
         if (newStatus == item.Status) return;
 
-        MarkOrderDirty(parentOrder, item);
-        item.Status = newStatus;
+        if (item.Quantity > 1)
+        {
+            // Hỏi admin muốn đổi bao nhiêu cái
+            var qtyStr = await DisplayPromptAsync(
+                "Số lượng thay đổi",
+                $"Đổi bao nhiêu \"{item.Name}\" sang \"{result}\"?\n(Tổng: {item.Quantity})",
+                "Xác nhận", "Hủy",
+                initialValue: item.Quantity.ToString(),
+                maxLength: 3,
+                keyboard: Keyboard.Numeric);
+
+            if (qtyStr == null) return;
+            if (!int.TryParse(qtyStr, out var changeQty) || changeQty <= 0 || changeQty > item.Quantity)
+            {
+                await DisplayAlert("Lỗi", $"Vui lòng nhập số từ 1 đến {item.Quantity}.", "OK");
+                return;
+            }
+
+            if (changeQty == item.Quantity)
+            {
+                // Đổi toàn bộ
+                MarkOrderDirty(parentOrder, item);
+                item.Status = newStatus;
+            }
+            else
+            {
+                // Tách: giảm qty item gốc, tạo item mới với status mới
+                MarkOrderDirty(parentOrder, item);
+                item.Quantity -= changeQty;
+
+                var maxId = parentOrder.Items.Max(i => i.Id);
+                var splitItem = new OrderItem
+                {
+                    Id = maxId + 1,
+                    MenuItemId = item.MenuItemId,
+                    FirebaseKey = "",
+                    Name = item.Name,
+                    Price = item.Price,
+                    Quantity = changeQty,
+                    Notes = item.Notes,
+                    Status = newStatus,
+                    Image = item.Image
+                };
+
+                // Chèn ngay sau item gốc
+                var index = parentOrder.Items.IndexOf(item);
+                parentOrder.Items.Insert(index + 1, splitItem);
+                _addedItems.Add(splitItem);
+
+                _orderBeingEdited = parentOrder;
+                parentOrder.HasPendingEdits = true;
+            }
+        }
+        else
+        {
+            // Quantity = 1 → đổi trực tiếp
+            MarkOrderDirty(parentOrder, item);
+            item.Status = newStatus;
+        }
+
         parentOrder.NotifyItemsChanged();
+        OnPropertyChanged(nameof(FilteredOrders));
+    }
+
+    // ── Quick status for entire order ──
+    private async void OnQuickStatusTapped(object? sender, TappedEventArgs e)
+    {
+        if (e.Parameter is not string statusKey) return;
+
+        // Walk up to find the Order from the card's BindingContext
+        var element = sender as Element;
+        while (element != null && element.BindingContext is not Order)
+            element = element.Parent;
+        if (element?.BindingContext is not Order order) return;
+
+        if (await GuardPendingEditsAsync(order)) return;
+
+        var newStatus = statusKey switch
+        {
+            "Pending" => DishStatus.Pending,
+            "Preparing" => DishStatus.Preparing,
+            "Ready" => DishStatus.Ready,
+            "Served" => DishStatus.Served,
+            _ => (DishStatus?)null
+        };
+        if (newStatus == null) return;
+
+        // Skip if all items already have the target status
+        if (order.Items.All(i => i.Status == newStatus.Value)) return;
+
+        foreach (var item in order.Items)
+        {
+            if (item.Status != newStatus.Value)
+            {
+                MarkOrderDirty(order, item);
+                item.Status = newStatus.Value;
+            }
+        }
+
+        order.NotifyItemsChanged();
         OnPropertyChanged(nameof(FilteredOrders));
     }
 
