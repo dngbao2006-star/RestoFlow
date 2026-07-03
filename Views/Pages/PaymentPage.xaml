@@ -73,7 +73,7 @@
                     <VerticalStackLayout Spacing="16">
                         <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
                             <Label Text="Hóa Đơn Thanh Toán" FontFamily="{StaticResource DisplayFont}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource Primary}" HorizontalOptions="Center" />
-                            <Label Text="Classic Restaurant" FontFamily="{StaticResource DisplayFont}" FontSize="16" TextColor="{StaticResource Primary}" HorizontalOptions="Center" />
+                            <Label Text="The Golden Plate" FontFamily="{StaticResource DisplayFont}" FontSize="16" TextColor="{StaticResource Primary}" HorizontalOptions="Center" />
                             <Label Text="Quận 1, TP. Hồ Chí Minh | Hotline: 0900 999 888" Style="{StaticResource SecondaryTextStyle}" FontSize="11" HorizontalOptions="Center" />
                         </VerticalStackLayout>
 
